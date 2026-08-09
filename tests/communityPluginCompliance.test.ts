@@ -26,6 +26,7 @@ describe("Obsidian Community Plugin release guard", () => {
     const files = [
       "src/connections/DockerContextDialStdioTransport.ts",
       "src/connections/DockerContextDiscovery.ts",
+      "src/connections/DockerCliResolver.ts",
       "src/connections/DockerMutualTlsTransport.ts",
       "src/connections/SystemSshDiagnostics.ts",
       "src/services/DockerApiClient.ts"
