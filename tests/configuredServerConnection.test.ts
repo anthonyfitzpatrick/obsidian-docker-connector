@@ -1,0 +1,9 @@
+import { describe, expect, it } from "vitest";
+import { configuredServerConnection } from "../src/views/ConfiguredServerConnection";
+import type { DockerConnectionProfile } from "../src/models/DockerConnectionProfile";
+
+const base = { id: "id", name: "A very long configured server name that remains safely truncated by the card", enabled: true, createdAt: "", updatedAt: "" };
+const profiles: DockerConnectionProfile[] = [{ ...base, connectionType: "local", localEndpoint: { type: "unix-socket", socketPath: "/very/long/path/docker.sock" } }, { ...base, connectionType: "docker-context", contextName: "desktop-linux", contextSnapshot: { isCurrentWhenSaved: false, endpointType: "ssh", supported: true, importedAt: "", lastDiscoveredAt: "" } }, { ...base, connectionType: "ssh", sshHost: "server.example.com", sshPort: 22, sshUsername: "user", authentication: { type: "password" }, remoteSocketPath: "/var/run/docker.sock" }, { ...base, id: "key", connectionType: "ssh", sshHost: "server.example.com", sshPort: 22, sshUsername: "user", authentication: { type: "private-key", privateKeyPath: "/key" }, remoteSocketPath: "/var/run/docker.sock" }, { ...base, connectionType: "docker-tls", host: "docker.example.com", port: 2376, serverName: "docker.example.com", caCertificatePath: "/ca", clientCertificatePath: "/cert", clientKeyPath: "/key", tlsSnapshot: { serverName: "docker.example.com", importedAt: "" } }];
+describe("configured server connection labels", () => {
+  it("maps each configured connection method to safe visible labels", () => expect(profiles.map(configuredServerConnection)).toEqual([{ label: "Local Docker", detail: "Unix Socket" }, { label: "Docker Context", detail: "Context: desktop-linux" }, { label: "SSH (Password)", detail: "Host: server.example.com" }, { label: "SSH (Private Key)", detail: "Host: server.example.com" }, { label: "Docker API (Mutual TLS)", detail: "docker.example.com:2376" }]));
+});

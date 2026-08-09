@@ -1,0 +1,441 @@
+import { ItemView, Modal, Notice, Setting, setIcon, WorkspaceLeaf } from "obsidian";
+import type DockerConnectorPlugin from "../main";
+import type { DockerConnectionProfile, DockerContextProfile, DockerHostSnapshot, HostConnectionStatus } from "../models/DockerConnectionProfile";
+import { dockerPermissionRemediation } from "../security/DockerPermissionRemediation";
+import type { DockerContainerSummary } from "../containers/ContainerModels";
+import { ContainersTab } from "../containers/ContainersTab";
+import { ImagesTab } from "../images/ImagesTab";
+import { VolumesTab } from "../volumes/VolumesTab";
+import { NetworksTab } from "../networks/NetworksTab";
+import { ApplicationsTab } from "../applications/ApplicationsTab";
+import { selectAttentionItems, type DashboardAttentionItem } from "../overview/AttentionItems";
+import { renderMetricCards } from "../ui/MetricCards";
+import { DesktopFileDialog } from "../services/DesktopFileDialog";
+import { loadPrivateKeyFile } from "../security/PrivateKeyFile";
+import { defaultLocalEndpoint, discoverLocalDockerEndpoints } from "../connections/LocalEndpointDiscovery";
+import { DockerContextDiscoveryService, type DiscoveredDockerContext } from "../connections/DockerContextDiscovery";
+import { canSaveDiscoveredDockerContext, mapDiscoveredDockerContextToProfile, updateDockerContextProfile } from "../connections/DockerContextProfileMapper";
+import { evaluateDockerContextLifecycle, unavailableDockerContextLifecycle, type DockerContextLifecycleResult } from "../connections/DockerContextLifecycle";
+import { createDockerTlsProfile, validateDockerTlsFiles } from "../security/TlsProfileValidation";
+import { configuredServerConnection } from "./ConfiguredServerConnection";
+
+export const DOCKER_CONNECTOR_VIEW = "docker-connector-dashboard";
+
+type DashboardPage = "overview" | "applications" | "containers" | "images" | "volumes" | "networks" | "connections";
+type ContainerState = "running" | "stopped" | "paused" | "restarting" | "dead" | "created" | "unknown";
+
+const NAVIGATION: Array<{ id: DashboardPage; label: string; icon: string }> = [
+  { id: "overview", label: "Overview", icon: "layout-dashboard" },
+  { id: "applications", label: "Applications", icon: "boxes" },
+  { id: "containers", label: "Containers", icon: "container" },
+  { id: "images", label: "Images", icon: "layers-3" },
+  { id: "volumes", label: "Volumes", icon: "database" },
+  { id: "networks", label: "Networks", icon: "network" },
+  { id: "connections", label: "Connections", icon: "plug-zap" }
+];
+
+/**
+ * The plugin's single, internally routed monitoring view.
+ *
+ * Documentation: [[Docker Connector - Dashboard]] and [[Docker Connector - User Guide]]
+ */
+export class DockerDashboardView extends ItemView {
+  private page: DashboardPage = "overview";
+  private selectedHostId = "all";
+  private selectedContainerState?: ContainerState;
+  private readonly containersTab: ContainersTab;
+  private readonly imagesTab: ImagesTab;
+  private readonly volumesTab: VolumesTab;
+  private readonly networksTab: NetworksTab;
+  private readonly applicationsTab: ApplicationsTab;
+  private relativeTimeTimer?: number;
+  private readonly attentionReleaseChecks = new Set<string>();
+  private closed = false;
+  private removeSettingsListener?: () => void;
+
+  constructor(leaf: WorkspaceLeaf, private readonly plugin: DockerConnectorPlugin) { super(leaf); this.containersTab = new ContainersTab(plugin, () => void this.render()); this.applicationsTab = new ApplicationsTab(plugin, () => void this.render(), (id) => { this.containersTab.route(undefined, id); this.page = "containers"; void this.render(); }); this.imagesTab = new ImagesTab(plugin, () => void this.render(), (id) => { this.containersTab.route(undefined, id); this.page = "containers"; void this.render(); }); this.volumesTab = new VolumesTab(plugin, () => void this.render(), (id) => { this.containersTab.route(undefined, id); this.page = "containers"; void this.render(); }); this.networksTab = new NetworksTab(plugin, () => void this.render(), id => { this.containersTab.route(undefined,id);this.page="containers";void this.render();}); }
+
+  getViewType(): string { return DOCKER_CONNECTOR_VIEW; }
+  getDisplayText(): string { return "Docker Connector"; }
+  getIcon(): string { return "container"; }
+  async onOpen(): Promise<void> { this.closed = false; this.removeSettingsListener = this.plugin.onSettingsChanged((change) => { if (change.key === "containerManagementEnabled" && !this.closed) void this.render(); }); /* The view owns this presentation-only timer, so registerInterval ties it to ItemView disposal as well as the explicit close path. */ this.relativeTimeTimer = this.registerInterval(window.setInterval(() => { if (this.page === "containers") void this.render(); }, 60_000)); await this.render(); }
+  async onClose(): Promise<void> { this.closed = true; this.removeSettingsListener?.(); this.removeSettingsListener = undefined; this.attentionReleaseChecks.clear(); if (this.relativeTimeTimer) window.clearInterval(this.relativeTimeTimer); this.containersTab.dispose(); this.applicationsTab.dispose(); this.imagesTab.dispose(); this.volumesTab.dispose(); }
+
+  async render(): Promise<void> {
+    const root = this.contentEl;
+    root.empty();
+    root.addClass("docker-connector");
+    const profiles = this.plugin.settings.profiles;
+    if (this.selectedHostId !== "all" && !profiles.some((profile) => profile.id === this.selectedHostId)) this.selectedHostId = "all";
+    this.renderHeader(root, profiles);
+    this.renderNavigation(root);
+    const content = root.createDiv({ cls: "docker-connector__content" });
+    if (this.requiresAuthenticationGate(profiles)) {
+      this.renderAuthenticationGate(content, profiles);
+      return;
+    }
+    switch (this.page) {
+      case "overview": this.renderOverview(content, profiles); break;
+      case "applications": this.renderApplications(content); break;
+      case "containers": this.renderContainers(content); break;
+      case "images": this.renderImages(content); break;
+      case "volumes": this.renderVolumes(content); break;
+      case "networks": this.renderNetworks(content); break;
+      case "connections": this.renderConnections(content, profiles); break;
+    }
+  }
+
+  private renderHeader(root: HTMLElement, profiles: DockerConnectionProfile[]): void {
+    const header = root.createDiv({ cls: "docker-connector__header" });
+    const identity = header.createDiv({ cls: "docker-connector__brand" });
+    const logo = identity.createDiv({ cls: "docker-connector__brand-icon" }); setIcon(logo, "container");
+    const text = identity.createDiv(); text.createEl("h2", { text: "Docker Connector" }); text.createSpan({ text: "Read-only environment dashboard" });
+
+    const controls = header.createDiv({ cls: "docker-connector__header-controls" });
+    const hostPicker = controls.createDiv({ cls: "docker-connector__host-picker" });
+    const hostIcon = hostPicker.createSpan({ cls: "docker-connector__host-picker-icon", attr: { "aria-hidden": "true" } });
+    setIcon(hostIcon, "server");
+    hostPicker.createSpan({ text: "Current environment", cls: "docker-connector__control-label" });
+    const select = hostPicker.createEl("select", { attr: { "aria-label": "Current Docker host" } });
+    select.createEl("option", { text: "All Docker hosts", value: "all" });
+    profiles.forEach((profile) => select.createEl("option", { text: profile.name, value: profile.id }));
+    select.value = this.selectedHostId;
+    select.onchange = () => { this.selectedHostId = select.value; void this.render(); };
+
+    const status = this.currentStatus(profiles);
+    controls.appendChild(this.statusPill(status));
+    const refreshInfo = controls.createDiv({ cls: "docker-connector__refresh-info" });
+    refreshInfo.createSpan({ text: this.lastRefreshText(profiles) });
+    refreshInfo.createSpan({ text: this.plugin.settings.automaticRefresh ? `Auto · ${this.plugin.settings.refreshIntervalMinutes} min` : "Auto refresh off", cls: "docker-connector__auto-refresh" });
+    this.iconButton(controls, "Refresh dashboard", "refresh-cw", async (button) => {
+      button.disabled = true;
+      await this.plugin.refreshAll();
+      button.disabled = false;
+    }, "docker-connector__refresh-button");
+    this.iconButton(controls, "Add Docker host", "plus", () => new DockerHostModal(this.plugin, () => this.render()).open(), "mod-cta");
+    this.iconButton(controls, "Docker Connector settings", "settings", () => {
+      const settings = (this.plugin.app as unknown as { setting: { open(): void; openTabById(id: string): void } }).setting;
+      settings.open();
+      settings.openTabById(this.plugin.manifest.id);
+    });
+  }
+
+  private renderNavigation(root: HTMLElement): void {
+    const nav = root.createEl("nav", { cls: "docker-connector__nav", attr: { "aria-label": "Docker Connector sections" } });
+    for (const item of NAVIGATION) {
+      const button = nav.createEl("button", { cls: `docker-connector__nav-item${this.page === item.id ? " is-active" : ""}`, attr: { "aria-current": this.page === item.id ? "page" : "false" } });
+      setIcon(button.createSpan({ cls: "docker-connector__nav-icon" }), item.icon);
+      button.createSpan({ text: item.label });
+      button.onclick = () => this.navigate(item.id);
+    }
+  }
+
+  /**
+   * Keeps Docker metadata out of the dashboard until the selected session has
+   * authenticated. Configuration names and connection states remain available
+   * so the user can reconnect without exposing an old or unavailable snapshot.
+   */
+  private requiresAuthenticationGate(profiles: DockerConnectionProfile[]): boolean {
+    if (this.selectedHostId === "all") {
+      return profiles.some((profile) => this.plugin.snapshots.get(profile.id)?.status === "authentication-required");
+    }
+    return this.plugin.snapshots.get(this.selectedHostId)?.status === "authentication-required";
+  }
+
+  private renderAuthenticationGate(root: HTMLElement, profiles: DockerConnectionProfile[]): void {
+    this.sectionIntro(root, "Reconnect Docker hosts", "Docker details remain hidden until a secure session connection succeeds.");
+    const panel = this.panel(root, "Configured servers", "Connection state for this Obsidian session", "shield-check", "docker-connector__access-panel");
+    const list = panel.createDiv({ cls: "docker-connector__access-list", attr: { "aria-label": "Configured Docker server connection states" } });
+    for (const profile of profiles) {
+      const snapshot = this.plugin.snapshots.get(profile.id);
+      const row = list.createDiv({ cls: "docker-connector__access-row" });
+      const identity = row.createDiv({ cls: "docker-connector__access-identity" });
+      identity.createEl("strong", { text: profile.name });
+      const method = configuredServerConnection(profile);
+      identity.createDiv({ text: `Connection: ${method.label}`, cls: "docker-connector__access-method" });
+      if (method.detail) identity.createDiv({ text: method.detail, cls: "docker-connector__muted docker-connector__access-detail", attr: { "aria-label": method.detail } });
+      row.appendChild(this.statusPill(snapshot?.status ?? "unknown"));
+      if (snapshot?.status === "authentication-required") {
+        const reconnect = row.createEl("button", { text: "Reconnect", cls: "mod-cta" });
+        reconnect.onclick = () => new ReconnectPasswordModal(this.plugin, profile, () => this.render()).open();
+      }
+    }
+  }
+
+  private renderOverview(root: HTMLElement, profiles: DockerConnectionProfile[]): void {
+    const snapshots = this.visibleSnapshots();
+    const containers = snapshots.flatMap((snapshot) => snapshot.containers);
+    const online = profiles.filter((profile) => this.plugin.snapshots.get(profile.id)?.status === "online").length;
+    const states = this.containerStates(containers);
+    const attention = selectAttentionItems(profiles, this.plugin.snapshots, containers, (image) => this.plugin.publicImageReleases.get(image));
+    void this.loadAttentionReleases(containers);
+    this.sectionIntro(root, "Environment overview", this.selectedHostId === "all" ? "A concise view of every configured Docker environment." : "The current Docker environment at a glance.");
+
+    const cards = root.createDiv({ cls: "docker-connector__summary-grid" });
+    this.summaryCard(cards, "Hosts", profiles.length, `${online} online`, "server", "info", () => this.navigate("connections"));
+    this.summaryCard(cards, "Containers", containers.length, `${states.running} running · ${states.stopped} stopped`, "container", "accent", () => this.navigate("containers"));
+    this.summaryCard(cards, "Running", states.running, `${percentage(states.running, containers.length)}% of containers`, "circle-play", "success", () => this.navigate("containers", "running"));
+    this.summaryCard(cards, "Stopped", states.stopped, `${states.paused + states.restarting} need attention`, "circle-stop", "muted", () => this.navigate("containers", "stopped"));
+    this.summaryCard(cards, "Images", snapshots.reduce((total, snapshot) => total + snapshot.images.length, 0), "Available image library", "layers-3", "info", () => this.navigate("images"));
+    this.summaryCard(cards, "Volumes", snapshots.reduce((total, snapshot) => total + snapshot.volumes.length, 0), "Persistent data stores", "database", "warning", () => this.navigate("volumes"));
+    this.summaryCard(cards, "Networks", snapshots.reduce((total, snapshot) => total + snapshot.networks.length, 0), "Docker network definitions", "network", "accent", () => this.navigate("networks"));
+
+    const grid = root.createDiv({ cls: "docker-connector__overview-grid" });
+    const hasAttention = attention.length > 0;
+    this.renderHostHealth(grid, profiles);
+    if (hasAttention) this.renderAttention(grid, attention, true);
+    if (!hasAttention) this.renderAttention(grid, attention);
+  }
+
+  private renderHostHealth(root: HTMLElement, profiles: DockerConnectionProfile[]): void {
+    const panel = this.panel(root, "Host health", "Activity and Engine details", "heart-pulse", "docker-connector__panel--wide");
+    const hosts = this.selectedHostId === "all" ? profiles : profiles.filter((profile) => profile.id === this.selectedHostId);
+    if (!hosts.length) { this.emptyState(panel, "No Docker hosts yet", "Add an SSH Docker host to begin monitoring your environments.", "plus", () => new DockerHostModal(this.plugin, () => this.render()).open()); return; }
+    const list = panel.createDiv({ cls: "docker-connector__health-list" });
+    for (const host of hosts) {
+      const snapshot = this.plugin.snapshots.get(host.id);
+      const item = list.createEl("button", { cls: "docker-connector__health-row", attr: { "aria-label": `Select ${host.name}` } });
+      item.onclick = () => { this.selectedHostId = host.id; void this.render(); };
+      const main = item.createDiv(); main.createDiv({ text: host.name, cls: "docker-connector__health-name" }); main.createDiv({ text: host.category || connectionSummary(host), cls: "docker-connector__muted" });
+      const metrics = item.createDiv({ cls: "docker-connector__health-metrics" });
+      if (snapshot?.system) metrics.createSpan({ text: `Docker ${snapshot.system.dockerVersion}` });
+      metrics.createSpan({ text: snapshot?.system ? `${snapshot.system.operatingSystem} · ${snapshot.system.architecture}` : "Waiting for connection" });
+      item.appendChild(this.statusPill(snapshot?.status ?? "unknown"));
+    }
+    if (this.selectedHostId !== "all") this.renderSelectedHostDetails(panel, hosts[0], this.plugin.snapshots.get(hosts[0].id));
+  }
+
+  private renderSelectedHostDetails(panel: HTMLElement, host: DockerConnectionProfile, snapshot?: DockerHostSnapshot): void {
+    const details = panel.createEl("details", { cls: "docker-connector__host-details" });
+    details.createEl("summary", { text: "Host information and diagnostics" });
+    const grid = details.createDiv({ cls: "docker-connector__detail-grid" });
+    const values: Array<[string, string]> = [
+      ["Connection", "Secure SSH"], ["Docker context", "Default remote Docker context"],
+      ["Last refresh", snapshot ? relativeTime(snapshot.refreshedAt) : "Not refreshed"],
+      ["Docker version", snapshot?.system?.dockerVersion ?? "—"], ["API version", snapshot?.system?.apiVersion ?? "—"],
+      ["Operating system", snapshot?.system?.operatingSystem ?? "—"], ["Architecture", snapshot?.system?.architecture ?? "—"],
+      ["Kernel", snapshot?.system?.kernelVersion ?? "—"], ["CPU count", snapshot?.system ? String(snapshot.system.cpuCount) : "—"], ["Memory", snapshot?.system ? formatBytes(snapshot.system.totalMemory) : "—"]
+    ];
+    values.forEach(([label, value]) => { const item = grid.createDiv(); item.createSpan({ text: label }); item.createEl("strong", { text: value }); });
+    const diagnostics = details.createEl("details", { cls: "docker-connector__diagnostics" }); diagnostics.createEl("summary", { text: "Connection diagnostics" }); diagnostics.createDiv({ text: snapshot?.error ?? "No connection errors recorded.", cls: snapshot?.error ? "docker-connector__error" : "docker-connector__muted" });
+  }
+
+  private renderAttention(root: HTMLElement, issues: DashboardAttentionItem[], prominent = false): void {
+    const panel = this.panel(root, "Attention required", "Updates and conditions that may need a closer look", "triangle-alert", prominent ? "docker-connector__panel--wide docker-connector__attention-panel" : "");
+    if (!issues.length) { panel.createDiv({ text: "All refreshed hosts and containers are reporting normally.", cls: "docker-connector__empty-inline" }); return; }
+    const list = panel.createDiv({ cls: "docker-connector__attention-list" });
+    issues.forEach((issue) => {
+      const item = list.createDiv({ cls: `docker-connector__attention-item is-${issue.severity}` });
+      item.appendChild(this.attentionPill(issue.label, issue.severity));
+      const copy = item.createDiv(); copy.createEl("strong", { text: issue.title }); copy.createDiv({ text: issue.description, cls: "docker-connector__muted" });
+      if (issue.target === "host" && this.plugin.snapshots.get(issue.hostProfileId)?.status === "authentication-required") {
+        const profile = this.plugin.settings.profiles.find((candidate) => candidate.id === issue.hostProfileId);
+        if (profile) { const reconnect = item.createEl("button", { text: "Reconnect", cls: "mod-cta" }); reconnect.onclick = () => new ReconnectPasswordModal(this.plugin, profile, () => this.render()).open(); }
+      } else {
+        const action = item.createEl("button", { text: issue.target === "container" ? "View container" : issue.target === "image" ? "View images" : "Open connection" });
+        action.onclick = () => this.openAttentionItem(issue);
+      }
+    });
+  }
+
+  private renderContainers(root: HTMLElement): void {
+    this.containersTab.render(root, this.selectedHostId);
+  }
+  private renderApplications(root: HTMLElement): void { this.applicationsTab.render(root, this.selectedHostId); }
+  private renderImages(root: HTMLElement): void { this.imagesTab.render(root, this.selectedHostId); }
+  private renderVolumes(root: HTMLElement): void { this.volumesTab.render(root, this.selectedHostId); }
+  private renderNetworks(root: HTMLElement): void { this.networksTab.render(root, this.selectedHostId); }
+  private renderConnections(root: HTMLElement, profiles: DockerConnectionProfile[]): void {
+    root.addClass("dc-connections-tab");
+    this.sectionIntro(root, "Connections", "Secure SSH Docker environments configured for this Obsidian session.");
+    if (!profiles.length) {
+      const panel = this.panel(root, "Docker hosts", "Add a host to begin monitoring Docker environments", "plug-zap");
+      this.emptyState(panel, "No Docker hosts yet", "Add an SSH Docker host to begin monitoring your environments.", "plus", () => new DockerHostModal(this.plugin, () => this.render()).open());
+      return;
+    }
+    const online = profiles.filter((profile) => this.plugin.snapshots.get(profile.id)?.status === "online").length;
+    const reconnect = profiles.filter((profile) => this.plugin.snapshots.get(profile.id)?.status === "authentication-required").length;
+    renderMetricCards(root, [{ label: "Configured hosts", value: profiles.length, detail: "Secure SSH Docker hosts", icon: "server" }, { label: "Online", value: online, detail: "Connected this session", icon: "circle-check", tone: "success" }, { label: "Needs sign-in", value: reconnect, detail: "Password required to reconnect", icon: "key-round", tone: "warning" }], "Docker host connection summary");
+    const section = root.createEl("section", { cls: "dc-connections-panel" });
+    const heading = section.createDiv({ cls: "dc-connections-panel-header" });
+    const icon = heading.createDiv({ cls: "docker-connector__panel-icon" }); setIcon(icon, "plug-zap");
+    const copy = heading.createDiv(); copy.createEl("h2", { text: "Docker hosts" }); copy.createSpan({ text: "Select an environment to review its current Docker inventory." });
+    const cards = section.createDiv({ cls: "dc-connection-cards" });
+    profiles.forEach((profile) => this.renderConnectionRow(cards, profile, this.plugin.snapshots.get(profile.id)));
+  }
+
+  private renderConnectionRow(root: HTMLElement, profile: DockerConnectionProfile, snapshot?: DockerHostSnapshot): void {
+    const status = snapshot?.status ?? "unknown";
+    const card = root.createEl("article", { cls: `dc-connection-card status-${status}` });
+    const header = card.createDiv({ cls: "dc-connection-card-header" });
+    const identity = header.createDiv({ cls: "dc-connection-identity" });
+    const icon = identity.createDiv({ cls: "dc-resource-icon is-connection" }); setIcon(icon, "server");
+    const copy = identity.createDiv(); copy.createEl("h3", { text: profile.name });
+    copy.createSpan({ text: profile.description || profile.category || "Secure SSH Docker host", cls: "docker-connector__muted" });
+    header.appendChild(this.statusPill(status));
+
+    if (profile.connectionType === "docker-context") {
+      const lifecycle = this.plugin.contextLifecycle.get(profile.id);
+      copy.createSpan({ text: "Docker Context", cls: "docker-connector__muted" });
+      const endpoint = card.createDiv({ cls: "dc-connection-endpoint" });
+      endpoint.createSpan({ text: `Context: ${profile.contextName}` });
+      endpoint.createSpan({ text: `Endpoint: ${profile.contextSnapshot.endpointType} · ${profile.contextSnapshot.endpointDisplay ?? "—"}`, cls: "docker-connector__muted" });
+      endpoint.createSpan({ text: `Lifecycle: ${contextLifecycleLabel(lifecycle?.state)}`, cls: "docker-connector__muted" });
+      endpoint.createSpan({ text: `Imported: ${profile.contextSnapshot.importedAt}${lifecycle?.checkedAt ? ` · Checked: ${lifecycle.checkedAt}` : ""}`, cls: "docker-connector__muted" });
+      const details = card.createEl("details", { cls: "docker-connector__host-details" }); details.createEl("summary", { text: "View Context Details" }); const grid = details.createDiv({ cls: "docker-connector__detail-grid" }); [["Saved endpoint", profile.contextSnapshot.endpointDisplay ?? "—"], ["TLS verification", profile.contextSnapshot.skipTlsVerify ? "Skipped" : "Enforced"], ["Supported", profile.contextSnapshot.supported ? "Yes" : "No"], ["Lifecycle", contextLifecycleLabel(lifecycle?.state)], ["Error", lifecycle?.errorCode ?? "—"]].forEach(([label, value]) => { const item = grid.createDiv(); item.createSpan({ text: label }); item.createEl("strong", { text: value }); }); lifecycle?.changes.forEach((change) => details.createDiv({ text: `${change.field}: ${String(change.previousValue ?? "—")} → ${String(change.currentValue ?? "—")} (${change.severity})`, cls: "docker-connector__muted", attr: { "aria-label": `Context change ${change.field}` } }));
+      const actions = card.createDiv({ cls: "dc-connection-actions" });
+      const edit = actions.createEl("button", { text: "Edit" });
+      edit.onclick = () => new DockerHostModal(this.plugin, () => this.render(), profile).open();
+      const refresh = actions.createEl("button", { text: "Refresh Context Metadata", attr: { "aria-label": `Refresh Context metadata for ${profile.name}` } }); refresh.onclick = () => void this.plugin.refreshContextMetadata(profile);
+      const remove = actions.createEl("button", { text: "Remove" }); remove.onclick = async () => { if (!window.confirm("This removes the connection from Docker Connector. It does not remove the Docker CLI context.")) return; await this.plugin.hostManager.remove(profile.id); await this.render(); };
+      return;
+    }
+    if (profile.connectionType === "docker-tls") {
+      copy.createSpan({ text: "Docker API with TLS", cls: "docker-connector__muted" });
+      const endpoint = card.createDiv({ cls: "dc-connection-endpoint" }); endpoint.createSpan({ text: `${profile.host}:${profile.port}` }); endpoint.createSpan({ text: `Server name: ${profile.serverName} · ${titleCase(status)}`, cls: "docker-connector__muted" });
+      if (snapshot) { const inventory = card.createDiv({ cls: "dc-connection-inventory" }); [["Containers", snapshot.containers.length], ["Images", snapshot.images.length], ["Volumes", snapshot.volumes.length], ["Networks", snapshot.networks.length]].forEach(([label, value]) => { const metric = inventory.createDiv(); metric.createEl("strong", { text: String(value) }); metric.createSpan({ text: String(label) }); }); card.createDiv({ text: snapshot.system ? `Docker ${snapshot.system.dockerVersion} · API ${snapshot.system.apiVersion}` : snapshot.error ?? "Docker details unavailable", cls: "docker-connector__muted" }); }
+      const actions = card.createDiv({ cls: "dc-connection-actions" }); const open = actions.createEl("button", { text: "Open dashboard", cls: "mod-cta" }); open.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); }; const refresh = actions.createEl("button", { text: "Refresh" }); refresh.onclick = () => void this.plugin.retryHost(profile); if (status === "authentication-required") { const reconnect = actions.createEl("button", { text: "Reconnect" }); reconnect.onclick = () => new ReconnectPasswordModal(this.plugin, profile, () => this.render()).open(); }
+      return;
+    }
+
+    const endpoint = card.createDiv({ cls: "dc-connection-endpoint" });
+    const endpointIcon = endpoint.createSpan({ attr: { "aria-hidden": "true" } }); setIcon(endpointIcon, "network");
+    endpoint.createSpan({ text: connectionSummary(profile) });
+    endpoint.createSpan({ text: profile.connectionType === "ssh" ? profile.authentication.type === "password" ? "Password" : `Private Key File · ${shortPath(profile.authentication.privateKeyPath)}` : "Local Docker", cls: "docker-connector__muted" });
+    if (profile.category) endpoint.createSpan({ text: profile.category, cls: "dc-connection-category" });
+
+    if (snapshot) {
+      const inventory = card.createDiv({ cls: "dc-connection-inventory", attr: { "aria-label": `${profile.name} Docker inventory` } });
+      [["Containers", snapshot.containers.length, "container"], ["Images", snapshot.images.length, "layers-3"], ["Volumes", snapshot.volumes.length, "database"], ["Networks", snapshot.networks.length, "network"]].forEach(([label, value, iconName]) => {
+        const metric = inventory.createDiv(); const metricIcon = metric.createSpan({ attr: { "aria-hidden": "true" } }); setIcon(metricIcon, String(iconName));
+        metric.createEl("strong", { text: String(value) }); metric.createSpan({ text: String(label) });
+      });
+      const engine = card.createDiv({ cls: "dc-connection-engine" });
+      engine.createSpan({ text: snapshot.system ? `Docker ${snapshot.system.dockerVersion}` : "Docker details unavailable" });
+      engine.createSpan({ text: snapshot.system ? `${snapshot.system.operatingSystem} · ${snapshot.system.architecture}` : this.lastRefreshText([profile]) });
+    } else {
+      card.createDiv({ text: "Docker inventory is available after a successful connection.", cls: "dc-connection-unavailable" });
+    }
+
+    const actions = card.createDiv({ cls: "dc-connection-actions" });
+    const action = actions.createEl("button", { text: "Open dashboard", cls: "mod-cta" });
+    action.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); };
+    const refresh = actions.createEl("button", { text: "Refresh" }); refresh.onclick = () => void this.plugin.retryHost(profile);
+    if (status === "authentication-required") {
+      const reconnect = actions.createEl("button", { text: "Reconnect", cls: "dc-connection-reconnect" });
+      reconnect.onclick = () => new ReconnectPasswordModal(this.plugin, profile, () => this.render()).open();
+    }
+  }
+
+  private renderInventory(root: HTMLElement, title: string, icon: string, rows: Array<[string, string, string]>, subtitle = `Read-only ${title.toLowerCase()} across the selected environments.`, clearFilter?: () => void): void { this.sectionIntro(root, title, subtitle); if (clearFilter) { const clear = root.createEl("button", { text: "Clear container filter", cls: "docker-connector__clear-filter" }); clear.onclick = clearFilter; } const panel = this.panel(root, title, `${rows.length} available`, icon); if (!rows.length) { panel.createDiv({ text: "No data is available. Refresh an authenticated host to load this inventory.", cls: "docker-connector__empty-inline" }); return; } const table = panel.createDiv({ cls: "docker-connector__inventory" }); rows.forEach(([primary, secondary, detail]) => { const row = table.createDiv({ cls: "docker-connector__inventory-row" }); row.createEl("strong", { text: primary }); row.createSpan({ text: secondary, cls: "docker-connector__muted" }); row.createSpan({ text: detail, cls: "docker-connector__muted" }); }); }
+  private panel(root: HTMLElement, title: string, subtitle: string, icon: string, cls = ""): HTMLElement { const panel = root.createEl("section", { cls: `docker-connector__panel ${cls}` }); const header = panel.createDiv({ cls: "docker-connector__panel-header" }); const iconEl = header.createDiv({ cls: "docker-connector__panel-icon" }); setIcon(iconEl, icon); const copy = header.createDiv(); copy.createEl("h3", { text: title }); copy.createSpan({ text: subtitle }); return panel; }
+  private sectionIntro(root: HTMLElement, title: string, subtitle: string): void { const intro = root.createDiv({ cls: "docker-connector__section-intro" }); intro.createEl("h1", { text: title }); intro.createSpan({ text: subtitle }); }
+  private summaryCard(root: HTMLElement, label: string, value: number, detail: string, icon: string, colour: string, onclick: () => void): void { const card = root.createEl("button", { cls: `docker-connector__summary-card is-${colour}`, attr: { "aria-label": `${label}: ${value}. ${detail}` } }); card.onclick = onclick; const iconEl = card.createDiv({ cls: "docker-connector__summary-icon" }); setIcon(iconEl, icon); const copy = card.createDiv(); copy.createSpan({ text: label }); copy.createEl("strong", { text: String(value) }); copy.createEl("small", { text: detail }); }
+  private attentionPill(label: string, severity: "danger" | "warning" | "info"): HTMLElement { const pill = document.createElement("span"); pill.addClass("docker-connector__attention-badge", `is-${severity}`); pill.createSpan({ cls: "docker-connector__status-dot" }); pill.createSpan({ text: label }); return pill; }
+  private openAttentionItem(issue: DashboardAttentionItem): void { this.selectedHostId = issue.hostProfileId; if (issue.target === "container") { this.containersTab.route(undefined, issue.containerId); this.navigate("containers"); return; } this.navigate(issue.target === "image" ? "images" : "connections"); }
+  private emptyState(root: HTMLElement, title: string, message: string, icon: string, action: () => void): void { const empty = root.createDiv({ cls: "docker-connector__empty" }); const iconEl = empty.createDiv(); setIcon(iconEl, icon); empty.createEl("h4", { text: title }); empty.createSpan({ text: message }); const button = empty.createEl("button", { text: "Add host", cls: "mod-cta" }); button.onclick = action; }
+  private iconButton(root: HTMLElement, label: string, icon: string, onclick: (button: HTMLButtonElement) => void | Promise<void>, cls = ""): void { const button = root.createEl("button", { cls: `docker-connector__icon-button ${cls}`, attr: { "aria-label": label, title: label } }); setIcon(button, icon); button.onclick = () => void onclick(button); }
+  private statusPill(status: HostConnectionStatus | ContainerState): HTMLElement { const label = status === "authentication-required" ? "Authentication Required" : titleCase(status); const el = document.createElement("span"); el.addClass("docker-connector__status", `status-${status}`); el.createSpan({ cls: "docker-connector__status-dot" }); el.createSpan({ text: label }); return el; }
+  private currentStatus(profiles: DockerConnectionProfile[]): HostConnectionStatus { if (this.selectedHostId !== "all") return this.plugin.snapshots.get(this.selectedHostId)?.status ?? "unknown"; const statuses = profiles.map((profile) => this.plugin.snapshots.get(profile.id)?.status); return statuses.includes("online") ? "online" : statuses.includes("authentication-required") ? "authentication-required" : statuses.includes("degraded") ? "degraded" : statuses.includes("offline") ? "offline" : "unknown"; }
+  private visibleSnapshots(): DockerHostSnapshot[] { const snapshots = [...this.plugin.snapshots.values()]; return this.selectedHostId === "all" ? snapshots : snapshots.filter((snapshot) => snapshot.hostId === this.selectedHostId); }
+  private containerStates(containers: DockerContainerSummary[]): Record<ContainerState, number> { const initial: Record<ContainerState, number> = { running: 0, stopped: 0, paused: 0, restarting: 0, dead: 0, created: 0, unknown: 0 }; containers.forEach((container) => { initial[normaliseState(container.state)]++; }); return initial; }
+  private async loadAttentionReleases(containers: DockerContainerSummary[]): Promise<void> {
+    const images = [...new Set(containers.map((container) => container.image).filter((image) => image && image !== "Unknown image"))].filter((image) => !this.plugin.publicImageReleases.get(image) && !this.attentionReleaseChecks.has(image));
+    if (!images.length) return;
+    images.forEach((image) => this.attentionReleaseChecks.add(image));
+    await Promise.all(images.map((image) => this.plugin.publicImageReleases.check(image)));
+    images.forEach((image) => this.attentionReleaseChecks.delete(image));
+    if (!this.closed && this.page === "overview") void this.render();
+  }
+  private lastRefreshText(profiles: DockerConnectionProfile[]): string { const refreshed = profiles.map((profile) => this.plugin.snapshots.get(profile.id)?.refreshedAt).filter((value): value is string => Boolean(value)).sort().at(-1); return refreshed ? `Updated ${relativeTime(refreshed)}` : "Not refreshed yet"; }
+  private navigate(page: DashboardPage, filter?: ContainerState): void { this.page = page; this.selectedContainerState = page === "containers" ? filter : undefined; if (page === "containers") this.containersTab.route(filter === "stopped" ? "stopped" : filter === "running" ? "running" : undefined); void this.render(); }
+}
+
+function normaliseState(value: string): ContainerState { const state = value.toLowerCase(); if (state === "exited" || state === "stopped") return "stopped"; if (["running", "paused", "restarting", "dead", "created"].includes(state)) return state as ContainerState; return "unknown"; }
+function titleCase(value: string): string { return value.replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()); }
+function percentage(value: number, total: number): number { return total ? Math.round((value / total) * 100) : 0; }
+function relativeTime(value: string): string { const seconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000)); if (seconds < 60) return "just now"; if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`; if (seconds < 86_400) return `${Math.floor(seconds / 3600)} hr ago`; return `${Math.floor(seconds / 86_400)} d ago`; }
+function formatBytes(value: number): string { if (!value) return "0 B"; const units = ["B", "KB", "MB", "GB", "TB"]; const index = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1); return `${(value / 1024 ** index).toFixed(index ? 1 : 0)} ${units[index]}`; }
+function contextLifecycleLabel(state: DockerContextLifecycleResult["state"] | undefined): string { return ({ "not-tested": "Not Tested", unchanged: "Unchanged", missing: "Context Missing", changed: "Context Changed", unsupported: "Unsupported", "cli-unavailable": "Docker CLI Unavailable", "discovery-error": "Discovery Error" } as const)[state ?? "not-tested"]; }
+
+class DockerHostModal extends Modal {
+  private readonly id: string; private readonly createdAt: string; private name = ""; private description = ""; private category = ""; private connectionType: "ssh" | "local" | "docker-context" | "docker-tls" = "ssh"; private contexts: DiscoveredDockerContext[] = []; private selectedContextName?: string; private contextState = "Not checked"; private lifecycle?: DockerContextLifecycleResult; private discoverySucceeded = false; private discovering = false; private dismissed = false; private localEndpoint = defaultLocalEndpoint(); private localStatus?: string; private host = ""; private port = "22"; private username = ""; private password = ""; private passwordVisible = false; private authentication: "password" | "private-key" = "password"; private privateKeyPath = ""; private privateKeyPassphrase = ""; private socketPath = "/var/run/docker.sock"; private tlsHost = ""; private tlsPort = "2376"; private tlsServerName = ""; private tlsCaPath = ""; private tlsCertPath = ""; private tlsKeyPath = ""; private tlsPassphrase = ""; private tlsValidation?: Awaited<ReturnType<typeof validateDockerTlsFiles>>; private fingerprint = ""; private pendingFingerprint?: string; private formError?: string; private keyStatus?: { tone: "success" | "error" | "warning"; message: string }; private lastResult?: import("../connections/DockerTransport").DockerConnectionTestResult;
+  constructor(private readonly plugin: DockerConnectorPlugin, private readonly onSaved: () => Promise<void>, private readonly editingProfile?: DockerContextProfile) { super(plugin.app); this.id = editingProfile?.id ?? crypto.randomUUID(); this.createdAt = editingProfile?.createdAt ?? new Date().toISOString(); if (editingProfile) { this.name = editingProfile.name; this.description = editingProfile.description ?? ""; this.category = editingProfile.category ?? ""; this.connectionType = "docker-context"; this.selectedContextName = editingProfile.contextName; } }
+  onOpen(): void { this.dismissed = false; this.render(); }
+  onClose(): void { this.dismissed = true; }
+  private render(): void { this.contentEl.empty(); this.contentEl.addClass("dc-host-modal"); this.contentEl.createEl("h2", { text: this.editingProfile ? "Edit Docker Host" : "Add Docker Host" }); const form = this.contentEl.createDiv({ cls: "dc-host-modal__form" }); const host = this.section(form, "Host Information"); this.text(host, "Friendly Name", this.name, (value) => this.name = value); this.text(host, "Description", this.description, (value) => this.description = value); this.text(host, "Category", this.category, (value) => this.category = value);
+    const connection = this.section(form, "Connection"); new Setting(connection).setName("Connection Type").addDropdown((dropdown) => { dropdown.addOption("local", "Local Docker").addOption("docker-context", "Docker Context").addOption("ssh", "SSH").addOption("docker-tls", "Docker API with TLS").setValue(this.connectionType).onChange((value) => { this.connectionType = value as typeof this.connectionType; this.formError = undefined; this.render(); }); dropdown.setDisabled(Boolean(this.editingProfile)); }); if (this.connectionType === "local") this.localFields(connection); else if (this.connectionType === "docker-context") this.contextFields(connection); else if (this.connectionType === "docker-tls") this.tlsFields(connection); else { this.text(connection, "Host", this.host, (value) => this.host = value); this.text(connection, "Port", this.port, (value) => this.port = value); this.text(connection, "Username", this.username, (value) => this.username = value); }
+    if (this.connectionType === "ssh") { const auth = this.section(form, "Authentication"); new Setting(auth).setName("Authentication Method").setDesc("Choose how this host authenticates. Secrets remain in memory only.").addDropdown((dropdown) => dropdown.addOption("password", "Password").addOption("private-key", "Private Key File").setValue(this.authentication).onChange((value) => { this.authentication = value as typeof this.authentication; this.formError = undefined; this.keyStatus = undefined; this.render(); })); const details = this.section(form, "Authentication Details", "dc-host-modal__auth-details"); if (this.authentication === "password") this.passwordField(details); else this.privateKeyFields(details); const docker = this.section(form, "Docker"); this.text(docker, "Docker Socket", this.socketPath, (value) => this.socketPath = value); const security = this.section(form, "Security"); new Setting(security).setName("Host Key Fingerprint").setDesc(this.fingerprint ? "Trusted host identity." : "Displayed after the first connection.").addText((text) => { text.setValue(this.fingerprint || "Awaiting first connection"); text.inputEl.readOnly = true; }); }
+    if (this.formError) form.createDiv({ text: this.formError, cls: "dc-host-modal__validation", attr: { role: "alert" } }); if (this.lastResult) this.renderDiagnostics(form, this.lastResult);
+    const footer = this.contentEl.createDiv({ cls: "dc-host-modal__footer" }); const cancel = footer.createEl("button", { text: "Cancel" }); cancel.onclick = () => this.close(); const test = footer.createEl("button", { text: "Test Connection", attr: { title: this.connectionType === "docker-context" ? "Discovery must confirm the selected Docker Context before testing." : "" } }); test.disabled = this.connectionType === "docker-context" && !this.canSaveContext(); test.onclick = () => void this.test(); const save = footer.createEl("button", { text: "Save Host", cls: "mod-cta" }); save.disabled = this.connectionType === "docker-context" && !this.canSaveContext(); save.onclick = () => void this.save(); }
+  private section(root: HTMLElement, title: string, cls = ""): HTMLElement { const section = root.createDiv({ cls: `dc-host-modal__section ${cls}` }); section.createEl("h3", { text: title }); return section; }
+  private text(root: HTMLElement, name: string, value: string, onChange: (value: string) => void): void { new Setting(root).setName(name).addText((text) => text.setValue(value).onChange(onChange)); }
+  private passwordField(root: HTMLElement): void { new Setting(root).setName("Password").setDesc("Used only in memory for this Obsidian session. It is never saved to disk.").addText((text) => { text.setValue(this.password); text.inputEl.type = this.passwordVisible ? "text" : "password"; text.inputEl.autocomplete = "current-password"; text.onChange((value) => this.password = value); }).addButton((button) => button.setButtonText(this.passwordVisible ? "Hide password" : "Show password").onClick(() => { this.passwordVisible = !this.passwordVisible; this.render(); })); }
+  private privateKeyFields(root: HTMLElement): void { new Setting(root).setName(this.privateKeyPath ? "Selected key" : "Private Key").setDesc(this.privateKeyPath ? shortPath(this.privateKeyPath) : "Choose an OpenSSH private key file. Only its path is saved.").addButton((button) => button.setButtonText("Browse…").onClick(() => void this.choosePrivateKey())); if (this.keyStatus) root.createDiv({ text: `${this.keyStatus.tone === "success" ? "✓ " : ""}${this.keyStatus.message}`, cls: `dc-host-modal__key-status is-${this.keyStatus.tone}`, attr: { role: "status" } }); if (this.privateKeyPath) new Setting(root).setName("Passphrase (optional)").setDesc("Required only for encrypted keys. It remains in memory and is never saved.").addText((text) => { text.inputEl.type = "password"; text.inputEl.autocomplete = "current-password"; text.onChange((value) => this.privateKeyPassphrase = value); }); }
+  private localFields(root: HTMLElement): void { const unix = this.localEndpoint.type === "unix-socket"; new Setting(root).setName("Endpoint Type").addText((text) => { text.setValue(unix ? "Unix Socket" : "Windows Named Pipe"); text.inputEl.readOnly = true; }); this.text(root, unix ? "Socket Path" : "Named Pipe", localEndpointValue(this.localEndpoint), (value) => { this.localEndpoint = unix ? { type: "unix-socket", socketPath: value } : { type: "windows-named-pipe", pipePath: value }; }); new Setting(root).addButton((button) => button.setButtonText("Detect Local Docker").onClick(() => void this.detectLocal())); if (this.localStatus) root.createDiv({ text: this.localStatus, cls: "dc-host-modal__key-status", attr: { role: "status" } }); }
+  private tlsFields(root: HTMLElement): void { this.text(root, "Docker Host", this.tlsHost, (value) => { this.tlsHost = value; if (!this.tlsServerName && !/[:]/.test(value)) this.tlsServerName = value; this.tlsValidation = undefined; }); this.text(root, "Docker Port", this.tlsPort, (value) => { this.tlsPort = value; this.tlsValidation = undefined; }); this.text(root, "Server Name", this.tlsServerName, (value) => { this.tlsServerName = value; this.tlsValidation = undefined; }); const files: Array<[string, "tlsCaPath" | "tlsCertPath" | "tlsKeyPath", string]> = [["CA Certificate", "tlsCaPath", "Choose CA certificate"], ["Client Certificate", "tlsCertPath", "Choose client certificate"], ["Client Private Key", "tlsKeyPath", "Choose client private key"]]; files.forEach(([label, field, title]) => new Setting(root).setName(label).setDesc((this[field] ? shortPath(this[field]) : "Choose a PEM file.")).addButton((button) => button.setButtonText("Browse…").onClick(() => void this.chooseTlsFile(field, title)))); if (this.tlsKeyPath) this.text(root, "Client Key Passphrase", this.tlsPassphrase, (value) => { this.tlsPassphrase = value; this.tlsValidation = undefined; }); if (this.tlsValidation) root.createDiv({ text: `TLS files validated · client certificate valid until ${this.tlsValidation.clientCertificateValidTo}`, cls: "dc-host-modal__key-status is-success", attr: { role: "status" } }); }
+  private contextFields(root: HTMLElement): void { const cli = this.section(root, "Docker CLI"); cli.createDiv({ text: this.contextState, cls: "dc-host-modal__key-status", attr: { role: "status", "aria-live": "polite" } }); new Setting(cli).addButton((button) => { button.setButtonText(this.contexts.length ? "Refresh Contexts" : "Discover Contexts"); button.setDisabled(this.discovering); button.onClick(() => void this.discoverContexts()); }); if (this.editingProfile) this.savedContextDetails(root); if (this.lifecycle) { const status = this.section(root, "Context Status"); status.createEl("strong", { text: contextLifecycleLabel(this.lifecycle.state) }); status.createDiv({ text: this.lifecycle.message ?? "", attr: { role: "status", "aria-live": "polite" } }); this.lifecycle.changes.forEach((change) => status.createDiv({ text: `${change.field}: ${String(change.previousValue ?? "—")} → ${String(change.currentValue ?? "—")} (${change.severity})`, cls: "docker-connector__muted" })); } if (!this.contexts.length) return; const section = this.section(root, "Context"); new Setting(section).setName("Docker Context").addDropdown((dropdown) => { dropdown.addOption("", "Select a context"); this.contexts.forEach((context) => dropdown.addOption(context.name, `${context.name}${context.isCurrent ? " — Current" : ""}${context.supported ? "" : " — Unsupported"}`)); dropdown.setValue(this.selectedContextName ?? "").onChange((value) => { this.selectedContextName = value || undefined; const selected = this.contexts.find((context) => context.name === value); if (selected && !this.name) this.name = selected.name; this.formError = undefined; this.render(); }); }); const selected = this.selectedContext(); if (selected) section.createDiv({ text: `Endpoint: ${selected.dockerEndpoint?.displayHost ?? "Unknown"} · ${selected.dockerEndpoint?.type ?? "unknown"} · ${selected.supported ? "Supported" : "Unsupported"}`, cls: selected.supported ? "dc-host-modal__key-status is-success" : "dc-host-modal__key-status is-warning" }); }
+  private savedContextDetails(root: HTMLElement): void { const profile = this.editingProfile!; const snapshot = profile.contextSnapshot; const section = this.section(root, "Saved Context Details"); [["Context Name", profile.contextName], ["Description", snapshot.description ?? "—"], ["Endpoint Type", snapshot.endpointType], ["Safe Endpoint", snapshot.endpointDisplay ?? "—"], ["Current When Saved", snapshot.isCurrentWhenSaved ? "Yes" : "No"], ["Supported State", snapshot.supported ? "Supported" : "Unsupported"], ["Imported At", snapshot.importedAt], ["Last Discovered", snapshot.lastDiscoveredAt]].forEach(([name, value]) => new Setting(section).setName(name).setDesc(value)); }
+  private async discoverContexts(): Promise<void> { if (this.discovering) return; this.discovering = true; this.discoverySucceeded = false; this.contextState = "Checking Docker CLI…"; this.render(); try { const contexts = await new DockerContextDiscoveryService().discover(); if (this.dismissed) return; this.contexts = contexts; this.discoverySucceeded = true; this.contextState = this.contexts.length ? "Docker CLI available · Contexts available" : "Docker CLI available · No contexts found"; if (this.editingProfile) { this.lifecycle = evaluateDockerContextLifecycle(this.editingProfile, contexts, new Date().toISOString()); this.plugin.contextLifecycle.set(this.editingProfile.id, this.lifecycle); } const selectedExists = this.contexts.some((context) => context.name === this.selectedContextName); if (!selectedExists && this.editingProfile) { this.selectedContextName = undefined; this.formError = `The saved Docker Context \"${this.editingProfile.contextName}\" was not found.`; } else if (!selectedExists) this.selectedContextName = this.contexts.find((context) => context.isCurrent)?.name ?? (this.contexts.filter((context) => context.supported).length === 1 ? this.contexts.find((context) => context.supported)?.name : undefined); } catch (error) { if (!this.dismissed) { this.contextState = error instanceof Error ? error.message : "Discovery failed"; if (this.editingProfile) { this.lifecycle = unavailableDockerContextLifecycle(this.editingProfile, error, new Date().toISOString()); this.plugin.contextLifecycle.set(this.editingProfile.id, this.lifecycle); } } } finally { this.discovering = false; if (!this.dismissed) this.render(); } }
+  private async detectLocal(): Promise<void> { const found = await discoverLocalDockerEndpoints(); if (found.length === 1) { this.localEndpoint = found[0]; this.localStatus = "Local Docker endpoint detected."; } else if (!found.length) this.localStatus = "No local Docker endpoint was detected. Enter a socket or named-pipe path manually."; else this.localStatus = "Multiple local endpoints were detected; enter the preferred endpoint manually."; this.render(); }
+  private async choosePrivateKey(): Promise<void> { try { const path = await new DesktopFileDialog().choosePrivateKey(); if (path) { this.privateKeyPath = path; await this.validatePrivateKey(); } } catch (error) { this.keyStatus = { tone: "error", message: error instanceof Error ? error.message : "Private-key file selection failed." }; } this.render(); }
+  private async chooseTlsFile(field: "tlsCaPath" | "tlsCertPath" | "tlsKeyPath", title: string): Promise<void> { try { const path = await new DesktopFileDialog().chooseFile(title); if (path) { this[field] = path; await this.validateTls(); } } catch (error) { this.formError = error instanceof Error ? error.message : "TLS file validation failed."; } this.render(); }
+  private async validateTls(): Promise<void> { this.tlsValidation = await validateDockerTlsFiles({ caCertificatePath: this.tlsCaPath, clientCertificatePath: this.tlsCertPath, clientKeyPath: this.tlsKeyPath, clientKeyPassphrase: this.tlsPassphrase || undefined }); }
+  private async validatePrivateKey(): Promise<void> { try { const key = await loadPrivateKeyFile(this.privateKeyPath, undefined); key.contents.fill(0); this.keyStatus = { tone: "success", message: "Valid OpenSSH private key" }; } catch (error) { const code = error && typeof error === "object" ? (error as { code?: string }).code : undefined; this.keyStatus = { tone: code === "SSH_PRIVATE_KEY_PASSPHRASE_REQUIRED" ? "warning" : "error", message: code === "SSH_PRIVATE_KEY_PASSPHRASE_REQUIRED" ? "Passphrase required" : error instanceof Error ? error.message : "Private key could not be validated." }; } }
+  private selectedContext(): DiscoveredDockerContext | undefined { return this.contexts.find((context) => context.name === this.selectedContextName); }
+  private canSaveContext(): boolean { return Boolean(this.name.trim() && this.discoverySucceeded && this.selectedContextName && this.contexts.some((context) => context.name === this.selectedContextName) && canSaveDiscoveredDockerContext(this.selectedContext())); }
+  private profile(): DockerConnectionProfile { const clean = (value: string) => value.trim().replace(/[\r\n]+/g, ""); if (this.connectionType === "docker-context") return this.editingProfile ? updateDockerContextProfile({ existingProfile: this.editingProfile, name: this.name, description: this.description, category: this.category, selectedContext: this.selectedContext()!, now: new Date().toISOString() }) : mapDiscoveredDockerContextToProfile({ id: this.id, name: this.name, description: this.description, category: this.category, context: this.selectedContext()!, now: new Date().toISOString() }); if (this.connectionType === "docker-tls") { if (!this.tlsValidation) throw new Error("Validate TLS files before saving."); return createDockerTlsProfile({ id: this.id, name: this.name, description: this.description, category: this.category, host: this.tlsHost, port: Number(this.tlsPort), serverName: this.tlsServerName, caCertificatePath: this.tlsCaPath, clientCertificatePath: this.tlsCertPath, clientKeyPath: this.tlsKeyPath, validation: this.tlsValidation, now: new Date().toISOString() }); } const base = { id: this.id, name: this.name.trim(), description: this.description.trim() || undefined, category: this.category.trim() || undefined, enabled: true, createdAt: this.createdAt, updatedAt: new Date().toISOString() }; if (this.connectionType === "local") return { ...base, connectionType: "local", localEndpoint: this.localEndpoint }; return { ...base, connectionType: "ssh", sshHost: clean(this.host), sshPort: Number(this.port), sshUsername: clean(this.username), authentication: this.authentication === "password" ? { type: "password" } : { type: "private-key", privateKeyPath: clean(this.privateKeyPath) }, remoteSocketPath: clean(this.socketPath), hostKeyFingerprint: clean(this.fingerprint) || undefined }; }
+  private valid(): boolean { if (!this.name.trim()) this.formError = "Friendly name is required."; else if (this.connectionType === "docker-tls" && !this.tlsValidation) this.formError = "Choose and validate the TLS certificate files before saving."; else if (this.connectionType === "docker-context" && !this.discoverySucceeded) this.formError = "Discover Docker Contexts before saving."; else if (this.connectionType === "docker-context" && !this.selectedContextName) this.formError = "Select a Docker Context to save."; else if (this.connectionType === "docker-context" && !this.contexts.some((context) => context.name === this.selectedContextName)) this.formError = "The selected Docker Context is no longer available."; else if (this.connectionType === "docker-context" && !canSaveDiscoveredDockerContext(this.selectedContext())) this.formError = "The selected Docker Context has an unsupported or unsafe endpoint."; else if (this.connectionType === "local" && !(this.localEndpoint.type === "unix-socket" ? this.localEndpoint.socketPath : this.localEndpoint.pipePath)) this.formError = "Local Docker endpoint is required."; else if (this.connectionType === "ssh" && !this.host.trim()) this.formError = "Host is required."; else if (this.connectionType === "ssh" && !this.username.trim()) this.formError = "Username is required."; else if (this.connectionType === "ssh" && this.authentication === "password" && !this.password) this.formError = "Password is required."; else if (this.connectionType === "ssh" && this.authentication === "private-key" && !this.privateKeyPath) this.formError = "Private key is required."; else { this.formError = undefined; return true; } return false; }
+  private async test(): Promise<void> { if (!this.valid()) { this.render(); return; } try { const profile = this.profile(); const credential = profile.connectionType === "ssh" ? profile.authentication.type === "password" ? this.password : this.privateKeyPassphrase || undefined : undefined; this.lastResult = await this.plugin.testConnection(profile, credential); this.pendingFingerprint = this.lastResult.hostFingerprint; } catch (error) { this.formError = error instanceof Error ? error.message : "Connection test failed."; } this.render(); }
+  private async save(): Promise<void> { if (this.connectionType === "docker-tls") { try { await this.validateTls(); } catch (error) { this.formError = error instanceof Error ? error.message : "TLS file validation failed."; this.render(); return; } } if (!this.valid()) { this.render(); return; } try { const profile = this.profile(); if (this.editingProfile) await this.plugin.hostManager.update(profile); else await this.plugin.hostManager.add(profile); if (profile.connectionType === "ssh" && profile.authentication.type === "password" && this.password) this.plugin.setRuntimePassword(this.id, this.password); if (profile.connectionType === "ssh" && profile.authentication.type === "private-key" && this.privateKeyPassphrase) this.plugin.setRuntimePrivateKeyPassphrase(this.id, this.privateKeyPassphrase); if (profile.connectionType === "docker-tls" && this.tlsPassphrase) this.plugin.setRuntimeTlsClientKeyPassphrase(this.id, this.tlsPassphrase); this.close(); if (profile.connectionType !== "docker-context" && profile.connectionType !== "docker-tls") await this.plugin.refreshAll(); await this.onSaved(); } catch (error) { this.formError = error instanceof Error ? error.message : "Host could not be saved."; this.render(); } }
+  private renderDiagnostics(root: HTMLElement, result: import("../connections/DockerTransport").DockerConnectionTestResult): void { const diagnostics = root.createDiv({ cls: "docker-connector__diagnostics dc-host-modal__diagnostics" }); diagnostics.createEl("h4", { text: result.success ? "Connection diagnostics" : `Connection diagnostics: ${result.safeErrorCode ?? "failed"}` }); for (const step of result.steps) diagnostics.createDiv({ text: `${step.status.toUpperCase()} — ${step.label}${step.message ? `: ${step.message}` : ""}`, cls: `docker-connector__diagnostic is-${step.status}` }); }
+}
+
+/** Prompts only for the selected session-only authentication credential. */
+class ReconnectPasswordModal extends Modal {
+  private credential = "";
+  private reconnectButton?: HTMLButtonElement;
+  private submitting = false;
+  constructor(private readonly plugin: DockerConnectorPlugin, private readonly profile: DockerConnectionProfile, private readonly onComplete: () => Promise<void>) { super(plugin.app); }
+  onOpen(): void {
+    this.contentEl.createEl("h2", { text: `Reconnect ${this.profile.name}` });
+    const privateKey = this.profile.connectionType === "ssh" && this.profile.authentication.type === "private-key";
+    const tls = this.profile.connectionType === "docker-tls";
+    new Setting(this.contentEl).setName(tls ? "Client Key Passphrase" : privateKey ? "Private-Key Passphrase" : "SSH Password").setDesc("Used only in memory for this Obsidian session.").addText((text) => {
+      text.inputEl.type = "password";
+      text.inputEl.focus();
+      text.onChange((value) => this.credential = value);
+      // The handler is owned by the input element, which Obsidian removes with
+      // the modal content; no listener survives after the dialog closes.
+      text.inputEl.onkeydown = (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        void this.submit();
+      };
+    });
+    new Setting(this.contentEl).addButton((button) => {
+      button.setButtonText("Reconnect").setCta().onClick(() => void this.submit());
+      this.reconnectButton = button.buttonEl;
+    });
+  }
+
+  private async submit(): Promise<void> {
+    if (this.submitting) return;
+    if (!this.credential) { new Notice(this.profile.connectionType === "docker-tls" ? "Enter the client-key passphrase to reconnect." : this.profile.connectionType === "ssh" && this.profile.authentication.type === "private-key" ? "Enter the private-key passphrase to reconnect." : "Enter the SSH password to reconnect."); return; }
+    this.submitting = true;
+    this.reconnectButton?.setAttribute("disabled", "true");
+    try {
+      await this.plugin.reconnectHost(this.profile, this.credential);
+      this.credential = "";
+      await this.onComplete();
+      this.close();
+    } finally {
+      this.submitting = false;
+      this.reconnectButton?.removeAttribute("disabled");
+    }
+  }
+}
+
+function shortPath(path: string): string { const segments = path.replace(/\\/g, "/").split("/").filter(Boolean); return segments.length > 2 ? `…/${segments.slice(-2).join("/")}` : path; }
+function connectionSummary(profile: DockerConnectionProfile): string { if (profile.connectionType === "ssh") return `${profile.sshUsername}@${profile.sshHost}:${profile.sshPort}`; if (profile.connectionType === "docker-context") return `${profile.contextName} · ${profile.contextSnapshot.endpointDisplay ?? profile.contextSnapshot.endpointType}`; if (profile.connectionType === "docker-tls") return `${profile.host}:${profile.port}`; return profile.localEndpoint.type === "unix-socket" ? profile.localEndpoint.socketPath : profile.localEndpoint.pipePath; }
+function localEndpointValue(endpoint: import("../connections/LocalEndpointDiscovery").LocalDockerEndpoint): string { return endpoint.type === "unix-socket" ? endpoint.socketPath : endpoint.pipePath; }

@@ -1,0 +1,30 @@
+{
+  "name": "obsidian-docker-connector",
+  "version": "1.0.0",
+  "description": "A desktop Docker environment dashboard with optional, explicitly enabled container management.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "test": "vitest run",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "obsidian",
+    "docker",
+    "dashboard"
+  ],
+  "author": "Wolf 359 Press AB",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/ssh2": "^1.15.5",
+    "esbuild": "^0.24.0",
+    "obsidian": "latest",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "ssh2": "^1.17.0"
+  }
+}

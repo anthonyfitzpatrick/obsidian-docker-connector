@@ -1,0 +1,7 @@
+import type { DockerConnectionProfile, DockerHostSnapshot } from "../models/DockerConnectionProfile";
+import { DockerApiClient } from "./DockerApiClient";
+import { DockerConnectionFactory } from "../connections/DockerConnectionFactory";
+import { ImageMapper } from "../images/ImageMapper";
+import type { DockerImageDetails } from "../images/ImageModels";
+/** Lazy image inspect cache, scoped to the current host snapshot. */
+export class ImageDetailService { private readonly cache = new Map<string, { at: string; value: DockerImageDetails }>(); constructor(private readonly connections: DockerConnectionFactory) {} async inspect(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot, imageId: string): Promise<DockerImageDetails> { const key = `${profile.id}:${imageId}`; const cached = this.cache.get(key); if (cached?.at === snapshot.refreshedAt) return cached.value; const raw = await new DockerApiClient(this.connections.create(profile)).get<unknown>(`/images/${imageId}/json`); const containers = snapshot.containers.filter((container) => container.imageId === imageId || container.imageId === imageId.replace(/^sha256:/, "")).map((container) => ({ id: container.id, name: container.displayName, state: container.state, health: container.health })); const value = ImageMapper.details(raw, containers); this.cache.set(key, { at: snapshot.refreshedAt, value }); return value; } invalidateHost(id: string) { for (const key of this.cache.keys()) if (key.startsWith(`${id}:`)) this.cache.delete(key); } clear() { this.cache.clear(); } }

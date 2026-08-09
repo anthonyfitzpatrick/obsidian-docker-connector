@@ -1,0 +1,9 @@
+{
+  "id": "docker-connector",
+  "name": "Docker Connector",
+  "version": "1.0.0",
+  "minAppVersion": "1.7.0",
+  "description": "A desktop Docker environment dashboard with optional, explicitly enabled container management.",
+  "author": "Wolf 359 Press AB",
+  "isDesktopOnly": true
+}
