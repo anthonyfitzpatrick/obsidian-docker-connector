@@ -914,6 +914,10 @@ button.dc-metric-card:focus-visible,
 .dc-host-modal .setting-item-control { gap: 7px; }
 .dc-host-modal input, .dc-host-modal select { min-height: 34px; padding: 6px 9px; border-radius: 7px; }
 .dc-host-modal input[readonly] { color: var(--text-muted); background: var(--background-secondary); }
+.dc-host-modal .dc-host-modal__connection-type { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(300px, 1.2fr); gap: 12px; align-items: start; }
+.dc-host-modal .dc-host-modal__connection-type .setting-item-info, .dc-host-modal .dc-host-modal__connection-type .setting-item-control { min-width: 0; }
+.dc-host-modal .dc-host-modal__connection-type .setting-item-control { width: 100%; }
+.dc-host-modal .dc-host-modal__connection-type .setting-item-control select { width: 100%; min-width: 0; }
 .dc-host-modal__connection-info { display: grid; gap: 6px; margin: 4px 0 10px; padding: 10px; border: 1px solid var(--dc-border); border-radius: 8px; background: var(--background-secondary); font-size: .82em; line-height: 1.4; }
 .dc-host-modal__connection-info-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--text-normal); }
 .dc-host-modal__connection-badge { padding: 2px 6px; border-radius: 999px; color: var(--text-accent); background: color-mix(in srgb, var(--interactive-accent) 16%, transparent); font-size: .78em; font-weight: 700; white-space: nowrap; }
@@ -928,6 +932,7 @@ button.dc-metric-card:focus-visible,
 .dc-host-modal__footer { position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 8px; padding: 12px 22px 16px; border-top: 1px solid var(--dc-border); background: var(--background-primary); box-shadow: 0 -7px 14px color-mix(in srgb, var(--background-primary) 78%, transparent); }.dc-host-modal__footer button { min-height: 34px; padding: 6px 12px; }.dc-host-modal__footer button:first-child { margin-right: auto; }
 @keyframes dc-host-auth-in { from { opacity: .4; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .dc-host-modal__auth-details { animation: none; } }
+@media (max-width: 620px) { .dc-host-modal .dc-host-modal__connection-type { grid-template-columns: minmax(0, 1fr); gap: 5px; } }
 @media (max-width: 520px) { .dc-host-modal > h2 { padding: 16px 15px 10px; }.dc-host-modal__form { padding: 0 15px 10px; }.dc-host-modal .setting-item { align-items: flex-start; flex-direction: column; gap: 5px; }.dc-host-modal .setting-item-control { width: 100%; }.dc-host-modal input, .dc-host-modal select { width: 100%; }.dc-host-modal__connection-info-details { grid-template-columns: 1fr; }.dc-host-modal__footer { padding: 10px 15px 13px; }.dc-host-modal__footer button { flex: 1; }.dc-host-modal__footer button:first-child { margin-right: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
