@@ -1,13 +1,19 @@
 ---
-tags: [docker-connector, ui]
+title: Docker Connector - Connections View
 ---
 
 # Connections View
 
-The Connections view presents four clearly labelled methods: **Local Docker Socket**, **Docker Context**, **Remote Docker via SSH**, and **Remote Docker API (Mutual TLS)**. Each configured-server card uses the same canonical connection name as the Add/Edit Docker Host dialog, followed by safe endpoint or authentication detail.
+The **Connections** tab is the saved-profile management surface. Its heading is **Docker connections** and the page-level **Add Docker Host** action opens the canonical Add Docker Host dialog.
 
-Local Docker Socket is for Docker running on this computer. Docker Context uses an existing Docker CLI context without changing the active Docker context. Remote Docker via SSH uses password or private-key authentication and Docker's secure dial-stdio transport, so direct Docker API exposure is not required. Remote Docker API (Mutual TLS) is the advanced direct HTTPS option and requires a trusted CA, client certificate, and client private key.
+Each saved connection card uses one canonical display name: **Local Docker Socket**, **Docker Context**, **Remote Docker via SSH**, or **Remote Docker API (Mutual TLS)**. A card also shows a safe endpoint or authentication summary and the profile’s runtime status.
 
-Context cards show safe saved metadata and read-only lifecycle status, with Edit, View Context Details, and Refresh Context Metadata actions. Context profiles use the normal read-only refresh after lifecycle preflight. A local socket or Windows named-pipe Context uses the local transport while retaining the **Docker Context** card label; an SSH Context uses the Docker CLI Context helper. See [[Docker Connector - Docker Context Execution]], [[Docker Connector - Docker Context Editing]], and [[Docker Connector - Docker API TLS Connections]].
+Available status values are **Unknown**, **Connecting**, **Online**, **Offline**, **Degraded**, and **Authentication Required**. Unknown is the transient state before a profile has completed its first connection evaluation; it is not a substitute for an error after a completed refresh.
 
-Every saved connection card has a **Delete connection** action. Confirmation removes only Docker Connector’s saved profile, runtime credentials, cached session data, and transport. It does not delete or change Docker resources, Docker Contexts, SSH keys, TLS files, sockets, or the remote host.
+Every card has **Edit** and **Delete connection**. Authentication-required profiles have **Reconnect** so session-only passwords or passphrases can be entered again. Offline and degraded profiles expose a retry/reconnect action where the existing runtime flow can retry them. Action clicks do not select the card or switch the Current Environment.
+
+Deleting a card opens a confirmation dialog. Confirmation removes only the Docker Connector profile, runtime credentials, caches, status, active read-only work, and associated transport resources. It never deletes or changes containers, images, volumes, networks, Docker Contexts, sockets, SSH keys, TLS files, or remote Docker configuration. If the removed profile is current, the host manager safely reconciles the Current Environment from the remaining profiles.
+
+Docker Context cards remain labelled **Docker Context** even if their discovered endpoint uses the local Unix-socket or Windows named-pipe transport. Docker Connector does not mutate the Docker CLI Context.
+
+For end-user instructions, see [[Docker Connector - User Guide]].

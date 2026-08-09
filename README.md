@@ -1,111 +1,136 @@
 # Docker Connector
 
-Docker Connector is a desktop-only Docker environment dashboard for Obsidian. It is read-only by default. Optional container-management features must be deliberately enabled in Settings and remain limited to explicit, typed container actions.
+Docker Connector brings multi-host Docker monitoring and deliberately opt-in container management into Obsidian. Connect to local or remote Docker Engines, inspect Docker Compose applications and Docker resources, check image availability, and use explicit lifecycle actions without leaving your vault.
 
-> [!warning] Docker access is highly privileged
-> Access to a Docker daemon can be equivalent to root-level control of that host. Connect only to Docker hosts and accounts you trust. Obsidian and this plugin do not make Docker-daemon access harmless.
+It is a desktop-only Obsidian plugin. Docker Connector is read-only by default; Container management must be enabled explicitly before it can change a container.
 
-## At a glance
+> **Docker access is highly privileged.** A user or process that can control Docker can often gain extensive control of that Docker host. Connect only to Docker hosts, Docker Contexts, and credentials you trust.
 
-- Monitor Docker through Local Docker Socket, Docker Context, Remote Docker via SSH, or Remote Docker API (Mutual TLS).
-- Browse Overview, Applications, Containers, Images, Volumes, Networks, and Connections.
-- View Compose-labelled applications without running Docker Compose or modifying a stack.
-- Check whether eligible tagged images resolve to a newer image. Checks are advisory and never install an update automatically.
-- Optionally enable confirmed Start, Shut down, Stop, Restart, and safe standalone-container Update actions.
+## Features
 
-See the [User Guide](User%20Guide.md) for step-by-step use and the [Security Review](docs/Docker%20Connector%20-%20Security%20Review.md) for the security model.
+- Connect multiple Docker environments and switch the **Current Environment** at any time.
+- Use four clear connection methods: Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS).
+- Manage saved connections from **Connections**: add, edit, reconnect or retry when relevant, inspect status, and delete the plugin-only profile safely.
+- Browse host Overview data, Docker Compose **Applications**, **Containers**, **Images**, **Volumes**, and **Networks**.
+- Inspect container, image, volume, network, and Compose application details without opening a separate Docker dashboard.
+- Check eligible standalone containers for image updates on a 24-hour schedule or with **Check now**.
+- Explicitly enable confirmed Start, Shut down, Stop, Restart, and safe standalone-container Update actions.
+- Use a backup-first update transaction with rollback/recovery guidance for eligible standalone containers.
+- Keep SSH passwords and key passphrases, and TLS client-key passphrases, in memory only for the current Obsidian session.
+
+## Screenshots
+
+Release screenshots will be added as the UI is finalized. The full [User Guide](docs/Docker%20Connector%20-%20User%20Guide.md) contains a screenshot-production checklist and precise capture instructions; no placeholder image links are used here.
+
+## Connection methods
+
+| Connection method | Best for | Authentication | Direct Docker API exposure |
+| --- | --- | --- | --- |
+| Local Docker Socket | Docker running on the same computer | Local Docker permissions | No |
+| Docker Context | Existing Docker CLI configurations | Context-defined | Depends on Context |
+| Remote Docker via SSH | Most remote Docker hosts | Password or private key | No |
+| Remote Docker API (Mutual TLS) | Direct secured Docker Engine API access | CA + client certificate + private key | Yes |
+
+**Local Docker Socket** discovers and validates local Unix sockets or Windows named pipes. **Docker Context** uses an existing Docker CLI Context without changing your active Context; local Context endpoints route through the local transport, while supported SSH Contexts use Docker CLI’s secure Context transport. **Remote Docker via SSH** carries Docker traffic through SSH, so the Docker API does not need to be exposed directly. **Remote Docker API (Mutual TLS)** requires a trusted CA, client certificate, client private key, and mandatory server identity verification.
+
+Plain unauthenticated Docker TCP is not supported.
+
+## Read-only by default
+
+The normal Docker Engine client is restricted to approved read-only GET requests. **Container management** is disabled by default and must be enabled in Settings before lifecycle controls appear. Even then, Docker Connector exposes only explicit typed actions—Start, Shut down, Stop, Restart, and eligible Update—not a general-purpose Docker command shell or arbitrary API interface.
+
+## Applications and Docker resources
+
+Docker Connector’s **Applications** view groups only Docker Compose-labelled containers. It uses Docker’s Compose project and service labels, rather than guessing from container names. Applications are a read-only project-level overview: Docker Connector does not run `docker compose up` or `docker compose down`, edit Compose files, or update an entire Compose application.
+
+The Containers, Images, Volumes, and Networks views provide searchable, filterable inventories and read-only detail inspectors. Docker Connector does not delete images, volumes, or networks.
+
+## Update availability and safe updates
+
+Image update checks are advisory. For eligible standalone containers, Docker Connector compares the current image with the image resolved for the configured tagged reference. Automatic checks occur on a 24-hour stale interval while Container management is enabled; they do **not** automatically update, stop, restart, or recreate containers.
+
+When a newer image is confirmed and a standalone container is eligible, **Update** opens a preview before it starts a backup-first transaction. Docker Connector attempts to preserve supported configuration, creates and verifies a replacement, and attempts rollback if the transaction fails. Compose-managed containers are intentionally blocked from this standalone update workflow. Read the [Safe Container Updates](docs/Docker%20Connector%20-%20Safe%20Container%20Updates.md) note before using it.
+
+## Security and privacy
+
+- Docker access remains privileged; use least-privileged access where possible.
+- SSH passwords, SSH private-key passphrases, and TLS client-key passphrases are session-only and are never saved in plugin settings.
+- Selected key and certificate paths can be saved; their file contents are not copied into settings.
+- Mutual TLS requires server-certificate and Server Name verification. There is no insecure verification bypass.
+- Docker Contexts are discovered and used without `docker context use`, create, update, remove, import, or export commands.
+- Insecure plain Docker TCP is blocked.
+- Delete connection removes only Docker Connector’s profile, runtime credentials, cache, and transport state. It never deletes Docker resources, Docker Contexts, sockets, SSH keys, TLS certificate files, or remote-server configuration.
+- Docker Connector includes no telemetry or analytics service.
+
+For details, read the [Security Review](docs/Docker%20Connector%20-%20Security%20Review.md).
 
 ## Requirements
 
 | Requirement | Details |
 | --- | --- |
-| Obsidian | 1.7.0 or later, desktop only (`isDesktopOnly: true`) |
-| Local Docker Socket | A user-selected Unix socket or Windows named pipe |
-| Docker Context | Docker CLI installed locally; the selected Context already exists |
-| Remote Docker via SSH | SSH access plus Docker CLI with `docker system dial-stdio`; no `sudo` is used |
-| Remote Docker API (Mutual TLS) | CA certificate, client certificate, client key, and mandatory server verification |
-
-Mobile is not supported. The plugin uses desktop Node APIs for sockets, SSH, TLS files, and carefully bounded child processes.
+| Obsidian | Desktop Obsidian 1.7.0 or later. Mobile is unsupported. |
+| Local Docker Socket | A local Docker Engine/Docker Desktop and permission to access its Unix socket or Windows named pipe. |
+| Docker Context | Local Docker CLI and an existing Context. |
+| Remote Docker via SSH | SSH access and Docker access for the remote account; no interactive `sudo`. |
+| Remote Docker API (Mutual TLS) | A correctly secured Docker HTTPS endpoint plus CA, client certificate, and client key. |
 
 ## Installation
 
-Install Docker Connector through Obsidian's Community Plugins flow when it is published. For a manual release installation, place exactly these release assets in your vault's `.obsidian/plugins/docker-connector/` directory:
+When Docker Connector is available in Obsidian Community Plugins:
 
-- `main.js`
-- `manifest.json`
-- `styles.css`
+1. Open **Settings → Community plugins → Browse**.
+2. Search for **Docker Connector**.
+3. Install and enable it.
 
-Restart Obsidian or enable the plugin in **Settings → Community plugins**. The release does not require source files, `node_modules`, test fixtures, or local configuration.
+For manual release installation, place the release assets `main.js`, `manifest.json`, and `styles.css` in your vault’s `.obsidian/plugins/docker-connector/` directory, then enable the plugin in Obsidian. Do not install source files, test fixtures, or `node_modules` for normal use.
 
-## Connection methods
+## Quick start
 
-| Connection method | Best for | Authentication |
-| --- | --- | --- |
-| Local Docker Socket | Docker running on the same computer | Local Docker permissions |
-| Docker Context | Existing Docker CLI configurations | Context-defined |
-| Remote Docker via SSH | Most remote Docker hosts | Password or private key |
-| Remote Docker API (Mutual TLS) | Direct secured Docker API access | CA + client certificate + private key |
+1. Open **Docker Connector → Connections**.
+2. Select **Add Docker Host**.
+3. Enter a Friendly Name and choose a connection method.
+4. Complete its method-specific fields.
+5. Choose **Test Connection** and review diagnostics.
+6. Choose **Save Host**.
+7. Select the profile as the **Current Environment**.
+8. Browse the dashboard, which remains read-only until Container management is enabled.
 
-Local Docker Socket automatically discovers common local endpoints but never implies remote access. Docker Context uses `docker --context <name> system dial-stdio` without changing your active Docker Context. Remote Docker via SSH transports Docker's dial-stdio connection through SSH, so the remote Docker API does not need to be exposed to the network. Remote Docker API (Mutual TLS) requires server-certificate verification and a client certificate with its private key.
+For complete setup walkthroughs, connection fields, diagnostics, update behavior, recovery guidance, and troubleshooting, see the [Docker Connector User Guide](docs/Docker%20Connector%20-%20User%20Guide.md).
 
-Plain unauthenticated Docker TCP is not supported.
+## Documentation
 
-### Removing a saved connection
+- [Docker Connector User Guide](docs/Docker%20Connector%20-%20User%20Guide.md) — complete end-user manual, troubleshooting, FAQ, and screenshot checklist.
+- [Connections View](docs/Docker%20Connector%20-%20Connections%20View.md) — saved connection actions and status.
+- [Docker Context](docs/Docker%20Connector%20-%20Docker%20Context.md) — Context discovery, lifecycle, and secure routing.
+- [Docker Compose Awareness](docs/Docker%20Connector%20-%20Docker%20Compose%20Awareness.md) — how Applications grouping works.
+- [Container Management](docs/Docker%20Connector%20-%20Container%20Management.md) and [Safe Container Updates](docs/Docker%20Connector%20-%20Safe%20Container%20Updates.md) — opt-in mutation boundaries and recovery behavior.
+- [Security Review](docs/Docker%20Connector%20-%20Security%20Review.md) — security and privacy boundaries.
+- [Testing](docs/Docker%20Connector%20-%20Testing.md) — automated and manual validation scope.
 
-Use the Delete connection action on a Connections card to remove that profile from Docker Connector. Confirmation is required. This clears only plugin-owned profile metadata, session credentials, cached inventory, and the active transport; it never changes Docker containers, images, volumes, networks, Docker Contexts, servers, sockets, SSH keys, or TLS certificate files.
+## Known limitations
 
-Use **Connections** to add a host and **Test connection** before relying on its dashboard. For each transport's requirements and errors, see [Add, test, and save a connection](User%20Guide.md#4-add-test-and-save-a-connection).
+- Desktop-only; Obsidian mobile is unsupported.
+- Insecure unauthenticated Docker TCP is unsupported.
+- Compose applications are read-only at the project level.
+- Standalone Update is blocked for Compose-managed and other unsupported containers.
+- Runtime-only passwords and passphrases can require reconnecting after Obsidian restarts.
+- Some Docker Context endpoint types are blocked when they cannot be routed through an existing secure transport.
+- Docker permissions, Docker Engine availability, registry access, and host policy determine what can be inspected or managed.
 
-## Using the dashboard
-
-Select a host, then use the dashboard navigation:
-
-- **Overview** gives a host-level operational summary and attention items.
-- **Applications** groups only containers carrying Docker's `com.docker.compose.project` label. It is a read-only Compose overview; standalone containers remain in **Containers**.
-- **Containers** shows state, health, image, network, and available-update information. Selecting a container opens its inspector.
-- **Images**, **Volumes**, and **Networks** provide read-only inventory and lazy details.
-- **Connections** manages saved non-secret connection profiles.
-
-Applications use Docker's actual Compose labels. A project comes from `com.docker.compose.project`; a service comes from `com.docker.compose.service`; container names and image references are separate fields. The plugin never guesses Compose identity from names, paths, networks, or images. See [Applications View](docs/Docker%20Connector%20-%20Applications%20View.md).
-
-## Optional container management and image updates
-
-Container management starts disabled. Enabling it requires confirmation and only permits the explicit typed actions shown in the container inspector. The generic Docker Engine client remains GET-only; no arbitrary Docker API routes, shell commands, builds, bulk actions, or resource deletion are available.
-
-An image check pulls a tagged image through the configured Docker daemon and compares image IDs. It does not recreate, restart, or automatically update a container. The 24-hour scheduler checks only eligible standalone containers while management is enabled. A confirmed **Update** is available only for eligible standalone containers and follows a backup-first transaction with rollback protection. Compose-managed containers remain blocked from the standalone update workflow.
-
-Read [Container Management](docs/Docker%20Connector%20-%20Container%20Management.md), [Container Update Availability](docs/Docker%20Connector%20-%20Container%20Update%20Availability.md), and [Safe Container Updates](docs/Docker%20Connector%20-%20Safe%20Container%20Updates.md) before enabling management.
-
-## Privacy and security
-
-- No telemetry, analytics, cloud service, remote script, remote CSS, or runtime executable-code download.
-- Network activity is limited to the configured Docker/SSH/TLS/Context connection, public image-registry checks for update information, and image pulls performed by the configured Docker daemon.
-- SSH passwords, SSH key passphrases, and TLS client-key passphrases stay in memory for the current Obsidian session. They are never saved in plugin settings.
-- Certificate and private-key contents are read only from the explicitly selected paths and are never persisted.
-- Docker-provided environment-variable values, raw inspect responses, registry credentials, and full label dumps are not rendered or copied into safe diagnostics.
-- Insecure Docker TCP and disabling TLS certificate verification are unsupported.
-
-## Troubleshooting
-
-- **Cannot connect locally:** Confirm Docker is running and that Obsidian's user account can access the selected socket or named pipe.
-- **SSH authentication or host-key error:** Verify the host, port, account, and fingerprint. Do not bypass a changed host key without independently verifying it.
-- **Docker Context unavailable:** Ensure Docker CLI is installed and the named Context already exists. The plugin discovers and uses Contexts but never creates, imports, exports, removes, or activates them.
-- **No Applications listed:** Only containers with `com.docker.compose.project` appear in Applications. Non-Compose containers remain in Containers.
-- **Update unavailable:** An image may be newer but still ineligible—for example, if the container is Compose-managed, untagged, or cannot be recreated safely. This is intentional.
-
-For detailed walkthroughs, safe limitations, and what data is stored, use the [User Guide](User%20Guide.md).
-
-## Development and release checks
+## Development
 
 ```bash
-npm ci
+npm install
 npm test
 npm run lint
 npm run build
-npm audit
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [CHANGELOG.md](CHANGELOG.md), [Testing](docs/Docker%20Connector%20-%20Testing.md), [Release Checklist](docs/Docker%20Connector%20-%20Release%20Checklist.md), and [Community Plugin Compliance](docs/Docker%20Connector%20-%20Obsidian%20Community%20Plugin%20Compliance.md).
+The automated test suite covers connection routing, lifecycle behavior, update transactions, UI boundaries, and security constraints. See [CONTRIBUTING.md](CONTRIBUTING.md), [CHANGELOG.md](CHANGELOG.md), [Testing](docs/Docker%20Connector%20-%20Testing.md), [Release Checklist](docs/Docker%20Connector%20-%20Release%20Checklist.md), and [Community Plugin Compliance](docs/Docker%20Connector%20-%20Obsidian%20Community%20Plugin%20Compliance.md).
+
+## Contributing
+
+Contributions should preserve the plugin’s read-only-by-default posture, avoid insecure Docker TCP and arbitrary mutation routes, and include focused tests for behavior changes. Please read the project documentation and contribution guidance before proposing a change.
 
 ## License
 
