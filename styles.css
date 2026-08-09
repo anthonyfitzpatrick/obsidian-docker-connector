@@ -93,7 +93,7 @@
 .docker-connector__nav { display: flex; gap: 4px; overflow-x: auto; padding: 4px; margin: 0 -4px 22px; border-radius: 10px; background: var(--dc-surface); }
 .docker-connector__nav-item { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; border: 0; border-radius: 7px; padding: 8px 11px; background: transparent; color: var(--dc-text-muted); font-size: .84em; }
 .docker-connector__nav-item:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
-.docker-connector__nav-item.is-active { background: var(--dc-surface-raised); color: var(--dc-accent); box-shadow: 0 1px 4px rgb(0 0 0 / .1); font-weight: 600; }
+.docker-connector__nav-item.is-active { background: var(--dc-surface-raised); color: var(--dc-accent); box-shadow: 0 1px 4px rgb(0 0 0 / .1); font-weight: 600; opacity: 1; pointer-events: auto; }
 .docker-connector__nav-icon { width: 15px; height: 15px; }
 .docker-connector__section-intro { margin: 0 0 16px; }
 .docker-connector__section-intro h1 { margin: 0 0 3px; font-size: 1.35em; letter-spacing: -.025em; }
@@ -148,6 +148,7 @@
 /* Connections: a scannable host catalogue, kept visually consistent with resource cards. */
 .dc-connections-tab { max-width: 1320px; }
 .dc-connections-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 16px; }
+.dc-connections-page-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0 0 16px; }.dc-connections-page-header > div { min-width: 0; }.dc-connections-page-header h1 { margin: 0 0 3px; font-size: 1.35em; letter-spacing: -.025em; }.dc-connections-page-header span { color: var(--dc-text-muted); font-size: .82em; }.dc-connections-page-header > button { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; }.dc-connections-page-header > button svg { width: 15px; height: 15px; }
 .dc-connections-summary-card { display: flex; align-items: center; gap: 10px; min-height: 72px; padding: 11px 13px; border: 1px solid var(--dc-border); border-radius: 13px; background: var(--dc-surface-raised); box-shadow: var(--dc-shadow-soft); }
 .dc-connections-summary-card > div:last-child { display: grid; gap: 2px; min-width: 0; }
 .dc-connections-summary-card span { color: var(--dc-text-muted); font-size: .78em; }
@@ -185,7 +186,7 @@
 .dc-connection-actions button { min-height: 32px; border-radius: 8px; padding: 6px 10px; font-size: .79em; }
 .dc-connection-actions .dc-connection-reconnect { border-color: color-mix(in srgb, var(--dc-warning) 45%, var(--dc-border)); background: var(--dc-warning-soft); color: var(--dc-warning); }
 .dc-connection-actions .dc-connection-reconnect:hover { border-color: var(--dc-warning); }
-@container (max-width: 620px) { .dc-connections-summary { grid-template-columns: 1fr; }.dc-connections-panel { padding: 13px; }.dc-connection-cards { grid-template-columns: 1fr; }.dc-connection-inventory { grid-template-columns: repeat(2, minmax(0, 1fr)); }.dc-connection-inventory > div:nth-child(2) { border-right: 0; }.dc-connection-inventory > div:nth-child(-n + 2) { border-bottom: 1px solid var(--dc-border); }.dc-connection-card-header { align-items: flex-start; }.dc-connection-card-header > .docker-connector__status { flex: 0 0 auto; } }
+@container (max-width: 620px) { .dc-connections-summary { grid-template-columns: 1fr; }.dc-connections-page-header { align-items: flex-start; flex-direction: column; }.dc-connections-panel { padding: 13px; }.dc-connection-cards { grid-template-columns: 1fr; }.dc-connection-inventory { grid-template-columns: repeat(2, minmax(0, 1fr)); }.dc-connection-inventory > div:nth-child(2) { border-right: 0; }.dc-connection-inventory > div:nth-child(-n + 2) { border-bottom: 1px solid var(--dc-border); }.dc-connection-card-header { align-items: flex-start; }.dc-connection-card-header > .docker-connector__status { flex: 0 0 auto; }.dc-connection-actions { width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .dc-connection-card { transition: none; }.dc-connection-card:hover { transform: none; } }
 .docker-connector__muted { color: var(--dc-text-muted); }.docker-connector__error { color: var(--dc-danger); }
 .docker-connector__settings-status { margin-top: 6px; color: var(--dc-text-muted); font-size: .8em; }
