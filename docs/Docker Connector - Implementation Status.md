@@ -8,7 +8,7 @@ Implemented: [[Docker Connector - Applications View]] groups Docker Compose-mana
 
 Implemented: Applications presentation uses naturally sized cards, wrapping service previews, responsive filters, and a Containers-style master/detail inspector. Inspector rows contain their complete metadata, long identifiers truncate safely with a tooltip, selection changes reset scroll, and refresh timestamps are human-readable. Manual validation remains appropriate for actual Obsidian pane dimensions and installed themes.
 
-Implemented: Password and Private Key authentication, session-only credentials, host-key verification, Remote Docker via SSH dial-stdio, direct Local Docker Socket HTTP transport over Unix sockets/named pipes, and saving/editing safe Docker Context profiles. Windows live validation remains outstanding.
+Implemented: Password and Private Key authentication, session-only credentials, host-key verification, Remote Docker via SSH dial-stdio, direct Local Docker Socket HTTP transport over Unix sockets/named pipes, and saving/editing safe Docker Context profiles. Docker Context execution now resolves local Unix/named-pipe endpoints through the local transport and retains dial-stdio only for SSH Contexts. Windows live validation remains outstanding.
 
 Implemented: Remote Docker API (Mutual TLS) profile modeling, HTTPS mutual-TLS Test Connection, dashboard refresh, and lazy details. The four supported methods—Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS)—share the read-only API policy and cleanup lifecycle. Not implemented: SSH Agent, SSH config import, and OS credential storage. See [[Docker Connector - Connectivity Overview]].
 

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Route Docker Context profiles by their freshly discovered endpoint: local Unix sockets and Windows named pipes use the local Docker transport, while SSH Contexts retain Docker CLI dial-stdio.
+- Continue blocking insecure TCP and unsupported Context endpoints without a fallback transport.
+
+## Unreleased
+
 - Clarified all connection-method labels and descriptions: Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS). The dialog now provides dynamic security and recommendation guidance without changing saved profile discriminator values or transport behavior.
 
 - Added a complete end-user guide and expanded the README with accurate installation, connection, dashboard, Compose-awareness, update-safety, privacy, and troubleshooting guidance.
