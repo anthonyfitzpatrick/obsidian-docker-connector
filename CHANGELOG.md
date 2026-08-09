@@ -5,6 +5,7 @@
 - Route Docker Context profiles by their freshly discovered endpoint: local Unix sockets and Windows named pipes use the local Docker transport, while SSH Contexts retain Docker CLI dial-stdio.
 - Continue blocking insecure TCP and unsupported Context endpoints without a fallback transport.
 - Refresh a newly saved Docker Context profile immediately so its runtime snapshot and status are published instead of remaining Unknown.
+- Add confirmed Delete connection actions for every saved profile; deletion clears Docker Connector state only and never deletes Docker resources or credential files.
 
 ## Unreleased
 

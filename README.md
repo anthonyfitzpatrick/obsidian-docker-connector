@@ -50,6 +50,10 @@ Local Docker Socket automatically discovers common local endpoints but never imp
 
 Plain unauthenticated Docker TCP is not supported.
 
+### Removing a saved connection
+
+Use the Delete connection action on a Connections card to remove that profile from Docker Connector. Confirmation is required. This clears only plugin-owned profile metadata, session credentials, cached inventory, and the active transport; it never changes Docker containers, images, volumes, networks, Docker Contexts, servers, sockets, SSH keys, or TLS certificate files.
+
 Use **Connections** to add a host and **Test connection** before relying on its dashboard. For each transport's requirements and errors, see [Add, test, and save a connection](User%20Guide.md#4-add-test-and-save-a-connection).
 
 ## Using the dashboard

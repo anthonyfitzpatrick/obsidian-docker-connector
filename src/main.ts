@@ -163,6 +163,9 @@ export default class DockerConnectorPlugin extends Plugin {
     const results = await Promise.all(this.settings.profiles.filter((profile) => profile.enabled && connectionCapabilities(profile).supportsAutomaticRefresh).map((profile) => this.inspectionService.inspectHost(profile)));
     if (this.unloading || generation !== this.refreshGeneration) return;
     for (const snapshot of results) {
+      // A profile can be deleted while an earlier read-only refresh is still
+      // completing. Never republish state for a profile that no longer exists.
+      if (!this.settings.profiles.some((profile) => profile.id === snapshot.hostId)) continue;
       const previous = this.snapshots.get(snapshot.hostId);
       const retained = snapshot.status === "offline" && previous?.status === "online" ? { ...previous, status: "offline" as const, stale: true, refreshedAt: snapshot.refreshedAt, error: snapshot.error } : snapshot;
       this.snapshots.set(snapshot.hostId, retained);
@@ -187,16 +190,29 @@ export default class DockerConnectorPlugin extends Plugin {
     const normalized = normalizeProfile(profile);
     if (credential !== undefined) this.setRuntimeCredential(normalized, credential);
     const snapshot = await this.inspectionService.inspectHost(normalized);
+    if (!this.settings.profiles.some((item) => item.id === normalized.id)) return;
     this.snapshots.set(normalized.id, snapshot);
     this.refreshOpenDashboard();
   }
   async retryHost(profile: DockerConnectionProfile, scheduleUpdateChecks = true): Promise<void> {
     const snapshot = await this.inspectionService.inspectHost(normalizeProfile(profile));
+    if (!this.settings.profiles.some((item) => item.id === profile.id)) return;
     const previous = this.snapshots.get(profile.id);
     const retained = snapshot.status === "offline" && previous?.status === "online" ? { ...previous, status: "offline" as const, stale: true, refreshedAt: snapshot.refreshedAt, error: snapshot.error } : snapshot; this.snapshots.set(profile.id, retained); this.containerDetailService.invalidateHost(profile.id); this.imageDetailService.invalidateHost(profile.id); this.volumeDetailService.invalidateHost(profile.id); if (scheduleUpdateChecks) this.scheduleContainerImageUpdateChecks(profile, retained);
     this.refreshOpenDashboard();
   }
   async disconnectProfile(profileId: string): Promise<void> { await this.connectionFactory.disconnect(profileId); }
+  hasActiveContainerAction(profileId: string): boolean { return this.containerActions.hasActiveProfile(profileId); }
+  /** Clears every runtime-only record owned by a deleted connection profile. */
+  clearDeletedProfileState(profileId: string): void {
+    this.snapshots.delete(profileId);
+    this.contextLifecycle.clear(profileId);
+    this.containerDetailService.invalidateHost(profileId);
+    this.imageDetailService.invalidateHost(profileId);
+    this.volumeDetailService.invalidateHost(profileId);
+    this.containerImageUpdates.clearProfile(profileId);
+    this.containerActions.clear(profileId);
+  }
   async refreshContextMetadata(profile: DockerContextProfile) {
     const now = new Date().toISOString();
     try { const result = evaluateDockerContextLifecycle(profile, await new DockerContextDiscoveryService().discover(), now); this.contextLifecycle.set(profile.id, result); return result; }

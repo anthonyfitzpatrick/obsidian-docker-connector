@@ -288,13 +288,13 @@ export class DockerDashboardView extends ItemView {
       const edit = actions.createEl("button", { text: "Edit" });
       edit.onclick = () => new DockerHostModal(this.plugin, () => this.render(), profile).open();
       const refresh = actions.createEl("button", { text: "Refresh Context Metadata", attr: { "aria-label": `Refresh Context metadata for ${profile.name}` } }); refresh.onclick = () => void this.plugin.refreshContextMetadata(profile);
-      const remove = actions.createEl("button", { text: "Remove" }); remove.onclick = async () => { if (!window.confirm("This removes the connection from Docker Connector. It does not remove the Docker CLI context.")) return; await this.plugin.hostManager.remove(profile.id); await this.render(); };
+      this.addDeleteAction(actions, profile);
       return;
     }
     if (profile.connectionType === "docker-tls") {
       const endpoint = card.createDiv({ cls: "dc-connection-endpoint" }); endpoint.createSpan({ text: `${profile.host}:${profile.port}` }); endpoint.createSpan({ text: `Server name: ${profile.serverName} · ${titleCase(status)}`, cls: "docker-connector__muted" });
       if (snapshot) { const inventory = card.createDiv({ cls: "dc-connection-inventory" }); [["Containers", snapshot.containers.length], ["Images", snapshot.images.length], ["Volumes", snapshot.volumes.length], ["Networks", snapshot.networks.length]].forEach(([label, value]) => { const metric = inventory.createDiv(); metric.createEl("strong", { text: String(value) }); metric.createSpan({ text: String(label) }); }); card.createDiv({ text: snapshot.system ? `Docker ${snapshot.system.dockerVersion} · API ${snapshot.system.apiVersion}` : snapshot.error ?? "Docker details unavailable", cls: "docker-connector__muted" }); }
-      const actions = card.createDiv({ cls: "dc-connection-actions" }); const open = actions.createEl("button", { text: "Open dashboard", cls: "mod-cta" }); open.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); }; const refresh = actions.createEl("button", { text: "Refresh" }); refresh.onclick = () => void this.plugin.retryHost(profile); if (status === "authentication-required") { const reconnect = actions.createEl("button", { text: "Reconnect" }); reconnect.onclick = () => new ReconnectPasswordModal(this.plugin, profile, () => this.render()).open(); }
+      const actions = card.createDiv({ cls: "dc-connection-actions" }); const open = actions.createEl("button", { text: "Open dashboard", cls: "mod-cta" }); open.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); }; const refresh = actions.createEl("button", { text: "Refresh" }); refresh.onclick = () => void this.plugin.retryHost(profile); if (status === "authentication-required") { const reconnect = actions.createEl("button", { text: "Reconnect" }); reconnect.onclick = () => new ReconnectPasswordModal(this.plugin, profile, () => this.render()).open(); } this.addDeleteAction(actions, profile);
       return;
     }
 
@@ -325,6 +325,18 @@ export class DockerDashboardView extends ItemView {
       const reconnect = actions.createEl("button", { text: "Reconnect", cls: "dc-connection-reconnect" });
       reconnect.onclick = () => new ReconnectPasswordModal(this.plugin, profile, () => this.render()).open();
     }
+    this.addDeleteAction(actions, profile);
+  }
+
+  private addDeleteAction(actions: HTMLElement, profile: DockerConnectionProfile): void {
+    const button = actions.createEl("button", { cls: "docker-connector__icon-button mod-warning", attr: { "aria-label": `Delete connection ${profile.name}`, title: "Delete connection" } });
+    setIcon(button, "trash-2");
+    button.onclick = (event) => { event.preventDefault(); event.stopPropagation(); new DeleteConnectionModal(this.plugin, profile, async () => { this.reconcileSelectedHostAfterDelete(profile.id); await this.render(); this.contentEl.querySelector<HTMLButtonElement>('[aria-label^="Delete connection"], [aria-label="Add Docker host"]')?.focus(); }).open(); };
+  }
+  private reconcileSelectedHostAfterDelete(profileId: string): void {
+    if (this.selectedHostId !== profileId) return;
+    const remaining = this.plugin.settings.profiles;
+    this.selectedHostId = remaining.find((profile) => this.plugin.snapshots.get(profile.id)?.status === "online")?.id ?? remaining[0]?.id ?? "all";
   }
 
   private renderInventory(root: HTMLElement, title: string, icon: string, rows: Array<[string, string, string]>, subtitle = `Read-only ${title.toLowerCase()} across the selected environments.`, clearFilter?: () => void): void { this.sectionIntro(root, title, subtitle); if (clearFilter) { const clear = root.createEl("button", { text: "Clear container filter", cls: "docker-connector__clear-filter" }); clear.onclick = clearFilter; } const panel = this.panel(root, title, `${rows.length} available`, icon); if (!rows.length) { panel.createDiv({ text: "No data is available. Refresh an authenticated host to load this inventory.", cls: "docker-connector__empty-inline" }); return; } const table = panel.createDiv({ cls: "docker-connector__inventory" }); rows.forEach(([primary, secondary, detail]) => { const row = table.createDiv({ cls: "docker-connector__inventory-row" }); row.createEl("strong", { text: primary }); row.createSpan({ text: secondary, cls: "docker-connector__muted" }); row.createSpan({ text: detail, cls: "docker-connector__muted" }); }); }
@@ -433,6 +445,39 @@ class ReconnectPasswordModal extends Modal {
     } finally {
       this.submitting = false;
       this.reconnectButton?.removeAttribute("disabled");
+    }
+  }
+}
+
+/** Explicit, plugin-only confirmation for deleting a saved connection profile. */
+class DeleteConnectionModal extends Modal {
+  private deleting = false;
+  constructor(private readonly plugin: DockerConnectorPlugin, private readonly profile: DockerConnectionProfile, private readonly onDeleted: () => Promise<void>) { super(plugin.app); }
+  onOpen(): void {
+    this.contentEl.createEl("h2", { text: "Delete connection?" });
+    this.contentEl.createEl("p", { text: `Remove "${this.profile.name}" from Docker Connector?` });
+    this.contentEl.createDiv({ text: `Connection: ${getDockerConnectionTypeDisplayName(this.profile.connectionType)}`, cls: "docker-connector__muted" });
+    this.contentEl.createEl("p", { text: "This deletes only the saved Docker Connector connection profile and its cached session data. It does not change or delete anything on the Docker host." });
+    this.contentEl.createEl("p", { text: "Containers, images, volumes, networks, SSH keys, TLS certificate files, and Docker Contexts are not deleted.", cls: "docker-connector__muted" });
+    if (this.plugin.hasActiveContainerAction(this.profile.id)) this.contentEl.createDiv({ text: "A container operation is currently in progress for this connection. Wait for it to finish before deleting the connection.", cls: "docker-connector__error", attr: { role: "alert" } });
+    const footer = this.contentEl.createDiv({ cls: "dc-host-modal__footer" });
+    const cancel = footer.createEl("button", { text: "Cancel" }); cancel.onclick = () => this.close();
+    const remove = footer.createEl("button", { text: "Delete connection", cls: "mod-warning" });
+    remove.disabled = this.plugin.hasActiveContainerAction(this.profile.id);
+    remove.onclick = () => void this.delete();
+    cancel.focus();
+  }
+  private async delete(): Promise<void> {
+    if (this.deleting) return;
+    this.deleting = true;
+    try {
+      await this.plugin.hostManager.remove(this.profile.id);
+      this.close();
+      await this.onDeleted();
+      new Notice(`Deleted connection "${this.profile.name}" from Docker Connector.`);
+    } catch {
+      new Notice(`Could not delete connection "${this.profile.name}". The saved profile was not removed.`);
+      this.deleting = false;
     }
   }
 }

@@ -43,6 +43,8 @@ export class DockerContainerActionService {
   onUpdateProgress(listener: (event: ContainerUpdateProgressEvent) => void): () => void { this.updateProgressListeners.add(listener); return () => this.updateProgressListeners.delete(listener); }
   async preflight(profile: DockerConnectionProfile, containerId: string): Promise<ContainerUpdatePreview> { this.guard(profile, containerId); const api = new DockerApiClient(this.connections.create(profile)); const raw = await api.get<unknown>(`/containers/${containerId}/json`); return containerUpdatePreview(raw, validateContainerRecreatePlan(buildContainerRecreatePlan(raw))); }
   isActive(profileId: string, containerId: string): boolean { const state = this.state(profileId, containerId)?.state; return Boolean(state && !["idle", "succeeded", "failed"].includes(state)); }
+  /** A profile with a running lifecycle action cannot be removed safely. */
+  hasActiveProfile(profileId: string): boolean { return [...this.progress.entries()].some(([id, progress]) => id.startsWith(`${profileId}:`) && !["idle", "succeeded", "failed"].includes(progress.state)) || [...this.activeUpdates.keys()].some((id) => id.startsWith(`${profileId}:`)); }
   clear(profileId?: string): void { if (!profileId) { this.progress.clear(); return; } for (const id of this.progress.keys()) if (id.startsWith(`${profileId}:`)) this.progress.delete(id); }
   cancelUpdate(profileId: string, containerId: string): void { this.activeUpdates.get(key(profileId, containerId))?.abort(); }
   cancelAllUpdates(): void { this.activeUpdates.forEach((controller) => controller.abort()); }

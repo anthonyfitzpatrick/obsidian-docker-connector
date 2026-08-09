@@ -10,6 +10,8 @@ Implemented: Applications presentation uses naturally sized cards, wrapping serv
 
 Implemented: Password and Private Key authentication, session-only credentials, host-key verification, Remote Docker via SSH dial-stdio, direct Local Docker Socket HTTP transport over Unix sockets/named pipes, and saving/editing safe Docker Context profiles. Docker Context execution now resolves local Unix/named-pipe endpoints through the local transport and retains dial-stdio only for SSH Contexts. Windows live validation remains outstanding.
 
+Implemented: deletion of saved Docker Connector connection profiles with explicit confirmation. Deletion clears plugin-owned runtime state and never deletes external Docker resources, Docker Contexts, credential files, or server configuration.
+
 Implemented: Remote Docker API (Mutual TLS) profile modeling, HTTPS mutual-TLS Test Connection, dashboard refresh, and lazy details. The four supported methods—Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS)—share the read-only API policy and cleanup lifecycle. Not implemented: SSH Agent, SSH config import, and OS credential storage. See [[Docker Connector - Connectivity Overview]].
 
 Implemented: Container management is opt-in and disabled by default. Its setting now shows saving, success, and safe failure feedback; a successful persistence event updates open dashboard views without a Docker refresh. Manual Obsidian verification of the installed bundle and `data.json` persistence remains outstanding.
