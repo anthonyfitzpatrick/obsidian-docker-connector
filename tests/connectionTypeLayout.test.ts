@@ -5,11 +5,12 @@ const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
 const modal = readFileSync(new URL("../src/views/DockerDashboardView.ts", import.meta.url), "utf8");
 
 describe("Connection Type field layout", () => {
-  it("uses a scoped responsive grid and full-width native select", () => {
+  it("uses a shared scoped responsive grid and full-width native select", () => {
     expect(modal).toContain('connectionTypeSetting.settingEl.addClass("dc-host-modal__connection-type")');
-    expect(styles).toContain(".dc-host-modal .dc-host-modal__connection-type { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(300px, 1.2fr);");
-    expect(styles).toContain(".dc-host-modal .dc-host-modal__connection-type .setting-item-control select { width: 100%; min-width: 0; }");
-    expect(styles).toContain("@media (max-width: 620px) { .dc-host-modal .dc-host-modal__connection-type { grid-template-columns: minmax(0, 1fr);");
+    expect(modal).toContain('connectionTypeSetting.settingEl.addClass("dc-host-modal__full-width-field")');
+    expect(styles).toContain(".dc-host-modal .dc-host-modal__full-width-field { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(300px, 1.2fr);");
+    expect(styles).toContain(".dc-host-modal .dc-host-modal__full-width-field .setting-item-control select { width: 100%; min-width: 0; }");
+    expect(styles).toContain("@media (max-width: 620px) { .dc-host-modal .dc-host-modal__full-width-field { grid-template-columns: minmax(0, 1fr);");
   });
 
   it("preserves all four option labels and stable internal values", () => {
