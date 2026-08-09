@@ -7,7 +7,7 @@ Docker Connector is a desktop-only Docker environment dashboard for Obsidian. It
 
 ## At a glance
 
-- Monitor local Docker, a named Docker Context, SSH Docker, or the Docker API with mutual TLS.
+- Monitor Docker through Local Docker Socket, Docker Context, Remote Docker via SSH, or Remote Docker API (Mutual TLS).
 - Browse Overview, Applications, Containers, Images, Volumes, Networks, and Connections.
 - View Compose-labelled applications without running Docker Compose or modifying a stack.
 - Check whether eligible tagged images resolve to a newer image. Checks are advisory and never install an update automatically.
@@ -20,10 +20,10 @@ See the [User Guide](User%20Guide.md) for step-by-step use and the [Security Rev
 | Requirement | Details |
 | --- | --- |
 | Obsidian | 1.7.0 or later, desktop only (`isDesktopOnly: true`) |
-| Local Docker | A user-selected Unix socket or Windows named pipe |
+| Local Docker Socket | A user-selected Unix socket or Windows named pipe |
 | Docker Context | Docker CLI installed locally; the selected Context already exists |
-| SSH Docker | SSH access plus Docker CLI with `docker system dial-stdio`; no `sudo` is used |
-| Mutual TLS | CA certificate, client certificate, client key, and mandatory server verification |
+| Remote Docker via SSH | SSH access plus Docker CLI with `docker system dial-stdio`; no `sudo` is used |
+| Remote Docker API (Mutual TLS) | CA certificate, client certificate, client key, and mandatory server verification |
 
 Mobile is not supported. The plugin uses desktop Node APIs for sockets, SSH, TLS files, and carefully bounded child processes.
 
@@ -39,12 +39,16 @@ Restart Obsidian or enable the plugin in **Settings → Community plugins**. The
 
 ## Connection methods
 
-| Method | How it connects | Important behaviour |
+| Connection method | Best for | Authentication |
 | --- | --- | --- |
-| Local Docker | A configured Unix socket or Windows named pipe | Only explicit conventional endpoints are discovered; filesystem scanning is not used. |
-| Docker Context | `docker --context <name> system dial-stdio` | The plugin never changes the globally active Docker Context. |
-| SSH Docker | SSH plus `docker system dial-stdio` | Host-key verification is required; passwords and key passphrases are session-only. |
-| Docker API with mutual TLS | HTTPS with a CA, client certificate, and client key | Certificate verification is mandatory; insecure TCP is unsupported. |
+| Local Docker Socket | Docker running on the same computer | Local Docker permissions |
+| Docker Context | Existing Docker CLI configurations | Context-defined |
+| Remote Docker via SSH | Most remote Docker hosts | Password or private key |
+| Remote Docker API (Mutual TLS) | Direct secured Docker API access | CA + client certificate + private key |
+
+Local Docker Socket automatically discovers common local endpoints but never implies remote access. Docker Context uses `docker --context <name> system dial-stdio` without changing your active Docker Context. Remote Docker via SSH transports Docker's dial-stdio connection through SSH, so the remote Docker API does not need to be exposed to the network. Remote Docker API (Mutual TLS) requires server-certificate verification and a client certificate with its private key.
+
+Plain unauthenticated Docker TCP is not supported.
 
 Use **Connections** to add a host and **Test connection** before relying on its dashboard. For each transport's requirements and errors, see [Add, test, and save a connection](User%20Guide.md#4-add-test-and-save-a-connection).
 

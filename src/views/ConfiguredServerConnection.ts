@@ -1,5 +1,17 @@
 import type { DockerConnectionProfile } from "../models/DockerConnectionProfile";
+import { getDockerConnectionTypeDisplayName } from "../connections/DockerConnectionTypePresentation";
 
 /** Safe, compact metadata for configured-server cards. */
-export function configuredServerConnection(profile: DockerConnectionProfile): { label: string; detail?: string } { switch (profile.connectionType) { case "local": return { label: "Local Docker", detail: profile.localEndpoint.type === "unix-socket" ? "Unix Socket" : "Windows Named Pipe" }; case "docker-context": return { label: "Docker Context", detail: `Context: ${profile.contextName}` }; case "ssh": return { label: profile.authentication.type === "password" ? "SSH (Password)" : "SSH (Private Key)", detail: `Host: ${profile.sshHost}` }; case "docker-tls": return { label: "Docker API (Mutual TLS)", detail: `${profile.host}:${profile.port}` }; default: return assertNever(profile); } }
-function assertNever(profile: never): never { throw new Error(`Unsupported connection profile: ${String(profile)}`); }
+export function configuredServerConnection(profile: DockerConnectionProfile): { label: string; detail?: string } {
+  const label = getDockerConnectionTypeDisplayName(profile.connectionType);
+  switch (profile.connectionType) {
+    case "local":
+      return { label, detail: profile.localEndpoint.type === "unix-socket" ? "Local Docker Unix socket" : "Windows named pipe" };
+    case "docker-context":
+      return { label, detail: `Docker Context: ${profile.contextName}` };
+    case "ssh":
+      return { label, detail: `SSH Host: ${profile.sshHost} · ${profile.authentication.type === "password" ? "Password" : "Private Key"}` };
+    case "docker-tls":
+      return { label, detail: `Docker Host: ${profile.host}:${profile.port}` };
+  }
+}

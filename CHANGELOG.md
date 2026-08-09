@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Clarified all connection-method labels and descriptions: Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS). The dialog now provides dynamic security and recommendation guidance without changing saved profile discriminator values or transport behavior.
+
 - Added a complete end-user guide and expanded the README with accurate installation, connection, dashboard, Compose-awareness, update-safety, privacy, and troubleshooting guidance.
 - Added human-readable security and lifecycle commentary to the remaining local transport, diagnostics, network, and volume modules.
 - Corrected stale Docker Context documentation to describe the implemented lifecycle preflight, Test Connection, and dial-stdio execution path.
