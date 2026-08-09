@@ -13,7 +13,7 @@ Docker Connector is a desktop-only Docker environment dashboard for Obsidian. It
 - Check whether eligible tagged images resolve to a newer image. Checks are advisory and never install an update automatically.
 - Optionally enable confirmed Start, Shut down, Stop, Restart, and safe standalone-container Update actions.
 
-See the [User Guide](docs/Docker%20Connector%20-%20User%20Guide.md) for step-by-step use and the [Security Review](docs/Docker%20Connector%20-%20Security%20Review.md) for the security model.
+See the [User Guide](User%20Guide.md) for step-by-step use and the [Security Review](docs/Docker%20Connector%20-%20Security%20Review.md) for the security model.
 
 ## Requirements
 
@@ -46,7 +46,7 @@ Restart Obsidian or enable the plugin in **Settings → Community plugins**. The
 | SSH Docker | SSH plus `docker system dial-stdio` | Host-key verification is required; passwords and key passphrases are session-only. |
 | Docker API with mutual TLS | HTTPS with a CA, client certificate, and client key | Certificate verification is mandatory; insecure TCP is unsupported. |
 
-Use **Connections** to add a host and **Test connection** before relying on its dashboard. For each transport's requirements and errors, see [Add and test a connection](docs/Docker%20Connector%20-%20User%20Guide.md#add-and-test-a-connection).
+Use **Connections** to add a host and **Test connection** before relying on its dashboard. For each transport's requirements and errors, see [Add, test, and save a connection](User%20Guide.md#4-add-test-and-save-a-connection).
 
 ## Using the dashboard
 
@@ -85,7 +85,7 @@ Read [Container Management](docs/Docker%20Connector%20-%20Container%20Management
 - **No Applications listed:** Only containers with `com.docker.compose.project` appear in Applications. Non-Compose containers remain in Containers.
 - **Update unavailable:** An image may be newer but still ineligible—for example, if the container is Compose-managed, untagged, or cannot be recreated safely. This is intentional.
 
-For detailed walkthroughs, safe limitations, and what data is stored, use the [User Guide](docs/Docker%20Connector%20-%20User%20Guide.md).
+For detailed walkthroughs, safe limitations, and what data is stored, use the [User Guide](User%20Guide.md).
 
 ## Development and release checks
 
