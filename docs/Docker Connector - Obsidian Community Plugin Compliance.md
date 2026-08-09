@@ -35,4 +35,4 @@ Current Obsidian guidance prefers distributing `main.js` as a release attachment
 
 ## User-facing documentation
 
-[[Docker Connector - User Guide]] is the end-user starting point and [[README]] provides the Marketplace-facing overview. Both identify the desktop-only requirement, all four supported connection methods, Compose-label Applications, optional management, image-update limitations, privilege warning, no-telemetry policy, runtime-only credentials, installation, and troubleshooting. Technical notes remain linked from the guide rather than being required reading for a first-time user.
+[[User Guide]] is the end-user starting point and [[README]] provides the Marketplace-facing overview. Both identify the desktop-only requirement, all four supported connection methods, Compose-label Applications, optional management, image-update limitations, privilege warning, no-telemetry policy, runtime-only credentials, installation, and troubleshooting. Technical notes remain linked from the guide rather than being required reading for a first-time user.

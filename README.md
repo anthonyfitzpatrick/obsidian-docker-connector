@@ -20,7 +20,7 @@ It is a desktop-only Obsidian plugin. Docker Connector is read-only by default; 
 
 ## Screenshots
 
-Release screenshots will be added as the UI is finalized. The full [User Guide](docs/Docker%20Connector%20-%20User%20Guide.md) contains a screenshot-production checklist and precise capture instructions; no placeholder image links are used here.
+Release screenshots will be added as the UI is finalized. The full [User Guide](User%20Guide.md) contains a screenshot-production checklist and precise capture instructions; no placeholder image links are used here.
 
 ## Connection methods
 
@@ -95,11 +95,11 @@ For manual release installation, place the release assets `main.js`, `manifest.j
 7. Select the profile as the **Current Environment**.
 8. Browse the dashboard, which remains read-only until Container management is enabled.
 
-For complete setup walkthroughs, connection fields, diagnostics, update behavior, recovery guidance, and troubleshooting, see the [Docker Connector User Guide](docs/Docker%20Connector%20-%20User%20Guide.md).
+For complete setup walkthroughs, connection fields, diagnostics, update behavior, recovery guidance, and troubleshooting, see the [Docker Connector User Guide](User%20Guide.md).
 
 ## Documentation
 
-- [Docker Connector User Guide](docs/Docker%20Connector%20-%20User%20Guide.md) — complete end-user manual, troubleshooting, FAQ, and screenshot checklist.
+- [Docker Connector User Guide](User%20Guide.md) — complete end-user manual, troubleshooting, FAQ, and screenshot checklist.
 - [Connections View](docs/Docker%20Connector%20-%20Connections%20View.md) — saved connection actions and status.
 - [Docker Context](docs/Docker%20Connector%20-%20Docker%20Context.md) — Context discovery, lifecycle, and secure routing.
 - [Docker Compose Awareness](docs/Docker%20Connector%20-%20Docker%20Compose%20Awareness.md) — how Applications grouping works.

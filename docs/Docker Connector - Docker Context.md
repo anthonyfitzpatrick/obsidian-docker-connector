@@ -10,4 +10,4 @@ Docker Connector then selects the appropriate underlying transport from that dis
 
 The connection card and profile continue to say **Docker Context**, even when the underlying transport is local. Docker Connector never changes the active Docker CLI Context. Its bounded Docker CLI resolver checks the current process PATH and safe platform locations; it does not invoke a login shell or parse shell startup files.
 
-For the user workflow, field explanations, and troubleshooting, see [[Docker Connector - User Guide]].
+For the user workflow, field explanations, and troubleshooting, see [[User Guide]].

@@ -12,7 +12,7 @@ Automated coverage verifies password regression, profile migration, separated ru
 
 Deletion coverage verifies stable profile-ID removal, preservation of other profiles, serialized persistence failure rollback, runtime credential/cache/transport cleanup, active container-operation blocking, and accessible confirmation wording. It verifies plugin-only deletion and does not invoke Docker resource or Docker Context mutation routes.
 
-Marketplace documentation is reviewed alongside the source: the README and [[Docker Connector - User Guide]] must describe only implemented connection methods, preserve the desktop-only and Docker-privilege warnings, and never describe an automatic update, Compose mutation, credential persistence, or telemetry feature.
+Marketplace documentation is reviewed alongside the source: the README and [[User Guide]] must describe only implemented connection methods, preserve the desktop-only and Docker-privilege warnings, and never describe an automatic update, Compose mutation, credential persistence, or telemetry feature.
 
 Update coverage verifies structured eligibility, normal tagged references including `ghost:5-alpine`, registry-path references, exact Compose-label blocking, active-action isolation, direct disabled reasons, and that the UI invokes the transaction-gated update service rather than a generic mutation route.
 

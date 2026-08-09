@@ -1,327 +1,613 @@
 ---
-title: Docker Connector - User Guide
-tags: [docker-connector, user-guide]
+title: Docker Connector User Guide
 ---
 
-# Docker Connector - User Guide
+# Docker Connector User Guide
 
-Docker Connector is a desktop-only Docker dashboard inside Obsidian. It lets you connect to trusted Docker environments, inspect their workload and resource inventory, and—only after deliberate opt-in—perform a small set of explicitly confirmed container actions. The normal dashboard is read-only. It does not provide a terminal, a generic Docker API console, Docker Compose deployment, stack editing, bulk operations, or resource deletion.
+Docker Connector is an Obsidian desktop plugin for viewing Docker environments and, when you explicitly enable it, carrying out a small set of container-management actions. It lets you keep local and remote Docker environments in one Obsidian workspace without treating Obsidian as a replacement for Docker Desktop, the Docker CLI, or a full deployment platform.
 
-> [!warning] Docker access is privileged access
-> A Docker daemon can usually control its host at an administrator or root-equivalent level. Treat every connection profile as a privileged credential. Add only hosts, sockets, certificates, and SSH accounts you trust.
+Docker Connector is read-only by default. You can inspect hosts, Docker Compose applications, containers, images, volumes, networks, and image-update availability without enabling container management. Lifecycle and update actions are deliberately opt-in.
 
-> [!info] How to use this guide
-> Complete the sections in order for a first connection: requirements, settings, connection, test, and dashboard. Red screenshot callouts are production-documentation requirements. Replace each callout with the specified screenshot after the UI and example data are ready; redact hostnames, user names, addresses, certificate paths, container names, image names, project names, and all secrets where necessary.
+> [!warning] Docker access is highly privileged
+> A person or process that can control a Docker daemon can often gain extensive control of that Docker host. Connect only to hosts and credentials you trust. The safeguards in Docker Connector reduce accidental risk; they do not make Docker-daemon access low-risk.
 
-## Screenshot placement map
+## 1. About Docker Connector
 
-🟥 <span style="color: red;"><strong>Screenshot 1 — Insert after “1. Before you begin”.</strong> Show installation and desktop requirements.</span>
+Docker Connector supports multiple saved Docker environments. Each saved connection has its own status, inventory, cached dashboard data, and runtime credentials. Select one environment as the **Current Environment** to view its Overview, Applications, Containers, Images, Volumes, and Networks.
 
-🟥 <span style="color: red;"><strong>Screenshot 2 — Insert after “2. Open Docker Connector”.</strong> Show the Command palette command or ribbon entry point.</span>
+The current release supports four connection methods:
 
-🟥 <span style="color: red;"><strong>Screenshot 3 — Insert after “3. Configure plugin settings”.</strong> Show Automatic refresh, Refresh interval, Theme integration, and Container management.</span>
-
-🟥 <span style="color: red;"><strong>Screenshot 4 — Insert immediately after Screenshot 3.</strong> Show the Container-management confirmation dialog.</span>
-
-🟥 <span style="color: red;"><strong>Screenshot 5 — Insert after the general workflow in “4. Add, test, and save a connection”.</strong> Show the Connections tab and Add Docker host entry point.</span>
-
-🟥 <span style="color: red;"><strong>Screenshot 6 — Insert after the four connection-method subsections in Section 4.</strong> Show the connection-method form; use 6a–6d if separate method forms are needed.</span>
-
-🟥 <span style="color: red;"><strong>Screenshot 7 — Insert immediately after Screenshot 6.</strong> Show a successful Test connection and, optionally, a redacted safe diagnostic error state.</span>
-
-🟥 <span style="color: red;"><strong>Screenshot 8 — Insert after the Overview subsection in “5. Navigate and interpret the dashboard”.</strong> Show the selected-host overview dashboard.</span>
-
-🟥 <span style="color: red;"><strong>Screenshot 9 — Insert after the Containers subsection in Section 5.</strong> Show Applications and Containers together as panels 9a and 9b.</span>
-
-🟥 <span style="color: red;"><strong>Screenshot 10 — Insert after the Images, Volumes, and Networks subsection in Section 5.</strong> Show the three read-only inventory views.</span>
-
-🟥 <span style="color: red;"><strong>Screenshot 11 — Insert after the lifecycle-actions subsection in “6. Use optional container management safely”.</strong> Show lifecycle controls and safe failure handling.</span>
-
-🟥 <span style="color: red;"><strong>Screenshot 12 — Insert at the end of Section 6.</strong> Show the image-check result and safe standalone-update confirmation as 12a and 12b.</span>
-
-🟥 <span style="color: red;"><strong>Screenshot 13 — Insert after the troubleshooting table in “8. Troubleshooting”.</strong> Show a fully redacted safe diagnostic example.</span>
-
-## 1. Before you begin
-
-Use Obsidian Desktop 1.7.0 or later. Mobile is not supported because Docker Connector needs desktop access to local sockets, SSH, certificate files, and local Docker CLI processes.
-
-Before creating a profile, decide which connection method matches the Docker host you intend to monitor. Prepare only the information for that method.
-
-| Connection method | Use it when | What you need | Important limitation |
+| Method | Best for | Authentication | Direct Docker API exposure |
 | --- | --- | --- | --- |
-| Local Docker | Docker runs on the same computer as Obsidian. | A usable Unix socket or Windows named pipe. | Your desktop user must have permission to use the endpoint. |
-| Docker Context | Docker Desktop or Docker CLI already has a named Context for the target. | Docker CLI installed locally and an existing supported Context. | The plugin never changes the globally active Context. |
-| SSH Docker | The Docker host is remote and reachable over SSH. | Host, port, user, host-key verification, and password or private key. The remote account must run `docker system dial-stdio` without `sudo`. | Passwords and private-key passphrases are session-only. |
-| Docker API with mutual TLS | The Docker Engine API is deliberately exposed through secure mutual TLS. | Host, port, server name, CA certificate, client certificate, client key, and optional key passphrase. | Insecure TCP and disabled certificate verification are unsupported. |
+| Local Docker Socket | Docker running on the same computer as Obsidian | Local operating-system and Docker permissions | No |
+| Docker Context | An existing Docker CLI configuration | Defined by the selected Context | Depends on the Context |
+| Remote Docker via SSH | Most remote Docker hosts | Password or private key | No |
+| Remote Docker API (Mutual TLS) | A deliberately secured direct Docker Engine API | CA certificate, client certificate, and client private key | Yes |
 
-Do not put passwords, private keys, certificate contents, registry tokens, or Docker environment values in the profile name, description, screenshot, or an Obsidian note.
+Plain unauthenticated Docker TCP is not supported.
 
-🟥 <span style="color: red;"><strong>Screenshot 1 — Installation and requirements.</strong> Place this immediately after this section. Capture Obsidian Desktop with Docker Connector enabled in Community plugins, plus a cropped view of the plugin’s desktop-only notice or requirements. Do not include other vault names, installed-plugin lists, or personal paths. The screenshot should establish where the plugin is enabled and that this guide applies to desktop Obsidian.</span>
+## 2. Important security information
 
-## 2. Open Docker Connector
+Docker Connector is designed to make its boundaries visible:
 
-There are two equivalent ways to open the dashboard:
+- It is read-only until **Container management** is enabled in Settings.
+- Its normal Docker Engine client is limited to approved GET requests. Start, Stop, Shut down, Restart, and Update use dedicated, typed operations rather than a general-purpose Docker API console.
+- Passwords and private-key passphrases are runtime-only. They are kept in memory for the current Obsidian session and are not saved in plugin settings.
+- Remote Docker via SSH keeps Docker API traffic inside the SSH session. It does not require a direct Docker API listener.
+- Mutual TLS requires server-certificate verification and a client certificate. Docker Connector does not offer an insecure “accept any certificate” mode.
+- Docker Context discovery and use never changes your active Docker Context.
+- Delete connection removes Docker Connector data only; it never deletes Docker resources or external credential files.
 
-1. Select the Docker Connector ribbon icon in Obsidian’s left ribbon.
-2. Or open the Command palette, search for **Docker Connector: Open dashboard**, and run it.
+## 3. Requirements
 
-The dashboard opens as an Obsidian view. Use **Docker Connector: Refresh all Docker hosts** from the Command palette whenever you want to request a new snapshot for every enabled profile. Refreshing reads current Docker state; it does not start, stop, restart, update, or remove a container.
+Docker Connector is a desktop-only plugin (`isDesktopOnly: true`). It is supported on desktop Obsidian for macOS, Windows, and Linux. It is not supported on Obsidian mobile because it needs desktop Node/Electron capabilities for local sockets or named pipes, file selection, SSH, TLS, and bounded Docker CLI processes.
 
-If this is your first use, open **Connections** first. An empty dashboard is expected until at least one profile is saved and successfully connected.
+You also need appropriate access for the method you select:
 
-🟥 <span style="color: red;"><strong>Screenshot 2 — Opening the dashboard.</strong> Place this after the preceding numbered steps. Capture the Command palette with “Docker Connector: Open dashboard” highlighted, or the ribbon icon with a visible tooltip. Use a clean demonstration vault. The image must make it obvious how a user discovers the dashboard command.</span>
+- **Local Docker Socket:** Docker Engine or Docker Desktop running locally, and permission to open its socket or named pipe.
+- **Docker Context:** Docker CLI installed locally and an existing Docker Context. The context is discovered; Docker Connector does not create or modify it.
+- **Remote Docker via SSH:** SSH access to the Docker host and permission for that remote account to use the configured Docker socket without interactive `sudo`.
+- **Remote Docker API (Mutual TLS):** a Docker Engine HTTPS endpoint configured for mutual TLS, plus a CA certificate, client certificate, and matching client private key.
 
-## 3. Configure plugin settings
+## 4. Installation
 
-Open **Settings → Docker Connector** in Obsidian. These settings apply to the plugin as a whole, not to an individual Docker host.
+When Docker Connector is available through Obsidian Community Plugins, install it from **Settings → Community plugins → Browse**, search for **Docker Connector**, then install and enable it. If it is not yet listed in the Community Plugin directory, use the project’s release instructions rather than copying source files into your vault.
 
-### Automatic refresh
+For a manual release installation, the plugin directory needs the release assets `main.js`, `manifest.json`, and `styles.css`. Source files, test fixtures, and `node_modules` are not required for normal use.
 
-**Automatic refresh** controls whether Docker Connector asks enabled profiles for a fresh dashboard snapshot in the background. It is enabled by default.
+## 5. First launch
 
-1. Leave it enabled if you want a dashboard that regularly reflects host changes.
-2. Turn it off if you only want information refreshed when you explicitly use Refresh all Docker hosts or reopen the relevant view.
-3. Disabling automatic refresh does not delete profiles, disconnect a host permanently, change Docker configuration, or alter container state. It only stops scheduled background refresh requests.
+On first launch there are no saved Docker connections. Open **Connections** and choose **Add Docker Host**. After testing and saving a host, choose it as the Current Environment to populate the dashboard.
 
-### Refresh interval
+> <span style="color: red;"><strong>📷 Screenshot required — First launch and empty connection state</strong></span>
+>
+> Capture: The Connections view with no saved profiles, its explanatory empty state, and the Add Docker Host action.
+>
+> Suggested filename: `docs/images/user-guide/first-launch-empty-state.png`
 
-**Refresh interval** sets the number of minutes between background refresh attempts. The default is five minutes and the minimum accepted value is one minute.
+## 6. Understanding the interface
 
-1. Enter a whole number of minutes.
-2. Use a longer interval for remote, low-bandwidth, metered, or heavily loaded hosts.
-3. Use a shorter interval only when you need more frequent operational visibility and the selected hosts can tolerate the additional read-only requests.
-4. If you enter an invalid value, the previous valid interval remains in effect. Verify the field before leaving Settings.
+The header identifies the Current Environment and its connection status. Use the refresh control for an immediate read-only snapshot refresh. When automatic refresh is enabled, Docker Connector also refreshes configured hosts in the background at the interval chosen in Settings.
 
-### Theme integration
+The primary navigation contains **Overview**, **Applications**, **Containers**, **Images**, **Volumes**, **Networks**, and **Connections**. The resource tabs show data for the Current Environment; their search, filter, sort, and detail controls never mutate Docker resources.
 
-**Theme integration** makes the dashboard use Obsidian’s native theme variables.
+> <span style="color: red;"><strong>📷 Screenshot required — Main Docker Connector dashboard</strong></span>
+>
+> Capture: The Overview tab showing Current Environment, Online status, navigation tabs, summary cards, refresh controls, and host information.
+>
+> Suggested filename: `docs/images/user-guide/dashboard-overview.png`
 
-1. Leave it enabled for the best match with your Obsidian light or dark theme.
-2. Disable it only if you are diagnosing a theme-specific display issue or deliberately want the plugin’s non-integrated presentation.
-3. This option changes appearance only. It has no effect on connection security, Docker permissions, refresh behaviour, or data retention.
+## 7. Adding a Docker host
 
-### Container management
+1. Open **Connections**.
+2. Select **Add Docker Host**.
+3. Provide a **Friendly Name**. Description and Category are optional organization fields.
+4. Select a **Connection Type**.
+5. Complete only the fields for that method.
+6. Choose **Test Connection** and review the transport-specific diagnostics.
+7. Choose **Save Host**.
 
-**Container management** is disabled by default. When disabled, Docker Connector remains read-only even if a dashboard displays a container that could otherwise accept an action. When enabled, the detail panel can offer Start, Shut down, Stop, Restart, and—where the safety requirements are met—Update.
+Testing before saving is strongly recommended. A successful test proves the selected profile can validate its endpoint and obtain safe Docker information; saving then registers the profile for the normal dashboard refresh lifecycle.
 
-1. Enable this only after you understand that the configured Docker account can have administrator-level control of its host.
-2. Turn on the toggle and read the confirmation dialog. Select **Cancel** if you are not prepared to grant mutating access.
-3. Select **OK** only for trusted hosts and only when you intend to use the limited actions provided by the plugin.
-4. Wait for the status beside the setting to report **Enabled**. While the setting is saving, the toggle is intentionally disabled.
-5. If the status says **Save failed**, the old setting remains authoritative. Correct the storage problem and try again; do not assume the toggle was saved.
-6. Turning the setting on does not itself perform a Docker action. Turning it off immediately prevents the plugin from authorizing new container actions.
+> <span style="color: red;"><strong>📷 Screenshot required — Add Docker Host dialog</strong></span>
+>
+> Capture: A complete Add Docker Host form with Friendly Name, Connection Type, method description panel, Test Connection, and Save Host controls visible.
+>
+> Suggested filename: `docs/images/user-guide/add-docker-host.png`
 
-🟥 <span style="color: red;"><strong>Screenshot 3 — Docker Connector settings.</strong> Place this at the end of the settings section. Capture all four settings in one view: Automatic refresh, Refresh interval, Theme integration, and Container management with its authoritative status text. Use a safe sample value for the interval. If management is shown enabled, include no host details and annotate that this is an intentional opt-in.</span>
+## 8. Connection methods
 
-🟥 <span style="color: red;"><strong>Screenshot 4 — Container-management confirmation.</strong> Place directly after Screenshot 3. Capture the confirmation dialog that appears when enabling Container management. The dialog must be legible enough to show the privileged-access warning and the available confirm/cancel choice. Use a non-production demonstration environment.</span>
+### 8.1 Local Docker Socket
 
-## 4. Add, test, and save a connection
+**Local Docker Socket** connects to Docker running on the same computer as Obsidian. On macOS and Linux this is a Unix socket; on Windows it is a Docker named pipe. Docker Connector discovers common local endpoints and validates the endpoint before connecting.
 
-Choose the **Connections** tab, then choose the control to add a Docker host. A profile is a saved, non-secret description of one Docker endpoint. Use a friendly name that tells you what the host is for—such as “Development NAS” or “Office Docker Desktop”—without embedding a password, network address, or customer information.
+On macOS, Docker Desktop commonly uses a user socket such as `~/.docker/run/docker.sock`; `/var/run/docker.sock` may be a compatibility symlink. Docker Connector resolves and validates supported socket symlinks rather than replacing them. No SSH credentials, TLS files, or Docker TCP listener are involved.
 
-For every method, use this sequence:
+The **Docker Endpoint** field can show the detected local Unix socket or Windows named pipe. If Docker Desktop is stopped, the endpoint is missing, the symlink is broken, or your account cannot open it, Test Connection explains that local endpoint problem.
 
-1. Enter a profile name and optional non-sensitive description or category.
-2. Choose exactly one connection method.
-3. Complete the fields required by that method.
-4. Run **Test connection** before relying on the profile.
-5. Read every diagnostic step from top to bottom if the test fails. The diagnostics are deliberately bounded: they tell you what to correct without exposing raw Docker responses, secrets, private-key material, or environment values.
-6. Save the profile only after the test succeeds or after you deliberately choose to save an offline configuration for later correction.
-7. Confirm the profile is enabled if you want it included in background refreshes. Disabled profiles remain saved but are not normally refreshed.
+> <span style="color: red;"><strong>📷 Screenshot required — Local Docker Socket configuration</strong></span>
+>
+> Capture: Local Docker Socket selected in Add Docker Host, with the detected Docker Endpoint and local discovery status visible.
+>
+> Suggested filename: `docs/images/user-guide/local-docker-socket.png`
 
-🟥 <span style="color: red;"><strong>Screenshot 5 — Connections tab and add-profile entry point.</strong> Place after the general connection workflow. Capture the Connections tab with one or two clearly fictional profiles and the Add Docker host control. Show the profile cards, connection type, enabled state, and available actions, but redact endpoint addresses, account names, certificate file paths, and any real host identity.</span>
+### 8.2 Docker Context
 
-### 4.1 Local Docker connection
+A **Docker Context** is a Docker CLI connection profile. Docker Connector finds existing contexts through the local Docker CLI and does not run `docker context use`, create, update, remove, import, or export a context.
 
-Use Local Docker when Docker runs on the same computer as Obsidian.
+This distinction matters: Docker Connector uses the context you select without changing the context that your terminal or other Docker tools consider active. The Docker CLI must be installed, but the CLI being present is separate from whether the Docker Engine is currently reachable.
 
-1. Select **Local Docker** as the connection method.
-2. Choose the Unix socket or Windows named pipe that Docker Desktop or Docker Engine exposes.
-3. Use the offered conventional endpoint where it matches your installation. Docker Connector discovers only explicit conventional locations; it does not scan your filesystem for Docker sockets.
-4. Run **Test connection**. A successful test confirms the selected endpoint is reachable and that the Obsidian desktop user can use it.
-5. If the test reports a permissions issue, resolve Docker socket or named-pipe permissions for your operating-system user. Do not work around the problem by broadly weakening endpoint permissions.
+The plugin performs bounded discovery of the Docker CLI from the current process PATH and standard platform locations. This helps normal macOS GUI launches, where Obsidian can inherit a different PATH than Terminal, without invoking a login shell or reading shell startup files.
 
-### 4.2 Docker Context connection
+Docker Connector resolves a selected Context to the right physical transport each time it is used:
 
-Use Docker Context when the target already exists in the local Docker CLI configuration.
+- a `unix://` Context uses the local Docker transport;
+- a Windows `npipe://` Context uses the local named-pipe transport;
+- an `ssh://` Context uses Docker CLI’s explicit Context-backed secure transport;
+- insecure, unknown, and endpoint types that cannot be handled safely are blocked.
 
-1. Select **Docker Context**.
-2. Use the discovery control to list existing Contexts.
-3. Select a supported Context and review its safe metadata: name, endpoint type, supported state, and lifecycle state.
-4. Save the profile and run **Test connection**.
-5. For an existing Context profile, use **Refresh Context Metadata** if its endpoint details may have changed, and use **View Context Details** to inspect the safe saved metadata.
+The saved profile and connection card still say **Docker Context**, even when the underlying transport is local.
 
-Docker Connector runs the CLI with an explicit `docker --context <name> system dial-stdio` invocation. It does not run `docker context use`, create, import, export, remove, or activate a Context. If a Context disappears, becomes unsupported, or its safe endpoint characteristics change, the profile reports that state rather than silently switching to a different Context.
+> <span style="color: red;"><strong>📷 Screenshot required — Docker Context discovery</strong></span>
+>
+> Capture: Docker Context selected with Docker CLI detected, version, discovered context selector, safe endpoint summary, and supported status.
+>
+> Suggested filename: `docs/images/user-guide/docker-context.png`
 
-### 4.3 SSH Docker connection
+### 8.3 Remote Docker via SSH
 
-Use SSH Docker for a remote Linux or Unix-like host that can run Docker through the configured account.
+**Remote Docker via SSH** is usually the most straightforward remote choice. Docker Connector opens an SSH session and runs Docker’s secure `docker system dial-stdio` transport through that session. The Docker API is therefore transported over SSH and does not need to be directly exposed to the network.
 
-1. Select **SSH Docker**.
-2. Enter the host name or address, SSH port, and account name.
-3. Choose **Password** or **Private key** authentication.
-4. For Password authentication, enter the password only into the prompt or session field. It is held in memory only while Obsidian runs.
-5. For Private key authentication, choose the private-key file and enter a passphrase only when required. The key content and passphrase are not saved in the plugin settings.
-6. Verify the server host fingerprint deliberately. A changed fingerprint can mean a legitimate server change, but it can also indicate a connection to the wrong host. Verify through an independent trusted channel before accepting a change.
-7. Run **Test connection**. The remote account needs permission to run `docker system dial-stdio` without `sudo` and to access the Docker daemon.
+Configure:
 
-If SSH itself succeeds but Docker access fails, the usual cause is that the remote account cannot access the Docker socket or is using a session that has not inherited recent Docker-group membership. End all SSH sessions for that account, reconnect, and test again after the host administrator confirms the intended permission.
+- **SSH Host** and **SSH Port**;
+- **SSH Username**;
+- **SSH Authentication**: Password or Private Key;
+- **Remote Docker Socket**; and
+- **Host Key Fingerprint** when host identity verification is required by the connection workflow.
 
-### 4.4 Docker API with mutual TLS
+The remote account must be able to access the configured Docker socket without interactive `sudo`.
 
-Use mutual TLS only for an intentionally secured Docker API endpoint.
+#### Password authentication
 
-1. Select **Docker API with mutual TLS**.
-2. Enter the endpoint host and port.
-3. Enter the **server name** expected by the server certificate. This must match the certificate identity; it is not merely a display label.
-4. Select the CA certificate, client certificate, and client-key file paths.
-5. Supply a client-key passphrase only if the selected key requires one. It remains session-only.
-6. Run **Test connection** and correct certificate paths, key matching, trust chain, or server-name mismatch errors before saving.
+With **Password** selected, enter the SSH password during connection or reconnection. Docker Connector keeps that password in memory only for the current Obsidian session. It is not stored in the saved profile, so a profile can show **Authentication Required** after Obsidian restarts. Choose **Reconnect** to provide it again.
 
-Docker Connector always verifies the server certificate and always uses mutual TLS for this method. It does not support plain Docker TCP, an invalid certificate, a missing CA trust chain, or a “skip verification” option.
+> <span style="color: red;"><strong>📷 Screenshot required — SSH password authentication</strong></span>
+>
+> Capture: Remote Docker via SSH selected with Password authentication, its password field, remote socket field, and host-key fingerprint field.
+>
+> Suggested filename: `docs/images/user-guide/ssh-password.png`
 
-🟥 <span style="color: red;"><strong>Screenshot 6 — Connection-method form.</strong> Place after the four connection-method subsections. Capture a sanitized edit form with the connection-method selector visible. If the layout requires separate captures, use four sub-images labelled 6a Local Docker, 6b Docker Context, 6c SSH Docker, and 6d Mutual TLS. Show field labels and the Test connection control; replace every sensitive value with obvious fictional data and blur file-system paths if they reveal a user name.</span>
+#### Private-key authentication
 
-🟥 <span style="color: red;"><strong>Screenshot 7 — Successful test connection and safe diagnostics.</strong> Place immediately after Screenshot 6. Capture a successful Test connection result showing its ordered validation steps. A second cropped example may show a safe, non-secret error state and Retry/diagnostics behaviour. Do not show raw errors, terminal output, certificate contents, passwords, or host fingerprints from a real environment.</span>
+With **Private Key** selected, choose a **Private Key File** and, if required, enter its **Private-Key Passphrase**. The profile can save the file path, not a copy of the key material. An encrypted key’s passphrase remains in memory only for the current session; an unencrypted key simply has no passphrase to enter.
 
-## 5. Navigate and interpret the dashboard
+> <span style="color: red;"><strong>📷 Screenshot required — SSH private-key authentication</strong></span>
+>
+> Capture: Remote Docker via SSH selected with Private Key authentication, file picker path, passphrase field, and host-key verification controls.
+>
+> Suggested filename: `docs/images/user-guide/ssh-private-key.png`
 
-Select an enabled host from the host selector. The dashboard represents the most recently retrieved snapshot for that profile. A refresh failure is shown safely and does not silently pretend that an old snapshot is current.
+#### Host-key verification
 
-### Overview
+The **Host Key Fingerprint** identifies the remote SSH server. Verifying it protects against connecting to an unexpected or malicious host that merely answers at the same network address. If Docker Connector reports a changed or unknown host key, independently verify the fingerprint with the server administrator before accepting any trust prompt. Do not treat a host-key warning as a password problem.
 
-**Overview** is the starting point for an operational scan. It summarizes the selected host and draws attention to items that may require review. Use it to decide whether to investigate a particular container, image update, connection problem, or resource category.
+### 8.4 Remote Docker API (Mutual TLS)
 
-1. Confirm the host selector shows the intended profile before acting on any information.
-2. Review attention items and metric cards.
-3. Follow the relevant tab or detail panel for investigation.
-4. Refresh the host when you need a current reading. A refresh only reads Docker state.
+**Remote Docker API (Mutual TLS)** is for a Docker Engine HTTPS endpoint that has deliberately been configured for mutual TLS. Unlike SSH, the Docker API endpoint is directly reachable on the network. Both sides authenticate:
 
-### Applications
+- Docker Connector verifies the Docker server certificate against the selected CA and Server Name.
+- Docker Engine verifies Docker Connector’s client certificate and private key.
 
-**Applications** is a read-only Docker Compose-oriented overview. An application appears only if Docker reports the `com.docker.compose.project` label. The displayed service comes from `com.docker.compose.service`.
+Configure these fields:
 
-1. Use the summary and filters to locate a Compose-labelled project.
-2. Select an application to inspect its safe project, service, container, image, network, volume, and Compose metadata.
-3. Select a container from the application when you need the full container detail inspector.
-4. If a workload does not appear here, look in **Containers**. Docker Connector does not guess Compose identity from container names, image references, paths, networks, or hyphens.
+| Field | Purpose |
+| --- | --- |
+| Docker Host | Network address of the Docker Engine endpoint. |
+| Docker API Port | HTTPS port exposed by the secured Docker Engine endpoint. |
+| Server Name | Certificate identity Docker Connector must verify. |
+| CA Certificate | Certificate authority used to verify the Docker server certificate. |
+| Client Certificate | Certificate presented to Docker Engine to authenticate Docker Connector. |
+| Client Private Key | Private key associated with the client certificate. |
+| Client-Key Passphrase | Optional passphrase for that private key; session-only. |
 
-Applications never run Docker Compose, parse a Compose file, edit a stack, deploy a project, or update an entire application. Compose-managed containers remain blocked from the standalone Update workflow.
+Server verification cannot be disabled. If the Server Name is an IP address, the server certificate must contain that IP in an **IP SAN**. If it is a DNS name, the certificate must contain the matching **DNS SAN**. A certificate common name alone is not a reliable substitute for a matching SAN.
 
-### Containers
+Selected certificate and key paths may be saved as profile metadata; certificate contents and client-key passphrases are not persisted in settings.
 
-**Containers** is the primary operational inventory. It includes standalone containers and Compose-managed containers. Use its search, filters, sorting, and density controls to narrow the list, then select a container for details.
+> <span style="color: red;"><strong>📷 Screenshot required — Mutual TLS configuration</strong></span>
+>
+> Capture: Remote Docker API (Mutual TLS) selected with Docker Host, Docker API Port, Server Name, CA Certificate, Client Certificate, Client Private Key, and Client-Key Passphrase fields.
+>
+> Suggested filename: `docs/images/user-guide/mutual-tls.png`
 
-1. Use search and the available health, network, or status filters to find a workload.
-2. Choose a container to open its inspector. Review state, health, image, network, and safe metadata before considering an action.
-3. Use **Check now** in the Image update section to check that one eligible container’s configured tagged image. This pulls the exact tag through the configured Docker daemon and compares image IDs; it does not restart or recreate anything.
-4. Use the **Updates Available** summary card to apply an additive filter for containers with a confirmed newer image. The filter preserves your other search, health, network, sort, and density choices. Use the **Updates available ×** chip to remove only that filter.
-5. When no matching containers remain, use **Show all containers** to clear the update filter.
+## 9. Testing a connection
 
-An image status can be not checked, checking, available, current, error, or unsupported. Only **available** means a newer image ID has been confirmed. It does not automatically make a container eligible for a safe update.
+**Test Connection** validates a draft before it is saved or after it is edited. The diagnostics are deliberately transport-specific, so not every method shows the same stages. Typical stages include profile validation, Docker Context discovery, local endpoint validation, loading TLS files, opening a connection, server-certificate verification, server-name verification, Docker `GET /_ping`, Docker `GET /version`, and response parsing.
 
-### Images, Volumes, and Networks
+A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. Stages that could not start after a failure are shown as **SKIPPED** or **NOT RUN**, rather than being presented as successful. For example, a mutual-TLS hostname mismatch stops before Docker API requests are used.
 
-These tabs are read-only inventories. Use them to understand what the selected Docker host reports, filter the list, and open lazy-loaded details where provided.
+> <span style="color: red;"><strong>📷 Screenshot required — Successful connection diagnostics</strong></span>
+>
+> Capture: A successful Test Connection result with relevant validation, ping, version, and verified security stages.
+>
+> Suggested filename: `docs/images/user-guide/connection-test-success.png`
 
-1. Select **Images** to inspect image inventory and associate image references with the container information you see elsewhere.
-2. Select **Volumes** to inspect named-volume inventory and details without altering or deleting a volume.
-3. Select **Networks** to inspect Docker network inventory and details without joining, leaving, creating, or removing a network.
-4. Return to **Containers** when you need to investigate a resource’s workload use or perform an explicitly enabled container action.
+> <span style="color: red;"><strong>📷 Screenshot required — Failed connection diagnostics</strong></span>
+>
+> Capture: A failed Test Connection showing the first failing stage, later NOT RUN/SKIPPED stages, and a safe error message.
+>
+> Suggested filename: `docs/images/user-guide/connection-test-failure.png`
 
-🟥 <span style="color: red;"><strong>Screenshot 8 — Dashboard Overview.</strong> Place after the Overview subsection. Capture a sanitized selected-host dashboard with the host selector, top-level navigation, metric cards, and at least one attention item. Use fictional container/project names and do not reveal IP addresses, internal DNS names, uptime patterns, or production capacity data.</span>
+## 10. Managing saved connections
 
-🟥 <span style="color: red;"><strong>Screenshot 9 — Applications and Containers workflow.</strong> Place after the Containers subsection. Use a two-part image or two consecutively numbered panels: 9a shows the Applications list and safe application inspector; 9b shows the Containers list, selected container inspector, and the Image update status area. Clearly demonstrate that standalone containers are found in Containers and that Compose-labelled applications are read-only.</span>
+Open **Connections** to manage every saved profile. The page is titled **Docker connections** and provides **Add Docker Host** at the top. Each card shows the friendly name, canonical connection method, a safe endpoint summary, and its current status.
 
-🟥 <span style="color: red;"><strong>Screenshot 10 — Read-only resource inventories.</strong> Place after the Images, Volumes, and Networks subsection. Use three small labelled panels for Images, Volumes, and Networks. Each must show a list and a safe detail panel, making clear that these screens are inspection-only. Use fictitious resource names.</span>
+Cards expose the applicable management actions:
 
-## 6. Use optional container management safely
+- **Edit** opens the same profile workflow without changing the profile’s stable identity.
+- **Reconnect** appears when session-only credentials need to be entered again.
+- **Retry** appears when an offline or degraded connection can be retried.
+- **Delete connection** opens a confirmation dialog.
 
-Do not use this section until **Container management** is deliberately enabled in Settings. The plugin checks the setting again for every action; a button’s appearance is not by itself permission to change Docker state.
+Status is information, not an action. The current states are **Unknown**, **Connecting**, **Online**, **Offline**, **Degraded**, and **Authentication Required**. Unknown means the profile has not yet been evaluated or is between registration and its first refresh; it should not be a permanent result after a completed connection attempt. Authentication Required normally means a required runtime-only secret needs to be supplied again.
 
-### Start, Shut down, Stop, and Restart
+> <span style="color: red;"><strong>📷 Screenshot required — Connections management page</strong></span>
+>
+> Capture: Docker connections with Add Docker Host, profiles in Online and Authentication Required states, and visible Edit, Reconnect/Retry, and Delete actions.
+>
+> Suggested filename: `docs/images/user-guide/connections-management.png`
 
-The container inspector shows only actions appropriate to the container’s current state. Running containers can show **Shut down**, **Stop**, and **Restart**. Stopped containers can show **Start**. Actions are explicit typed requests for the selected container’s full Docker ID; the plugin does not expose a free-form command entry field.
+### Delete connection
 
-1. In **Containers**, select the exact container you intend to affect.
-2. Reconfirm the selected host, container name, state, and any health information in the inspector.
-3. Choose the named lifecycle action.
-4. Read the confirmation and operational context carefully, then confirm only if the workload can safely experience the requested state change.
-5. Wait for the progress result. Do not repeatedly click an action while it is in flight.
-6. If Docker rejects the action, keep the inspector open and read the safe failure panel. It includes the action, safe explanation, error code, optional HTTP status, retry option, and safe diagnostics without exposing secrets or raw stack traces.
+Deleting a connection removes only Docker Connector’s saved profile, runtime credentials, cached session data, and associated transport state. It does **not** stop or remove containers; delete images, volumes, or networks; remove Docker Contexts; delete SSH keys or TLS files; change Docker sockets; or change a remote server configuration. The confirmation dialog repeats this boundary before removal.
 
-**Shut down** requests a graceful shutdown. **Stop** may be more abrupt after Docker’s configured stop behaviour. **Restart** stops and starts the chosen container. Review the application’s operational requirements before using any of these controls.
+> <span style="color: red;"><strong>📷 Screenshot required — Delete connection confirmation</strong></span>
+>
+> Capture: The Delete connection confirmation dialog showing a friendly name, connection method, explicit scope, Cancel, and destructive Delete connection action.
+>
+> Suggested filename: `docs/images/user-guide/delete-connection.png`
 
-### Check image availability
+## 11. Switching environments
 
-Image availability and update eligibility are separate safeguards.
+Use **Current Environment** to choose which saved host supplies dashboard data. Switching environment changes the data in Overview, Applications, Containers, Images, Volumes, and Networks. Profiles are isolated even if two profiles intentionally point to the same Docker daemon—for example, a Local Docker Socket profile and a Docker Context that resolves to Docker Desktop’s local socket.
 
-1. Select the container and locate **Image update**.
-2. Choose **Check now** for a one-time check. This forces a check for only the selected container and does not change the normal 24-hour check schedule.
-3. Wait for the status. **Current** means the configured tag resolves to the same image ID; **Available** means it resolves to a different image ID; **Unsupported** means the image or container cannot safely use this workflow; **Error** means the check could not complete.
-4. Treat **Available** as advisory. Review the deployment, configuration, persistent data, and the container’s role before you choose Update.
+If the selected profile is deleted, Docker Connector chooses a safe remaining profile where possible, preferring an Online profile. If no profiles remain, the dashboard returns to its no-host state.
 
-Eligible online standalone containers may also be checked after a snapshot refresh when no status exists or the existing status is at least 24 hours old. This scheduler checks availability only; it never installs an update unattended.
+> <span style="color: red;"><strong>📷 Screenshot required — Current Environment switcher</strong></span>
+>
+> Capture: The Current Environment selector with multiple saved profiles and a visible active environment.
+>
+> Suggested filename: `docs/images/user-guide/current-environment.png`
 
-### Update an eligible standalone container
+## 12. Overview
 
-**Update** is available only when all safety requirements hold: Container management is enabled, the container is standalone rather than Compose-managed, its image reference is an explicit usable tag, a newer image has been confirmed, and the plugin can produce a safe recreate plan.
+Overview is the host-level operational summary. It presents connection health, Docker version and host information when available, resource counts, refresh information, and attention items that deserve review. Attention items can include a host connection problem, an unhealthy container, a restarting or dead container, a non-zero exit, or an available public release where supported by the view.
 
-1. Select the eligible standalone container and read the safe update preview in full.
-2. Verify the image tag is the one you expect and that the workload is not controlled by Docker Compose or another orchestrator.
-3. Confirm that important data is in appropriate volumes or another persistent store. Data held only in the old container’s writable layer can still be lost during a recreate.
-4. Choose **Update** only after you are prepared for the container to be recreated.
-5. Let the transaction complete. Docker Connector pulls the existing repository/tag, preserves the original as a temporary backup, creates and verifies a replacement, and removes the stopped backup only after a successful replacement.
-6. If the transaction fails, read the rollback result. The workflow is designed to follow its rollback path and never force-delete volumes, but you should still validate the application after any attempted update.
+Overview is not a metrics-history system. It shows the latest safe dashboard snapshot for the selected environment.
 
-Docker Connector never bulk-updates containers, updates Compose-managed containers, deletes volumes, or runs unattended automatic updates.
+## 13. Applications
 
-🟥 <span style="color: red;"><strong>Screenshot 11 — Lifecycle actions and failure handling.</strong> Place after the Start/Shut down/Stop/Restart subsection. Capture an eligible sample container detail inspector with the management controls and an action-progress area. Include a separate non-secret failure-state crop if possible, showing the safe explanation, error code, Retry, and diagnostics. Do not show a destructive action being executed against a production workload.</span>
+Applications groups Docker Compose-managed containers into projects. Docker Connector uses Docker’s Compose metadata—especially `com.docker.compose.project` and `com.docker.compose.service`—rather than guessing project membership from names, paths, networks, or image references.
 
-🟥 <span style="color: red;"><strong>Screenshot 12 — Image check and safe update confirmation.</strong> Place at the end of this section. Capture the Image update section in two states: 12a “Available” after Check now, and 12b the pre-update preview/confirmation for an eligible standalone sample container. Make the eligibility conditions and warning visible. Do not capture or imply an Update action for a Compose-managed container.</span>
+Application cards show a project’s services, container counts, running and stopped counts, available-update count where known, and associated networks, volumes, and images. The list supports searching, status and update filtering, sorting, and an inspector. The inspector exposes project details, services, containers, and images; selecting a listed container opens that container in **Containers**.
 
-## 7. What Docker Connector stores and protects
+For example, a project named `juliarosedelane` can contain services `ghost` and `ghost-db`, containers named `juliarosedelane-ghost` and `juliarosedelane-ghost-db`, and images such as `ghost:5-alpine` and `mysql:8.4`. These are different concepts, and Docker Connector keeps them separate.
 
-Docker Connector saves non-secret profile metadata and dashboard preferences. This can include the friendly profile identity, connection type, non-secret endpoint metadata, enabled state, refresh choices, display preferences, and saved Docker Context lifecycle metadata.
+Applications is read-only at the project level. Docker Connector does not run `docker compose up` or `docker compose down`, edit Compose files, or update a whole Compose application. A Compose-managed container can report that a newer image is available but remains blocked from the standalone Update workflow.
 
-It does not save the following in plugin settings:
+> <span style="color: red;"><strong>📷 Screenshot required — Applications list</strong></span>
+>
+> Capture: Compose application cards with search/filter controls, service chips, status, resource counts, and update availability.
+>
+> Suggested filename: `docs/images/user-guide/applications-list.png`
 
-- SSH passwords.
-- SSH private-key passphrases.
-- TLS client-key passphrases.
-- Private-key contents or certificate contents.
-- Registry credentials.
-- Docker environment values.
-- Raw Docker inspect responses, raw label dumps, or raw error stacks.
+> <span style="color: red;"><strong>📷 Screenshot required — Application inspector</strong></span>
+>
+> Capture: An opened application inspector with Services, Containers, and Images sections.
+>
+> Suggested filename: `docs/images/user-guide/application-inspector.png`
 
-Passwords and passphrases are retained only in memory for the current Obsidian session when they are required. Expect to supply them again after an Obsidian restart. When sharing screenshots, support requests, or issue reports, omit or redact every host identity, endpoint, account name, path, key, fingerprint, registry reference, environment value, and diagnostic detail that could identify a system or grant access.
+## 14. Containers
 
-## 8. Troubleshooting
+The **Containers** tab is the main container inventory. It has summary cards for **Containers**, **Running**, **Stopped**, and **Updates Available**. Selecting the Updates Available card filters the list; clear the active filter to return to the complete inventory.
 
-| Symptom | Likely cause | What to do |
+Use the toolbar to search by container information and filter by State, Health, and Network. Sort and density controls make it practical to work with larger inventories. Each row identifies the container, image, short ID, state, health, and relevant update state. Copy controls copy a full ID without changing the Docker host.
+
+> <span style="color: red;"><strong>📷 Screenshot required — Containers list and filters</strong></span>
+>
+> Capture: Container summary cards, search, State/Health/Network filters, sorting/density controls, and rows with state and health information.
+>
+> Suggested filename: `docs/images/user-guide/containers-list.png`
+
+### Container health
+
+Docker state and Docker health are distinct. A container can be Running, Stopped/Exited, Restarting, or Dead. Health can be Healthy, Unhealthy, or **No health check**. No health check means the image or container configuration does not define Docker health checks; it does not mean Docker considers the container unhealthy.
+
+## 15. Container detail inspector
+
+Select a container to open its read-only inspector. The inspector provides **Actions**, **Overview**, **State**, **Configuration**, **Networking**, **Storage**, **Metadata**, and safe diagnostics where those details are available. Depending on the container, this can include image, creation time, state, health, restart count, port bindings, networks, mounts, labels that are safe to show, and storage attachments.
+
+The inspector lets you refresh details and copy the full container ID. It does not provide an interactive shell, file browser, log terminal, or arbitrary Docker API console.
+
+> <span style="color: red;"><strong>📷 Screenshot required — Container detail inspector</strong></span>
+>
+> Capture: A selected container with Actions and expanded Overview, State, Configuration, Networking, and Storage sections.
+>
+> Suggested filename: `docs/images/user-guide/container-inspector.png`
+
+## 16. Images
+
+The **Images** tab is a read-only image inventory. Summary cards cover Images, In use, Dangling, and No visible references. You can search, filter by usage/tag state, architecture, and operating system, then sort by repository, tag, creation date, size, or usage count.
+
+Select an image for an inspector with overview data, repository tags and digests, safe labels, and visible container references. Docker Connector does not delete images or expose arbitrary pull controls from this view.
+
+> <span style="color: red;"><strong>📷 Screenshot required — Images inventory</strong></span>
+>
+> Capture: Image summary cards, search and filters, list rows, and an opened image inspector.
+>
+> Suggested filename: `docs/images/user-guide/images.png`
+
+## 17. Volumes
+
+The **Volumes** tab lists Docker named volumes and their driver, scope, mountpoint summary, use state, and visible container count. It has summary cards for Volumes, In use, No visible references, and Drivers, plus search, driver, scope, and sort controls.
+
+The volume inspector shows overview information, options, safe labels, and containers using the volume where Docker makes that relationship visible. Docker Connector does not delete volumes.
+
+> <span style="color: red;"><strong>📷 Screenshot required — Volumes inventory</strong></span>
+>
+> Capture: Volume summary cards, filters, rows marked In Use or Unused, and a volume detail panel.
+>
+> Suggested filename: `docs/images/user-guide/volumes.png`
+
+## 18. Networks
+
+The **Networks** tab lists Docker network definitions. It distinguishes built-in and user-defined networks, shows unused networks, and supports search plus filters for type, driver, scope, internal/external, attachable, and IPv6-enabled networks.
+
+Selecting a network shows driver, scope, internal and attachable settings, IPv6 status, gateways, and attached containers. When a subnet is available it is shown in the list. Docker Connector does not create, change, or delete networks.
+
+> <span style="color: red;"><strong>📷 Screenshot required — Networks inventory</strong></span>
+>
+> Capture: Network summary cards, filters, list rows, and a selected network with attached-container details.
+>
+> Suggested filename: `docs/images/user-guide/networks.png`
+
+## 19. Image update checking
+
+Image update checking is advisory. Docker Connector compares the image used by an eligible container with the image currently resolved for its configured tagged image reference. It can show **Update status not checked**, **Checking for updates…**, **Update available**, **Image is current**, or a safe unavailable/error reason.
+
+Automatic checks run on a 24-hour stale interval for eligible standalone containers **while Container management is enabled** and an Online snapshot is available. This is automatic checking, not automatic updating. Docker Connector never stops, restarts, recreates, or updates a container just because a scheduled check runs.
+
+Choose **Check now** in the container inspector to perform a one-off check. The Docker daemon may pull or resolve image data to check the image ID, but Check now does not change the running container’s state.
+
+> [!note] Availability is not eligibility
+> **Update available** means a newer image is available. **Update eligibility** means Docker Connector can safely use its standalone update transaction. Compose-managed containers can have an available image but remain ineligible for the standalone Update action.
+
+> <span style="color: red;"><strong>📷 Screenshot required — Image update availability</strong></span>
+>
+> Capture: A container inspector’s Image update section showing Check now, Update available, comparison information, and the eligibility note.
+>
+> Suggested filename: `docs/images/user-guide/update-available.png`
+
+## 20. Container management
+
+**Container management** is disabled by default. Enable it in Docker Connector Settings only for Docker hosts you trust. Enabling it asks for confirmation because lifecycle and update actions change the Docker host.
+
+When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
+
+> <span style="color: red;"><strong>📷 Screenshot required — Container management setting</strong></span>
+>
+> Capture: Docker Connector Settings with the Container management toggle, its privileged-access description, and status feedback.
+>
+> Suggested filename: `docs/images/user-guide/container-management-setting.png`
+
+### Start, Stop, Shut down, and Restart
+
+- **Start** is available for stopped containers.
+- **Shut down** requests Docker’s graceful stop behavior with a 30-second wait.
+- **Stop** uses the normal stop action with a 10-second wait.
+- **Restart** uses Docker’s restart action with a 10-second wait.
+
+Docker Connector asks for confirmation before lifecycle actions and coordinates a refresh after an accepted action. These controls never appear as a bulk-action interface.
+
+### Update
+
+**Update** appears only when Container management is enabled, a newer image has been confirmed, and the container is eligible for the standalone update workflow. It is hidden when the current image is already current. Compose-managed containers and containers with unsupported configuration receive a safe reason instead of an unsafe generic update button.
+
+## 21. Safe container update workflow
+
+An eligible Update begins with a confirmation preview. It identifies the container and image, summarizes supported configuration preservation, shows warnings, and offers Cancel or a direct proceed action. There is no acknowledgement checkbox; the writable-layer warning remains prominent.
+
+The transaction is designed for standalone containers. It inspects the original container, validates eligibility, pulls the candidate image, compares image IDs, stops the original if needed, preserves it as a backup, creates and configures a replacement, restores supported networking, starts and verifies the replacement, then cleans up the backup where safe. The exact progress view reports the stage actually in progress.
+
+Docker Connector attempts to preserve the supported Docker configuration needed to recreate an eligible standalone container, including its relevant mounts, ports, restart configuration, and network attachments. No update workflow can make writable-layer-only data persistent.
+
+> <span style="color: red;"><strong>📷 Screenshot required — Update preview</strong></span>
+>
+> Capture: The standalone container update confirmation preview with container/image details, preservation summary, writable-layer warning, Cancel, and Proceed with update.
+>
+> Suggested filename: `docs/images/user-guide/update-preview.png`
+
+> <span style="color: red;"><strong>📷 Screenshot required — Update progress</strong></span>
+>
+> Capture: An in-progress update transaction showing its real current stage and non-interactive progress state.
+>
+> Suggested filename: `docs/images/user-guide/update-progress.png`
+
+## 22. Rollback and recovery
+
+If a replacement cannot be created, started, or verified after mutation starts, Docker Connector attempts to restore the original container from its preserved backup. Results distinguish successful updates, updates where a backup is retained, already-current images, failure before mutation, failure with rollback, incomplete rollback, and cancellation.
+
+Rollback is a recovery attempt, not an absolute guarantee against every host, storage, or Docker failure. If the result says a backup was retained, rollback is incomplete, or manual recovery is required, pause and inspect the reported container names and Docker state before taking further action. Do not repeatedly retry an unclear update result.
+
+> [!warning] Writable-layer data
+> Data kept only in a container’s writable layer is not equivalent to a named volume or bind mount. Recreating a container can lose writable-layer-only changes. Persist important data with Docker volumes or bind mounts before updating.
+
+> <span style="color: red;"><strong>📷 Screenshot required — Update result and recovery guidance</strong></span>
+>
+> Capture: A completed update result, including either success or a rollback/backup-retained result with safe next-step guidance.
+>
+> Suggested filename: `docs/images/user-guide/update-result.png`
+
+## 23. Automatic refresh
+
+Automatic refresh is enabled by default. The default interval is five minutes and can be changed to any whole number of minutes of at least one. Manual refresh performs one immediate snapshot refresh. Update checks use their separate 24-hour eligibility schedule and are not a substitute for snapshot refresh.
+
+## 24. Settings
+
+Docker Connector Settings provide:
+
+- **Automatic refresh** — refresh configured hosts in the background.
+- **Refresh interval** — minutes between background refreshes.
+- **Theme integration** — use Obsidian’s native theme variables.
+- **Container management** — enable or disable explicit Start, Shut down, Stop, Restart, and Update actions.
+
+Changing Container management is persisted safely and open Docker Connector views update their action controls. It does not retroactively run any Docker action.
+
+## 25. Security model and saved information
+
+Docker Connector saves connection metadata needed to reconnect, but keeps secrets out of saved settings where possible.
+
+| Information | Saved in the profile? |
+| --- | --- |
+| Friendly name, description, category, host, and port | Yes |
+| Docker Context name and safe endpoint snapshot | Yes |
+| SSH username and private-key file path | Yes |
+| SSH password | No — session-only |
+| SSH private-key passphrase | No — session-only |
+| TLS CA, client-certificate, and client-private-key paths | Yes |
+| TLS certificate/key contents | No |
+| TLS client-key passphrase | No — session-only |
+
+The plugin does not mutate Docker Contexts and does not support insecure `tcp://` Docker endpoints. Mutual TLS server verification is mandatory. Profile deletion clears runtime secrets and plugin-owned cached state but leaves external SSH and certificate files untouched.
+
+## 26. Troubleshooting
+
+### Docker CLI was not found
+
+Docker Context needs a local Docker CLI. Confirm Docker is installed with:
+
+```bash
+docker --version
+docker context ls
+```
+
+Docker Connector uses bounded PATH and standard-location discovery; it does not source `~/.zshrc`, `~/.bashrc`, or a login shell. If Terminal finds Docker but the plugin does not, restart Obsidian after installing Docker or Docker Desktop and use **Discover Contexts** again.
+
+### Docker Engine unavailable
+
+The Docker CLI being installed is not the same as Docker Engine being available. Check the engine with:
+
+```bash
+docker info
+docker ps -a
+```
+
+Docker Desktop may be stopped, a remote Context endpoint may be unreachable, or a socket may be missing. Do not change the active Docker Context merely to make Docker Connector connect.
+
+### Local Docker endpoint unavailable
+
+Check that Docker is running and that your account can access the selected endpoint. On macOS, inspect a compatibility link safely with:
+
+```bash
+ls -l /var/run/docker.sock
+```
+
+Docker Connector validates symlinks and reports missing, broken, non-socket, looped, or inaccessible endpoints. Do **not** use `chmod 666 /var/run/docker.sock` as a workaround; that weakens Docker-host security.
+
+### SSH authentication or host-key error
+
+Verify the host, port, username, password/key, passphrase, remote Docker socket path, and Docker permissions for the remote account. A password or passphrase must be re-entered after an Obsidian restart. For a host-key mismatch, independently verify the new fingerprint before trusting it.
+
+### Docker Context missing or changed
+
+The named Context may have been removed or its endpoint configuration may have changed outside Docker Connector. Rediscover contexts and edit/retest the profile. Docker Connector will not repair the Context by changing Docker CLI state for you.
+
+### Mutual TLS failure
+
+Check the selected CA, client certificate, matching client private key, optional passphrase, and Server Name. `DOCKER_TLS_HOSTNAME_MISMATCH` means the expected Server Name does not match a valid certificate identity. An IP address must appear in an IP SAN; a hostname must appear in a DNS SAN. Do not disable certificate verification to work around this error.
+
+### Client certificate rejected
+
+The Docker Engine may require a certificate signed by a different CA, a client certificate with the proper client-authentication purpose, or a matching key. Recheck the server’s mutual-TLS configuration with its administrator; Docker Connector cannot make an untrusted client certificate acceptable.
+
+### Connection stays Unknown
+
+Unknown means not yet evaluated. Use Retry or refresh the profile. A completed attempt should become Online, Offline, Degraded, or Authentication Required with a safe error. If it remains Unknown after a completed refresh, collect the diagnostics and report it as a problem.
+
+### Update check or update unavailable
+
+An image can be current, unavailable from a registry, untagged, inaccessible, Compose-managed, or unsuitable for safe standalone recreation. Check now does not override those safety restrictions. Registry authentication or pull failures must be resolved in the Docker environment; Docker Connector does not manage registry credentials.
+
+## 27. Frequently asked questions
+
+**Does Docker Connector store my SSH password?** No. SSH passwords and key passphrases are runtime-only and must be re-entered when the session needs them again.
+
+**Can I use it on mobile?** No. Docker Connector is desktop-only.
+
+**Does it change my active Docker Context?** No. It discovers and uses the selected context without running Context mutation commands.
+
+**Does it support insecure `tcp://host:2375`?** No. Plain unauthenticated Docker TCP is unsupported.
+
+**Can it manage a remote Docker host?** Yes, after you explicitly enable Container management and only through the supported connection profile and typed actions.
+
+**Can it update a Docker Compose application?** No. Applications are read-only and Compose-managed containers are blocked from the standalone Update workflow.
+
+**Does deleting a connection delete the Docker server?** No. It removes Docker Connector’s profile and cached session state only.
+
+**Does Update delete my volumes?** Docker Connector does not delete volumes. However, data stored only in a container writable layer may be lost when a container is recreated; use named volumes or bind mounts for persistent data.
+
+**Why is Update missing?** It appears only for an eligible standalone container after a newer image has been confirmed and Container management is enabled.
+
+**Can two profiles point to the same daemon?** Yes. For example, Local Docker Socket and Docker Context can intentionally reach the same local Docker Desktop daemon while remaining distinct saved profiles.
+
+**Does Docker Connector send telemetry?** No telemetry or analytics service is part of the plugin. Its network activity is limited to configured Docker/SSH/TLS/Context connections, image-registry availability checks, and Docker-daemon image pulls used for supported update checks.
+
+## 28. Known limitations
+
+- Docker Connector is desktop-only.
+- Plain insecure Docker TCP is not supported.
+- Applications is a Compose-aware read-only view; it does not deploy, edit, start, stop, or update Compose projects.
+- Standalone transactional Update is intentionally blocked for Compose-managed and otherwise unsupported containers.
+- Passwords and passphrases are session-only, so reconnecting after restarting Obsidian can require them again.
+- Some Docker Context endpoint types are blocked when they cannot be routed through an existing secure transport.
+- Docker permissions, Docker Engine availability, registry access, and remote host policy ultimately control what the plugin can inspect or change.
+
+## 29. Uninstalling Docker Connector
+
+Disable or remove Docker Connector through Obsidian’s Community Plugins settings. Removing the plugin does not delete Docker containers, images, volumes, networks, Docker Contexts, SSH keys, TLS certificates, Docker sockets, or remote server configuration. Removing saved plugin data follows Obsidian’s normal plugin-data behavior; inspect your vault before manually deleting plugin files.
+
+## 30. Glossary
+
+- **Docker Engine / daemon:** The service that manages containers, images, volumes, and networks.
+- **Docker socket:** A local Unix socket or Windows named pipe used to communicate with Docker Engine.
+- **Docker Context:** A Docker CLI connection profile describing where and how Docker is reached.
+- **SSH:** Secure Shell, a secure remote-session protocol.
+- **Private key:** A secret key file used for SSH or client-certificate authentication.
+- **Mutual TLS:** HTTPS where both the server and client prove their identities with certificates.
+- **CA:** Certificate authority; the certificate used to verify a server certificate chain.
+- **Client certificate:** A certificate presented by Docker Connector to a mutual-TLS Docker Engine.
+- **Compose project / service:** Docker Compose’s grouping and service metadata, represented by Docker labels.
+- **Container:** A running or stopped instance created from an image.
+- **Image:** A packaged filesystem and metadata used to create containers.
+- **Volume:** Docker-managed persistent storage that can outlive a container.
+- **Network:** Docker’s connectivity definition for containers.
+- **Health check:** Docker’s optional command-based health reporting for a container.
+- **Writable layer:** Data written inside a container outside mounted persistent storage.
+- **Rollback:** An attempt to restore the original container after an update transaction fails.
+
+## 31. Reporting problems and getting help
+
+When reporting a problem, include the connection method, safe error code or diagnostic stage, Docker Engine version, operating system, and the steps that reproduce the issue. Do not include passwords, passphrases, private keys, certificate contents, complete inspect output, or environment-variable values.
+
+For implementation and security details, see [[Docker Connector - Security Review]], [[Docker Connector - Testing]], [[Docker Connector - Docker Context]], and the repository README.
+
+## Screenshot production checklist
+
+| Filename | Section | Capture |
 | --- | --- | --- |
-| Local test fails | Docker is not running, the wrong socket/named pipe is selected, or the desktop user lacks permission. | Confirm Docker is running, choose the intended conventional endpoint, and have the operating-system administrator correct only the required user permission. |
-| SSH test fails before Docker checks | Wrong host, port, user, authentication data, or host-key verification issue. | Recheck the profile fields; verify a changed fingerprint independently before accepting it. |
-| SSH login succeeds but Docker access fails | The remote user cannot access Docker or its session has stale group membership. | Confirm the remote user can run `docker system dial-stdio` without `sudo`; end all sessions and reconnect after group membership changes. |
-| Mutual TLS test fails | Wrong file path, key/certificate mismatch, untrusted CA, or server-name mismatch. | Recheck each selected file and the certificate identity. Do not disable verification to make the test pass. |
-| Docker Context is unavailable or changed | Docker CLI is absent, the Context no longer exists, or its safe endpoint state changed. | Install/repair Docker CLI, restore the intended Context outside the plugin, then refresh Context metadata and test again. |
-| No applications appear | Workloads do not have Docker Compose labels. | Inspect **Containers**. Only `com.docker.compose.project` creates an Applications entry. |
-| Update is unavailable | Image is current, not safely tagged, Compose-managed, offline, unsupported, or lacks a safe recreate plan. | Read the displayed safe reason. Update the workload through its own orchestrator if it is Compose-managed. |
-| A setting says Save failed | Obsidian could not persist the requested setting. | Resolve the vault/plugin storage issue, reopen Settings, and verify the displayed authoritative status before relying on the change. |
-
-When requesting help, describe the connection method, the step that failed, the safe error code, and what you have already verified. Never attach secret material or raw diagnostic output unless you have first reviewed and redacted it.
-
-🟥 <span style="color: red;"><strong>Screenshot 13 — Troubleshooting example.</strong> Place after the troubleshooting table. Capture one fully redacted safe diagnostic result with a visible error code and recommended next step. This screenshot should teach a user where to find actionable diagnostics without disclosing any connection secret, path, host identity, certificate detail, or raw response.</span>
-
-## 9. Quick operating checklist
-
-Before relying on a Docker host:
-
-1. Confirm you are in the correct Obsidian vault and selected the intended Docker profile.
-2. Confirm the connection test succeeds and its identity details are expected.
-3. Keep Container management disabled unless you actively need a limited action.
-4. Use Overview and Containers to assess state before taking action.
-5. Treat an image update as a planned change, not routine housekeeping. Read the preview, confirm persistence, and validate the application afterward.
-6. Keep screenshots and support material free of secrets and internal infrastructure details.
-
-For implementation and security detail, see the documents in `docs/`, including Connection Architecture, Runtime Credentials, Applications View, Safe Container Updates, and Obsidian Community Plugin Compliance.
+| `first-launch-empty-state.png` | First launch | Empty Connections state and Add Docker Host action. |
+| `dashboard-overview.png` | Interface | Online Overview with header, navigation, and summary. |
+| `add-docker-host.png` | Adding a host | Complete Add Docker Host form. |
+| `local-docker-socket.png` | Local connection | Detected local endpoint and discovery status. |
+| `docker-context.png` | Docker Context | CLI detected and context selector. |
+| `ssh-password.png` | SSH | Password authentication fields. |
+| `ssh-private-key.png` | SSH | Private-key fields and host-key controls. |
+| `mutual-tls.png` | Mutual TLS | Host, Server Name, CA, client cert, and client key fields. |
+| `connection-test-success.png` | Testing | Successful transport-specific diagnostics. |
+| `connection-test-failure.png` | Testing | First failure with later stages not run. |
+| `connections-management.png` | Connections | Add, status, Edit, Reconnect/Retry, and Delete actions. |
+| `delete-connection.png` | Connections | Scope-safe delete confirmation. |
+| `current-environment.png` | Switching | Current Environment selector. |
+| `applications-list.png` | Applications | Compose project cards and filters. |
+| `application-inspector.png` | Applications | Services, containers, and images inspector. |
+| `containers-list.png` | Containers | Summary cards, filters, and container rows. |
+| `container-inspector.png` | Containers | Detail inspector sections. |
+| `images.png` | Images | Inventory and image inspector. |
+| `volumes.png` | Volumes | Inventory and volume inspector. |
+| `networks.png` | Networks | Inventory and network inspector. |
+| `update-available.png` | Update checking | Available image state and Check now. |
+| `container-management-setting.png` | Management | Opt-in Settings control. |
+| `update-preview.png` | Update | Confirmation and writable-layer warning. |
+| `update-progress.png` | Update | Transaction progress. |
+| `update-result.png` | Recovery | Update or rollback result guidance. |

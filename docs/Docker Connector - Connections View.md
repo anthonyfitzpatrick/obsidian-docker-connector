@@ -16,4 +16,4 @@ Deleting a card opens a confirmation dialog. Confirmation removes only the Docke
 
 Docker Context cards remain labelled **Docker Context** even if their discovered endpoint uses the local Unix-socket or Windows named-pipe transport. Docker Connector does not mutate the Docker CLI Context.
 
-For end-user instructions, see [[Docker Connector - User Guide]].
+For end-user instructions, see [[User Guide]].

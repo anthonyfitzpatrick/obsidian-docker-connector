@@ -5,7 +5,7 @@ tags: [docker-connector, release]
 # Release Checklist
 
 - Verify Applications groups only containers carrying `com.docker.compose.project`, excludes standalone containers, and displays update availability without an application-level action.
-- Verify the README and [[Docker Connector - User Guide]] describe only the shipped dashboard tabs and supported transports, retain the desktop-only and Docker-privilege warnings, and make no claim of automatic updates, Compose mutation, credential persistence, telemetry, or official Marketplace approval.
+- Verify the README and [[User Guide]] describe only the shipped dashboard tabs and supported transports, retain the desktop-only and Docker-privilege warnings, and make no claim of automatic updates, Compose mutation, credential persistence, telemetry, or official Marketplace approval.
 - Verify `manifest.json`, `package.json`, `package-lock.json`, and `versions.json` agree on the release version. Use a matching semantic-version GitHub tag, and attach `main.js`, `manifest.json`, and `styles.css` to the release.
 - Confirm the Community directory's plugin-ID and display-name requirements and uniqueness before submission. Resolve the repository policy for the currently tracked local `main.js` before publishing source.
 
