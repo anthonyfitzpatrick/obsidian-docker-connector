@@ -59,9 +59,9 @@ For a manual release installation, the plugin directory needs the release assets
 
 On first launch there are no saved Docker connections. Open **Connections** and choose **Add Docker Host**. After testing and saving a host, choose it as the Current Environment to populate the dashboard.
 
-> <span style="color: red;"><strong>📷 Screenshot 01 required — First launch and empty connection state</strong></span>
+> <font color="red"><strong>📷 Screenshot 01 required — First launch and empty connection state</strong></font>
 >
-> <span style="color: red;">Capture: The Connections view with no saved profiles, its explanatory empty state, and the Add Docker Host action.</span>
+> <font color="red">Capture: The Connections view with no saved profiles, its explanatory empty state, and the Add Docker Host action.</font>
 >
 > Suggested filename: `docs/images/user-guide/first-launch-empty-state.png`
 
@@ -71,9 +71,9 @@ The header identifies the Current Environment and its connection status. Use the
 
 The primary navigation contains **Overview**, **Applications**, **Containers**, **Images**, **Volumes**, **Networks**, and **Connections**. The resource tabs show data for the Current Environment; their search, filter, sort, and detail controls never mutate Docker resources.
 
-> <span style="color: red;"><strong>📷 Screenshot 02 required — Main Docker Connector dashboard</strong></span>
+> <font color="red"><strong>📷 Screenshot 02 required — Main Docker Connector dashboard</strong></font>
 >
-> <span style="color: red;">Capture: The Overview tab showing Current Environment, Online status, navigation tabs, summary cards, refresh controls, and host information.</span>
+> <font color="red">Capture: The Overview tab showing Current Environment, Online status, navigation tabs, summary cards, refresh controls, and host information.</font>
 >
 > Suggested filename: `docs/images/user-guide/dashboard-overview.png`
 
@@ -89,9 +89,9 @@ The primary navigation contains **Overview**, **Applications**, **Containers**, 
 
 Testing before saving is strongly recommended. A successful test proves the selected profile can validate its endpoint and obtain safe Docker information; saving then registers the profile for the normal dashboard refresh lifecycle.
 
-> <span style="color: red;"><strong>📷 Screenshot 03 required — Add Docker Host dialog</strong></span>
+> <font color="red"><strong>📷 Screenshot 03 required — Add Docker Host dialog</strong></font>
 >
-> <span style="color: red;">Capture: A complete Add Docker Host form with Friendly Name, Connection Type, method description panel, Test Connection, and Save Host controls visible.</span>
+> <font color="red">Capture: A complete Add Docker Host form with Friendly Name, Connection Type, method description panel, Test Connection, and Save Host controls visible.</font>
 >
 > Suggested filename: `docs/images/user-guide/add-docker-host.png`
 
@@ -105,9 +105,9 @@ On macOS, Docker Desktop commonly uses a user socket such as `~/.docker/run/dock
 
 The **Docker Endpoint** field can show the detected local Unix socket or Windows named pipe. If Docker Desktop is stopped, the endpoint is missing, the symlink is broken, or your account cannot open it, Test Connection explains that local endpoint problem.
 
-> <span style="color: red;"><strong>📷 Screenshot 04 required — Local Docker Socket configuration</strong></span>
+> <font color="red"><strong>📷 Screenshot 04 required — Local Docker Socket configuration</strong></font>
 >
-> <span style="color: red;">Capture: Local Docker Socket selected in Add Docker Host, with the detected Docker Endpoint and local discovery status visible.</span>
+> <font color="red">Capture: Local Docker Socket selected in Add Docker Host, with the detected Docker Endpoint and local discovery status visible.</font>
 >
 > Suggested filename: `docs/images/user-guide/local-docker-socket.png`
 
@@ -128,9 +128,9 @@ Docker Connector resolves a selected Context to the right physical transport eac
 
 The saved profile and connection card still say **Docker Context**, even when the underlying transport is local.
 
-> <span style="color: red;"><strong>📷 Screenshot 05 required — Docker Context discovery</strong></span>
+> <font color="red"><strong>📷 Screenshot 05 required — Docker Context discovery</strong></font>
 >
-> <span style="color: red;">Capture: Docker Context selected with Docker CLI detected, version, discovered context selector, safe endpoint summary, and supported status.</span>
+> <font color="red">Capture: Docker Context selected with Docker CLI detected, version, discovered context selector, safe endpoint summary, and supported status.</font>
 >
 > Suggested filename: `docs/images/user-guide/docker-context.png`
 
@@ -152,9 +152,9 @@ The remote account must be able to access the configured Docker socket without i
 
 With **Password** selected, enter the SSH password during connection or reconnection. Docker Connector keeps that password in memory only for the current Obsidian session. It is not stored in the saved profile, so a profile can show **Authentication Required** after Obsidian restarts. Choose **Reconnect** to provide it again.
 
-> <span style="color: red;"><strong>📷 Screenshot 06 required — SSH password authentication</strong></span>
+> <font color="red"><strong>📷 Screenshot 06 required — SSH password authentication</strong></font>
 >
-> <span style="color: red;">Capture: Remote Docker via SSH selected with Password authentication, its password field, remote socket field, and host-key fingerprint field.</span>
+> <font color="red">Capture: Remote Docker via SSH selected with Password authentication, its password field, remote socket field, and host-key fingerprint field.</font>
 >
 > Suggested filename: `docs/images/user-guide/ssh-password.png`
 
@@ -162,9 +162,9 @@ With **Password** selected, enter the SSH password during connection or reconnec
 
 With **Private Key** selected, choose a **Private Key File** and, if required, enter its **Private-Key Passphrase**. The profile can save the file path, not a copy of the key material. An encrypted key’s passphrase remains in memory only for the current session; an unencrypted key simply has no passphrase to enter.
 
-> <span style="color: red;"><strong>📷 Screenshot 07 required — SSH private-key authentication</strong></span>
+> <font color="red"><strong>📷 Screenshot 07 required — SSH private-key authentication</strong></font>
 >
-> <span style="color: red;">Capture: Remote Docker via SSH selected with Private Key authentication, file picker path, passphrase field, and host-key verification controls.</span>
+> <font color="red">Capture: Remote Docker via SSH selected with Private Key authentication, file picker path, passphrase field, and host-key verification controls.</font>
 >
 > Suggested filename: `docs/images/user-guide/ssh-private-key.png`
 
@@ -195,9 +195,9 @@ Server verification cannot be disabled. If the Server Name is an IP address, the
 
 Selected certificate and key paths may be saved as profile metadata; certificate contents and client-key passphrases are not persisted in settings.
 
-> <span style="color: red;"><strong>📷 Screenshot 08 required — Mutual TLS configuration</strong></span>
+> <font color="red"><strong>📷 Screenshot 08 required — Mutual TLS configuration</strong></font>
 >
-> <span style="color: red;">Capture: Remote Docker API (Mutual TLS) selected with Docker Host, Docker API Port, Server Name, CA Certificate, Client Certificate, Client Private Key, and Client-Key Passphrase fields.</span>
+> <font color="red">Capture: Remote Docker API (Mutual TLS) selected with Docker Host, Docker API Port, Server Name, CA Certificate, Client Certificate, Client Private Key, and Client-Key Passphrase fields.</font>
 >
 > Suggested filename: `docs/images/user-guide/mutual-tls.png`
 
@@ -207,15 +207,15 @@ Selected certificate and key paths may be saved as profile metadata; certificate
 
 A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. Stages that could not start after a failure are shown as **SKIPPED** or **NOT RUN**, rather than being presented as successful. For example, a mutual-TLS hostname mismatch stops before Docker API requests are used.
 
-> <span style="color: red;"><strong>📷 Screenshot 09 required — Successful connection diagnostics</strong></span>
+> <font color="red"><strong>📷 Screenshot 09 required — Successful connection diagnostics</strong></font>
 >
-> <span style="color: red;">Capture: A successful Test Connection result with relevant validation, ping, version, and verified security stages.</span>
+> <font color="red">Capture: A successful Test Connection result with relevant validation, ping, version, and verified security stages.</font>
 >
 > Suggested filename: `docs/images/user-guide/connection-test-success.png`
 
-> <span style="color: red;"><strong>📷 Screenshot 10 required — Failed connection diagnostics</strong></span>
+> <font color="red"><strong>📷 Screenshot 10 required — Failed connection diagnostics</strong></font>
 >
-> <span style="color: red;">Capture: A failed Test Connection showing the first failing stage, later NOT RUN/SKIPPED stages, and a safe error message.</span>
+> <font color="red">Capture: A failed Test Connection showing the first failing stage, later NOT RUN/SKIPPED stages, and a safe error message.</font>
 >
 > Suggested filename: `docs/images/user-guide/connection-test-failure.png`
 
@@ -232,9 +232,9 @@ Cards expose the applicable management actions:
 
 Status is information, not an action. The current states are **Unknown**, **Connecting**, **Online**, **Offline**, **Degraded**, and **Authentication Required**. Unknown means the profile has not yet been evaluated or is between registration and its first refresh; it should not be a permanent result after a completed connection attempt. Authentication Required normally means a required runtime-only secret needs to be supplied again.
 
-> <span style="color: red;"><strong>📷 Screenshot 11 required — Connections management page</strong></span>
+> <font color="red"><strong>📷 Screenshot 11 required — Connections management page</strong></font>
 >
-> <span style="color: red;">Capture: Docker connections with Add Docker Host, profiles in Online and Authentication Required states, and visible Edit, Reconnect/Retry, and Delete actions.</span>
+> <font color="red">Capture: Docker connections with Add Docker Host, profiles in Online and Authentication Required states, and visible Edit, Reconnect/Retry, and Delete actions.</font>
 >
 > Suggested filename: `docs/images/user-guide/connections-management.png`
 
@@ -242,9 +242,9 @@ Status is information, not an action. The current states are **Unknown**, **Conn
 
 Deleting a connection removes only Docker Connector’s saved profile, runtime credentials, cached session data, and associated transport state. It does **not** stop or remove containers; delete images, volumes, or networks; remove Docker Contexts; delete SSH keys or TLS files; change Docker sockets; or change a remote server configuration. The confirmation dialog repeats this boundary before removal.
 
-> <span style="color: red;"><strong>📷 Screenshot 12 required — Delete connection confirmation</strong></span>
+> <font color="red"><strong>📷 Screenshot 12 required — Delete connection confirmation</strong></font>
 >
-> <span style="color: red;">Capture: The Delete connection confirmation dialog showing a friendly name, connection method, explicit scope, Cancel, and destructive Delete connection action.</span>
+> <font color="red">Capture: The Delete connection confirmation dialog showing a friendly name, connection method, explicit scope, Cancel, and destructive Delete connection action.</font>
 >
 > Suggested filename: `docs/images/user-guide/delete-connection.png`
 
@@ -254,9 +254,9 @@ Use **Current Environment** to choose which saved host supplies dashboard data. 
 
 If the selected profile is deleted, Docker Connector chooses a safe remaining profile where possible, preferring an Online profile. If no profiles remain, the dashboard returns to its no-host state.
 
-> <span style="color: red;"><strong>📷 Screenshot 13 required — Current Environment switcher</strong></span>
+> <font color="red"><strong>📷 Screenshot 13 required — Current Environment switcher</strong></font>
 >
-> <span style="color: red;">Capture: The Current Environment selector with multiple saved profiles and a visible active environment.</span>
+> <font color="red">Capture: The Current Environment selector with multiple saved profiles and a visible active environment.</font>
 >
 > Suggested filename: `docs/images/user-guide/current-environment.png`
 
@@ -276,15 +276,15 @@ For example, a project named `juliarosedelane` can contain services `ghost` and 
 
 Applications is read-only at the project level. Docker Connector does not run `docker compose up` or `docker compose down`, edit Compose files, or update a whole Compose application. A Compose-managed container can report that a newer image is available but remains blocked from the standalone Update workflow.
 
-> <span style="color: red;"><strong>📷 Screenshot 14 required — Applications list</strong></span>
+> <font color="red"><strong>📷 Screenshot 14 required — Applications list</strong></font>
 >
-> <span style="color: red;">Capture: Compose application cards with search/filter controls, service chips, status, resource counts, and update availability.</span>
+> <font color="red">Capture: Compose application cards with search/filter controls, service chips, status, resource counts, and update availability.</font>
 >
 > Suggested filename: `docs/images/user-guide/applications-list.png`
 
-> <span style="color: red;"><strong>📷 Screenshot 15 required — Application inspector</strong></span>
+> <font color="red"><strong>📷 Screenshot 15 required — Application inspector</strong></font>
 >
-> <span style="color: red;">Capture: An opened application inspector with Services, Containers, and Images sections.</span>
+> <font color="red">Capture: An opened application inspector with Services, Containers, and Images sections.</font>
 >
 > Suggested filename: `docs/images/user-guide/application-inspector.png`
 
@@ -294,9 +294,9 @@ The **Containers** tab is the main container inventory. It has summary cards for
 
 Use the toolbar to search by container information and filter by State, Health, and Network. Sort and density controls make it practical to work with larger inventories. Each row identifies the container, image, short ID, state, health, and relevant update state. Copy controls copy a full ID without changing the Docker host.
 
-> <span style="color: red;"><strong>📷 Screenshot 16 required — Containers list and filters</strong></span>
+> <font color="red"><strong>📷 Screenshot 16 required — Containers list and filters</strong></font>
 >
-> <span style="color: red;">Capture: Container summary cards, search, State/Health/Network filters, sorting/density controls, and rows with state and health information.</span>
+> <font color="red">Capture: Container summary cards, search, State/Health/Network filters, sorting/density controls, and rows with state and health information.</font>
 >
 > Suggested filename: `docs/images/user-guide/containers-list.png`
 
@@ -310,9 +310,9 @@ Select a container to open its read-only inspector. The inspector provides **Act
 
 The inspector lets you refresh details and copy the full container ID. It does not provide an interactive shell, file browser, log terminal, or arbitrary Docker API console.
 
-> <span style="color: red;"><strong>📷 Screenshot 17 required — Container detail inspector</strong></span>
+> <font color="red"><strong>📷 Screenshot 17 required — Container detail inspector</strong></font>
 >
-> <span style="color: red;">Capture: A selected container with Actions and expanded Overview, State, Configuration, Networking, and Storage sections.</span>
+> <font color="red">Capture: A selected container with Actions and expanded Overview, State, Configuration, Networking, and Storage sections.</font>
 >
 > Suggested filename: `docs/images/user-guide/container-inspector.png`
 
@@ -322,9 +322,9 @@ The **Images** tab is a read-only image inventory. Summary cards cover Images, I
 
 Select an image for an inspector with overview data, repository tags and digests, safe labels, and visible container references. Docker Connector does not delete images or expose arbitrary pull controls from this view.
 
-> <span style="color: red;"><strong>📷 Screenshot 18 required — Images inventory</strong></span>
+> <font color="red"><strong>📷 Screenshot 18 required — Images inventory</strong></font>
 >
-> <span style="color: red;">Capture: Image summary cards, search and filters, list rows, and an opened image inspector.</span>
+> <font color="red">Capture: Image summary cards, search and filters, list rows, and an opened image inspector.</font>
 >
 > Suggested filename: `docs/images/user-guide/images.png`
 
@@ -334,9 +334,9 @@ The **Volumes** tab lists Docker named volumes and their driver, scope, mountpoi
 
 The volume inspector shows overview information, options, safe labels, and containers using the volume where Docker makes that relationship visible. Docker Connector does not delete volumes.
 
-> <span style="color: red;"><strong>📷 Screenshot 19 required — Volumes inventory</strong></span>
+> <font color="red"><strong>📷 Screenshot 19 required — Volumes inventory</strong></font>
 >
-> <span style="color: red;">Capture: Volume summary cards, filters, rows marked In Use or Unused, and a volume detail panel.</span>
+> <font color="red">Capture: Volume summary cards, filters, rows marked In Use or Unused, and a volume detail panel.</font>
 >
 > Suggested filename: `docs/images/user-guide/volumes.png`
 
@@ -346,9 +346,9 @@ The **Networks** tab lists Docker network definitions. It distinguishes built-in
 
 Selecting a network shows driver, scope, internal and attachable settings, IPv6 status, gateways, and attached containers. When a subnet is available it is shown in the list. Docker Connector does not create, change, or delete networks.
 
-> <span style="color: red;"><strong>📷 Screenshot 20 required — Networks inventory</strong></span>
+> <font color="red"><strong>📷 Screenshot 20 required — Networks inventory</strong></font>
 >
-> <span style="color: red;">Capture: Network summary cards, filters, list rows, and a selected network with attached-container details.</span>
+> <font color="red">Capture: Network summary cards, filters, list rows, and a selected network with attached-container details.</font>
 >
 > Suggested filename: `docs/images/user-guide/networks.png`
 
@@ -363,9 +363,9 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 > [!note] Availability is not eligibility
 > **Update available** means a newer image is available. **Update eligibility** means Docker Connector can safely use its standalone update transaction. Compose-managed containers can have an available image but remain ineligible for the standalone Update action.
 
-> <span style="color: red;"><strong>📷 Screenshot 21 required — Image update availability</strong></span>
+> <font color="red"><strong>📷 Screenshot 21 required — Image update availability</strong></font>
 >
-> <span style="color: red;">Capture: A container inspector’s Image update section showing Check now, Update available, comparison information, and the eligibility note.</span>
+> <font color="red">Capture: A container inspector’s Image update section showing Check now, Update available, comparison information, and the eligibility note.</font>
 >
 > Suggested filename: `docs/images/user-guide/update-available.png`
 
@@ -375,9 +375,9 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
-> <span style="color: red;"><strong>📷 Screenshot 22 required — Container management setting</strong></span>
+> <font color="red"><strong>📷 Screenshot 22 required — Container management setting</strong></font>
 >
-> <span style="color: red;">Capture: Docker Connector Settings with the Container management toggle, its privileged-access description, and status feedback.</span>
+> <font color="red">Capture: Docker Connector Settings with the Container management toggle, its privileged-access description, and status feedback.</font>
 >
 > Suggested filename: `docs/images/user-guide/container-management-setting.png`
 
@@ -402,15 +402,15 @@ The transaction is designed for standalone containers. It inspects the original 
 
 Docker Connector attempts to preserve the supported Docker configuration needed to recreate an eligible standalone container, including its relevant mounts, ports, restart configuration, and network attachments. No update workflow can make writable-layer-only data persistent.
 
-> <span style="color: red;"><strong>📷 Screenshot 23 required — Update preview</strong></span>
+> <font color="red"><strong>📷 Screenshot 23 required — Update preview</strong></font>
 >
-> <span style="color: red;">Capture: The standalone container update confirmation preview with container/image details, preservation summary, writable-layer warning, Cancel, and Proceed with update.</span>
+> <font color="red">Capture: The standalone container update confirmation preview with container/image details, preservation summary, writable-layer warning, Cancel, and Proceed with update.</font>
 >
 > Suggested filename: `docs/images/user-guide/update-preview.png`
 
-> <span style="color: red;"><strong>📷 Screenshot 24 required — Update progress</strong></span>
+> <font color="red"><strong>📷 Screenshot 24 required — Update progress</strong></font>
 >
-> <span style="color: red;">Capture: An in-progress update transaction showing its real current stage and non-interactive progress state.</span>
+> <font color="red">Capture: An in-progress update transaction showing its real current stage and non-interactive progress state.</font>
 >
 > Suggested filename: `docs/images/user-guide/update-progress.png`
 
@@ -423,9 +423,9 @@ Rollback is a recovery attempt, not an absolute guarantee against every host, st
 > [!warning] Writable-layer data
 > Data kept only in a container’s writable layer is not equivalent to a named volume or bind mount. Recreating a container can lose writable-layer-only changes. Persist important data with Docker volumes or bind mounts before updating.
 
-> <span style="color: red;"><strong>📷 Screenshot 25 required — Update result and recovery guidance</strong></span>
+> <font color="red"><strong>📷 Screenshot 25 required — Update result and recovery guidance</strong></font>
 >
-> <span style="color: red;">Capture: A completed update result, including either success or a rollback/backup-retained result with safe next-step guidance.</span>
+> <font color="red">Capture: A completed update result, including either success or a rollback/backup-retained result with safe next-step guidance.</font>
 >
 > Suggested filename: `docs/images/user-guide/update-result.png`
 
