@@ -15,31 +15,31 @@ Docker Connector is a desktop-only Docker dashboard inside Obsidian. It lets you
 
 ## Screenshot placement map
 
-<span style="color: red;"><strong>Screenshot 1 — Insert after “1. Before you begin”.</strong> Show installation and desktop requirements.</span>
+🟥 <span style="color: red;"><strong>Screenshot 1 — Insert after “1. Before you begin”.</strong> Show installation and desktop requirements.</span>
 
-<span style="color: red;"><strong>Screenshot 2 — Insert after “2. Open Docker Connector”.</strong> Show the Command palette command or ribbon entry point.</span>
+🟥 <span style="color: red;"><strong>Screenshot 2 — Insert after “2. Open Docker Connector”.</strong> Show the Command palette command or ribbon entry point.</span>
 
-<span style="color: red;"><strong>Screenshot 3 — Insert after “3. Configure plugin settings”.</strong> Show Automatic refresh, Refresh interval, Theme integration, and Container management.</span>
+🟥 <span style="color: red;"><strong>Screenshot 3 — Insert after “3. Configure plugin settings”.</strong> Show Automatic refresh, Refresh interval, Theme integration, and Container management.</span>
 
-<span style="color: red;"><strong>Screenshot 4 — Insert immediately after Screenshot 3.</strong> Show the Container-management confirmation dialog.</span>
+🟥 <span style="color: red;"><strong>Screenshot 4 — Insert immediately after Screenshot 3.</strong> Show the Container-management confirmation dialog.</span>
 
-<span style="color: red;"><strong>Screenshot 5 — Insert after the general workflow in “4. Add, test, and save a connection”.</strong> Show the Connections tab and Add Docker host entry point.</span>
+🟥 <span style="color: red;"><strong>Screenshot 5 — Insert after the general workflow in “4. Add, test, and save a connection”.</strong> Show the Connections tab and Add Docker host entry point.</span>
 
-<span style="color: red;"><strong>Screenshot 6 — Insert after the four connection-method subsections in Section 4.</strong> Show the connection-method form; use 6a–6d if separate method forms are needed.</span>
+🟥 <span style="color: red;"><strong>Screenshot 6 — Insert after the four connection-method subsections in Section 4.</strong> Show the connection-method form; use 6a–6d if separate method forms are needed.</span>
 
-<span style="color: red;"><strong>Screenshot 7 — Insert immediately after Screenshot 6.</strong> Show a successful Test connection and, optionally, a redacted safe diagnostic error state.</span>
+🟥 <span style="color: red;"><strong>Screenshot 7 — Insert immediately after Screenshot 6.</strong> Show a successful Test connection and, optionally, a redacted safe diagnostic error state.</span>
 
-<span style="color: red;"><strong>Screenshot 8 — Insert after the Overview subsection in “5. Navigate and interpret the dashboard”.</strong> Show the selected-host overview dashboard.</span>
+🟥 <span style="color: red;"><strong>Screenshot 8 — Insert after the Overview subsection in “5. Navigate and interpret the dashboard”.</strong> Show the selected-host overview dashboard.</span>
 
-<span style="color: red;"><strong>Screenshot 9 — Insert after the Containers subsection in Section 5.</strong> Show Applications and Containers together as panels 9a and 9b.</span>
+🟥 <span style="color: red;"><strong>Screenshot 9 — Insert after the Containers subsection in Section 5.</strong> Show Applications and Containers together as panels 9a and 9b.</span>
 
-<span style="color: red;"><strong>Screenshot 10 — Insert after the Images, Volumes, and Networks subsection in Section 5.</strong> Show the three read-only inventory views.</span>
+🟥 <span style="color: red;"><strong>Screenshot 10 — Insert after the Images, Volumes, and Networks subsection in Section 5.</strong> Show the three read-only inventory views.</span>
 
-<span style="color: red;"><strong>Screenshot 11 — Insert after the lifecycle-actions subsection in “6. Use optional container management safely”.</strong> Show lifecycle controls and safe failure handling.</span>
+🟥 <span style="color: red;"><strong>Screenshot 11 — Insert after the lifecycle-actions subsection in “6. Use optional container management safely”.</strong> Show lifecycle controls and safe failure handling.</span>
 
-<span style="color: red;"><strong>Screenshot 12 — Insert at the end of Section 6.</strong> Show the image-check result and safe standalone-update confirmation as 12a and 12b.</span>
+🟥 <span style="color: red;"><strong>Screenshot 12 — Insert at the end of Section 6.</strong> Show the image-check result and safe standalone-update confirmation as 12a and 12b.</span>
 
-<span style="color: red;"><strong>Screenshot 13 — Insert after the troubleshooting table in “8. Troubleshooting”.</strong> Show a fully redacted safe diagnostic example.</span>
+🟥 <span style="color: red;"><strong>Screenshot 13 — Insert after the troubleshooting table in “8. Troubleshooting”.</strong> Show a fully redacted safe diagnostic example.</span>
 
 ## 1. Before you begin
 
@@ -56,7 +56,7 @@ Before creating a profile, decide which connection method matches the Docker hos
 
 Do not put passwords, private keys, certificate contents, registry tokens, or Docker environment values in the profile name, description, screenshot, or an Obsidian note.
 
-<span style="color: red;"><strong>Screenshot 1 — Installation and requirements.</strong> Place this immediately after this section. Capture Obsidian Desktop with Docker Connector enabled in Community plugins, plus a cropped view of the plugin’s desktop-only notice or requirements. Do not include other vault names, installed-plugin lists, or personal paths. The screenshot should establish where the plugin is enabled and that this guide applies to desktop Obsidian.</span>
+🟥 <span style="color: red;"><strong>Screenshot 1 — Installation and requirements.</strong> Place this immediately after this section. Capture Obsidian Desktop with Docker Connector enabled in Community plugins, plus a cropped view of the plugin’s desktop-only notice or requirements. Do not include other vault names, installed-plugin lists, or personal paths. The screenshot should establish where the plugin is enabled and that this guide applies to desktop Obsidian.</span>
 
 ## 2. Open Docker Connector
 
@@ -69,7 +69,7 @@ The dashboard opens as an Obsidian view. Use **Docker Connector: Refresh all Doc
 
 If this is your first use, open **Connections** first. An empty dashboard is expected until at least one profile is saved and successfully connected.
 
-<span style="color: red;"><strong>Screenshot 2 — Opening the dashboard.</strong> Place this after the preceding numbered steps. Capture the Command palette with “Docker Connector: Open dashboard” highlighted, or the ribbon icon with a visible tooltip. Use a clean demonstration vault. The image must make it obvious how a user discovers the dashboard command.</span>
+🟥 <span style="color: red;"><strong>Screenshot 2 — Opening the dashboard.</strong> Place this after the preceding numbered steps. Capture the Command palette with “Docker Connector: Open dashboard” highlighted, or the ribbon icon with a visible tooltip. Use a clean demonstration vault. The image must make it obvious how a user discovers the dashboard command.</span>
 
 ## 3. Configure plugin settings
 
@@ -111,9 +111,9 @@ Open **Settings → Docker Connector** in Obsidian. These settings apply to the 
 5. If the status says **Save failed**, the old setting remains authoritative. Correct the storage problem and try again; do not assume the toggle was saved.
 6. Turning the setting on does not itself perform a Docker action. Turning it off immediately prevents the plugin from authorizing new container actions.
 
-<span style="color: red;"><strong>Screenshot 3 — Docker Connector settings.</strong> Place this at the end of the settings section. Capture all four settings in one view: Automatic refresh, Refresh interval, Theme integration, and Container management with its authoritative status text. Use a safe sample value for the interval. If management is shown enabled, include no host details and annotate that this is an intentional opt-in.</span>
+🟥 <span style="color: red;"><strong>Screenshot 3 — Docker Connector settings.</strong> Place this at the end of the settings section. Capture all four settings in one view: Automatic refresh, Refresh interval, Theme integration, and Container management with its authoritative status text. Use a safe sample value for the interval. If management is shown enabled, include no host details and annotate that this is an intentional opt-in.</span>
 
-<span style="color: red;"><strong>Screenshot 4 — Container-management confirmation.</strong> Place directly after Screenshot 3. Capture the confirmation dialog that appears when enabling Container management. The dialog must be legible enough to show the privileged-access warning and the available confirm/cancel choice. Use a non-production demonstration environment.</span>
+🟥 <span style="color: red;"><strong>Screenshot 4 — Container-management confirmation.</strong> Place directly after Screenshot 3. Capture the confirmation dialog that appears when enabling Container management. The dialog must be legible enough to show the privileged-access warning and the available confirm/cancel choice. Use a non-production demonstration environment.</span>
 
 ## 4. Add, test, and save a connection
 
@@ -129,7 +129,7 @@ For every method, use this sequence:
 6. Save the profile only after the test succeeds or after you deliberately choose to save an offline configuration for later correction.
 7. Confirm the profile is enabled if you want it included in background refreshes. Disabled profiles remain saved but are not normally refreshed.
 
-<span style="color: red;"><strong>Screenshot 5 — Connections tab and add-profile entry point.</strong> Place after the general connection workflow. Capture the Connections tab with one or two clearly fictional profiles and the Add Docker host control. Show the profile cards, connection type, enabled state, and available actions, but redact endpoint addresses, account names, certificate file paths, and any real host identity.</span>
+🟥 <span style="color: red;"><strong>Screenshot 5 — Connections tab and add-profile entry point.</strong> Place after the general connection workflow. Capture the Connections tab with one or two clearly fictional profiles and the Add Docker host control. Show the profile cards, connection type, enabled state, and available actions, but redact endpoint addresses, account names, certificate file paths, and any real host identity.</span>
 
 ### 4.1 Local Docker connection
 
@@ -180,9 +180,9 @@ Use mutual TLS only for an intentionally secured Docker API endpoint.
 
 Docker Connector always verifies the server certificate and always uses mutual TLS for this method. It does not support plain Docker TCP, an invalid certificate, a missing CA trust chain, or a “skip verification” option.
 
-<span style="color: red;"><strong>Screenshot 6 — Connection-method form.</strong> Place after the four connection-method subsections. Capture a sanitized edit form with the connection-method selector visible. If the layout requires separate captures, use four sub-images labelled 6a Local Docker, 6b Docker Context, 6c SSH Docker, and 6d Mutual TLS. Show field labels and the Test connection control; replace every sensitive value with obvious fictional data and blur file-system paths if they reveal a user name.</span>
+🟥 <span style="color: red;"><strong>Screenshot 6 — Connection-method form.</strong> Place after the four connection-method subsections. Capture a sanitized edit form with the connection-method selector visible. If the layout requires separate captures, use four sub-images labelled 6a Local Docker, 6b Docker Context, 6c SSH Docker, and 6d Mutual TLS. Show field labels and the Test connection control; replace every sensitive value with obvious fictional data and blur file-system paths if they reveal a user name.</span>
 
-<span style="color: red;"><strong>Screenshot 7 — Successful test connection and safe diagnostics.</strong> Place immediately after Screenshot 6. Capture a successful Test connection result showing its ordered validation steps. A second cropped example may show a safe, non-secret error state and Retry/diagnostics behaviour. Do not show raw errors, terminal output, certificate contents, passwords, or host fingerprints from a real environment.</span>
+🟥 <span style="color: red;"><strong>Screenshot 7 — Successful test connection and safe diagnostics.</strong> Place immediately after Screenshot 6. Capture a successful Test connection result showing its ordered validation steps. A second cropped example may show a safe, non-secret error state and Retry/diagnostics behaviour. Do not show raw errors, terminal output, certificate contents, passwords, or host fingerprints from a real environment.</span>
 
 ## 5. Navigate and interpret the dashboard
 
@@ -229,11 +229,11 @@ These tabs are read-only inventories. Use them to understand what the selected D
 3. Select **Networks** to inspect Docker network inventory and details without joining, leaving, creating, or removing a network.
 4. Return to **Containers** when you need to investigate a resource’s workload use or perform an explicitly enabled container action.
 
-<span style="color: red;"><strong>Screenshot 8 — Dashboard Overview.</strong> Place after the Overview subsection. Capture a sanitized selected-host dashboard with the host selector, top-level navigation, metric cards, and at least one attention item. Use fictional container/project names and do not reveal IP addresses, internal DNS names, uptime patterns, or production capacity data.</span>
+🟥 <span style="color: red;"><strong>Screenshot 8 — Dashboard Overview.</strong> Place after the Overview subsection. Capture a sanitized selected-host dashboard with the host selector, top-level navigation, metric cards, and at least one attention item. Use fictional container/project names and do not reveal IP addresses, internal DNS names, uptime patterns, or production capacity data.</span>
 
-<span style="color: red;"><strong>Screenshot 9 — Applications and Containers workflow.</strong> Place after the Containers subsection. Use a two-part image or two consecutively numbered panels: 9a shows the Applications list and safe application inspector; 9b shows the Containers list, selected container inspector, and the Image update status area. Clearly demonstrate that standalone containers are found in Containers and that Compose-labelled applications are read-only.</span>
+🟥 <span style="color: red;"><strong>Screenshot 9 — Applications and Containers workflow.</strong> Place after the Containers subsection. Use a two-part image or two consecutively numbered panels: 9a shows the Applications list and safe application inspector; 9b shows the Containers list, selected container inspector, and the Image update status area. Clearly demonstrate that standalone containers are found in Containers and that Compose-labelled applications are read-only.</span>
 
-<span style="color: red;"><strong>Screenshot 10 — Read-only resource inventories.</strong> Place after the Images, Volumes, and Networks subsection. Use three small labelled panels for Images, Volumes, and Networks. Each must show a list and a safe detail panel, making clear that these screens are inspection-only. Use fictitious resource names.</span>
+🟥 <span style="color: red;"><strong>Screenshot 10 — Read-only resource inventories.</strong> Place after the Images, Volumes, and Networks subsection. Use three small labelled panels for Images, Volumes, and Networks. Each must show a list and a safe detail panel, making clear that these screens are inspection-only. Use fictitious resource names.</span>
 
 ## 6. Use optional container management safely
 
@@ -276,9 +276,9 @@ Eligible online standalone containers may also be checked after a snapshot refre
 
 Docker Connector never bulk-updates containers, updates Compose-managed containers, deletes volumes, or runs unattended automatic updates.
 
-<span style="color: red;"><strong>Screenshot 11 — Lifecycle actions and failure handling.</strong> Place after the Start/Shut down/Stop/Restart subsection. Capture an eligible sample container detail inspector with the management controls and an action-progress area. Include a separate non-secret failure-state crop if possible, showing the safe explanation, error code, Retry, and diagnostics. Do not show a destructive action being executed against a production workload.</span>
+🟥 <span style="color: red;"><strong>Screenshot 11 — Lifecycle actions and failure handling.</strong> Place after the Start/Shut down/Stop/Restart subsection. Capture an eligible sample container detail inspector with the management controls and an action-progress area. Include a separate non-secret failure-state crop if possible, showing the safe explanation, error code, Retry, and diagnostics. Do not show a destructive action being executed against a production workload.</span>
 
-<span style="color: red;"><strong>Screenshot 12 — Image check and safe update confirmation.</strong> Place at the end of this section. Capture the Image update section in two states: 12a “Available” after Check now, and 12b the pre-update preview/confirmation for an eligible standalone sample container. Make the eligibility conditions and warning visible. Do not capture or imply an Update action for a Compose-managed container.</span>
+🟥 <span style="color: red;"><strong>Screenshot 12 — Image check and safe update confirmation.</strong> Place at the end of this section. Capture the Image update section in two states: 12a “Available” after Check now, and 12b the pre-update preview/confirmation for an eligible standalone sample container. Make the eligibility conditions and warning visible. Do not capture or imply an Update action for a Compose-managed container.</span>
 
 ## 7. What Docker Connector stores and protects
 
@@ -311,7 +311,7 @@ Passwords and passphrases are retained only in memory for the current Obsidian s
 
 When requesting help, describe the connection method, the step that failed, the safe error code, and what you have already verified. Never attach secret material or raw diagnostic output unless you have first reviewed and redacted it.
 
-<span style="color: red;"><strong>Screenshot 13 — Troubleshooting example.</strong> Place after the troubleshooting table. Capture one fully redacted safe diagnostic result with a visible error code and recommended next step. This screenshot should teach a user where to find actionable diagnostics without disclosing any connection secret, path, host identity, certificate detail, or raw response.</span>
+🟥 <span style="color: red;"><strong>Screenshot 13 — Troubleshooting example.</strong> Place after the troubleshooting table. Capture one fully redacted safe diagnostic result with a visible error code and recommended next step. This screenshot should teach a user where to find actionable diagnostics without disclosing any connection secret, path, host identity, certificate detail, or raw response.</span>
 
 ## 9. Quick operating checklist
 
