@@ -15,6 +15,8 @@ export interface ContainerUpdateProgressEvent { attemptId: string; profileId: st
 /** Bounded unload result; a timeout is reported honestly rather than claiming rollback completed. */
 export interface UpdateUnloadRecoveryResult { status: "no-active-updates" | "recovered" | "timed-out"; startedAt: string; finishedAt: string; durationMs: number; transactionResults: Array<{ profileId: string; containerId: string; status: string; errorCode?: string; safeRecoveryInstructions?: string }>; }
 export const DEFAULT_UPDATE_UNLOAD_RECOVERY_TIMEOUT_MS = 15_000;
+export const DEFAULT_UPDATE_HEALTH_VERIFICATION_TIMEOUT_MS = 30_000;
+export const DEFAULT_UPDATE_HEALTH_VERIFICATION_INTERVAL_MS = 1_000;
 /**
  * Result of a guarded update transaction. Success becomes authoritative only
  * after the replacement starts and verifies; failures retain or restore the
@@ -38,7 +40,7 @@ export class DockerContainerActionService {
   private readonly drainWaiters = new Set<() => void>();
   private readonly updateProgressListeners = new Set<(event: ContainerUpdateProgressEvent) => void>();
   private acceptingActions = true;
-  constructor(private readonly connections: DockerConnectionFactory, private readonly managementEnabled: () => boolean) {}
+  constructor(private readonly connections: DockerConnectionFactory, private readonly managementEnabled: () => boolean, private readonly now: () => number = Date.now, private readonly wait: (milliseconds: number) => Promise<void> = delay) {}
   state(profileId: string, containerId: string): ContainerActionProgress | undefined { return this.progress.get(key(profileId, containerId)); }
   onUpdateProgress(listener: (event: ContainerUpdateProgressEvent) => void): () => void { this.updateProgressListeners.add(listener); return () => this.updateProgressListeners.delete(listener); }
   async preflight(profile: DockerConnectionProfile, containerId: string): Promise<ContainerUpdatePreview> { this.guard(profile, containerId); const api = new DockerApiClient(this.connections.create(profile)); const raw = await api.get<unknown>(`/containers/${containerId}/json`); return containerUpdatePreview(raw, validateContainerRecreatePlan(buildContainerRecreatePlan(raw))); }
@@ -78,7 +80,7 @@ export class DockerContainerActionService {
       for (const network of plan.networks.slice(1)) { this.checkCancelled(controller); this.emit(attemptId, profile.id, containerId, "connecting-networks", "running", "Restoring network connections"); await this.mutate(transport, "POST", `/networks/${encodeURIComponent(network.id)}/connect`, JSON.stringify({ Container: replacementId, EndpointConfig: network.aliases.length ? { Aliases: network.aliases } : undefined }), "empty"); this.emit(attemptId, profile.id, containerId, "connecting-networks", "complete"); }
       if (plan.wasRunning) { this.emit(attemptId, profile.id, containerId, "starting-replacement", "running", "Starting replacement container"); await this.mutate(transport, "POST", `/containers/${replacementId}/start`, undefined, "empty"); mutation.replacementStarted = true; this.emit(attemptId, profile.id, containerId, "starting-replacement", "complete"); }
       this.checkCancelled(controller);
-      this.emit(attemptId, profile.id, containerId, "verifying", "running", "Verifying replacement container"); const replacement = await api.get<{ State?: { Running?: boolean; Health?: { Status?: string } } }>(`/containers/${replacementId}/json`); if (plan.wasRunning && !replacement.State?.Running) throw new DockerConnectionError("CONTAINER_UPDATE_VERIFY_FAILED", "The replacement container did not reach its expected running state."); if (plan.healthcheck && replacement.State?.Health?.Status === "unhealthy") throw new DockerConnectionError("CONTAINER_UPDATE_HEALTH_TIMEOUT", "The replacement container reported an unhealthy state."); mutation.replacementVerified = true; this.emit(attemptId, profile.id, containerId, "verifying", "complete");
+      this.emit(attemptId, profile.id, containerId, "verifying", "running", "Verifying replacement container"); await this.verifyReplacement(api, replacementId, plan, controller); mutation.replacementVerified = true; this.emit(attemptId, profile.id, containerId, "verifying", "complete");
       try { this.emit(attemptId, profile.id, containerId, "removing-backup", "running", "Removing rollback backup"); await this.mutate(transport, "DELETE", `/containers/${containerId}?v=false&force=false`, undefined, "empty"); mutation.backupRemoved = true; this.emit(attemptId, profile.id, containerId, "removing-backup", "complete"); } catch { this.progress.set(key(profile.id, containerId), { action: "update", state: "succeeded" }); this.emit(attemptId, profile.id, containerId, "completed", "warning", "Replacement is running; rollback backup was retained."); return { status: "updated-with-backup-retained", oldContainerId: containerId, newContainerId: replacementId, backupContainerName: backupName, oldImageId: plan.originalImageId, newImageId }; }
       this.progress.set(key(profile.id, containerId), { action: "update", state: "succeeded" }); this.emit(attemptId, profile.id, containerId, "completed", "complete", "Update complete"); return { status: "updated", oldContainerId: containerId, newContainerId: replacementId, oldImageId: plan.originalImageId, newImageId };
     } catch (error) {
@@ -97,6 +99,21 @@ export class DockerContainerActionService {
     this.progress.set(key(profile.id, containerId), { action, state });
     try { await this.connections.create(profile).request<void>({ method: "POST", path, responseType: "empty" }); this.progress.set(key(profile.id, containerId), { action, state: "succeeded" }); }
     catch (error) { const typed = actionFailure(action, error); this.progress.set(key(profile.id, containerId), { action, state: "failed", errorCode: typed.code, safeMessage: typed.message, failure: { action, errorCode: typed.code, safeMessage: typed.message, safeDetails: { httpStatus: typed.httpStatus, dockerMessage: typed.details } } }); throw typed; }
+  }
+  private async verifyReplacement(api: DockerApiClient, replacementId: string, plan: ContainerRecreatePlan, controller: AbortController): Promise<void> {
+    const started = this.now();
+    while (true) {
+      this.checkCancelled(controller);
+      const replacement = await api.get<{ State?: { Running?: boolean; Health?: { Status?: string } } }>(`/containers/${replacementId}/json`);
+      if (plan.wasRunning && !replacement.State?.Running) throw new DockerConnectionError("CONTAINER_UPDATE_VERIFY_FAILED", "The replacement container did not reach its expected running state.");
+      const health = replacement.State?.Health?.Status;
+      if (!plan.healthcheck || health !== "starting") {
+        if (plan.healthcheck && health === "unhealthy") throw new DockerConnectionError("CONTAINER_UPDATE_HEALTH_TIMEOUT", "The replacement container reported an unhealthy state.");
+        return;
+      }
+      if (this.now() - started >= DEFAULT_UPDATE_HEALTH_VERIFICATION_TIMEOUT_MS) throw new DockerConnectionError("CONTAINER_UPDATE_HEALTH_TIMEOUT", "The replacement container did not become healthy before verification timed out.");
+      await this.wait(DEFAULT_UPDATE_HEALTH_VERIFICATION_INTERVAL_MS);
+    }
   }
   private guard(_profile: DockerConnectionProfile, containerId: string): void { if (!this.acceptingActions) throw new DockerConnectionError("PLUGIN_UNLOADING", "Docker Connector is unloading and cannot start a new container action."); if (!this.managementEnabled()) throw new DockerConnectionError("CONTAINER_ACTIONS_DISABLED", "Container management is disabled. Enable it in Docker Connector settings before changing containers."); if (!CONTAINER_ID.test(containerId)) throw new DockerConnectionError("CONTAINER_NOT_FOUND", "The selected container identity is invalid."); if (this.isActive(_profile.id, containerId)) throw new DockerConnectionError("CONTAINER_ACTION_ALREADY_RUNNING", "Another action is already running for this container."); }
   private waitForDrain(): Promise<void> { if (!this.activeUpdates.size) return Promise.resolve(); return new Promise((resolve) => this.drainWaiters.add(resolve)); }
@@ -120,3 +137,4 @@ function repository(reference: string): string { return reference.slice(0, refer
 function tag(reference: string): string { return reference.slice(reference.lastIndexOf(":") + 1); }
 function parseKey(value: string): { profileId: string; containerId: string } { const point = value.lastIndexOf(":"); return { profileId: value.slice(0, point), containerId: value.slice(point + 1) }; }
 function recovery(status: UpdateUnloadRecoveryResult["status"], startedAt: string, started: number, transactionResults: UpdateUnloadRecoveryResult["transactionResults"]): UpdateUnloadRecoveryResult { const finishedAt = new Date().toISOString(); return { status, startedAt, finishedAt, durationMs: Date.now() - started, transactionResults }; }
+function delay(milliseconds: number): Promise<void> { return new Promise((resolve) => setTimeout(resolve, milliseconds)); }

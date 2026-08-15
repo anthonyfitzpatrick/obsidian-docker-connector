@@ -25,9 +25,14 @@ export function buildContainerRecreatePlan(raw: unknown): ContainerRecreatePlan 
   const reference = eligibility.imageReference!;
   const unsupportedFields = [host.AutoRemove ? "HostConfig.AutoRemove" : "", text(host.NetworkMode)?.startsWith("container:") ? "HostConfig.NetworkMode" : "", strings(host.VolumesFrom).length ? "HostConfig.VolumesFrom" : "", strings(host.Links).length ? "HostConfig.Links" : "", ...mountKinds(item.Mounts)].filter(Boolean);
   if (unsupportedFields.length) throw unsupported(unsupportedFields.join(", "));
-  const payload: RecordValue = { Image: reference, Hostname: config.Hostname, Domainname: config.Domainname, User: config.User, Tty: config.Tty, OpenStdin: config.OpenStdin, StdinOnce: config.StdinOnce, Env: config.Env, Cmd: config.Cmd, Entrypoint: config.Entrypoint, WorkingDir: config.WorkingDir, Labels: config.Labels, ExposedPorts: config.ExposedPorts, Healthcheck: config.Healthcheck, StopSignal: config.StopSignal, StopTimeout: config.StopTimeout, HostConfig: pickHostConfig(host) };
+  const mappedNetworks = Object.entries(networks).map(([name, value]) => { const network = object(value); return { id: text(network.NetworkID) ?? name, name, aliases: strings(network.Aliases) }; });
+  // Docker creates a container attached to one network. Explicitly retain the
+  // captured first attachment here, then the transaction reconnects each
+  // remaining attachment by its stable Docker network ID.
+  const primaryNetwork = mappedNetworks[0];
+  const payload: RecordValue = { Image: reference, Hostname: config.Hostname, Domainname: config.Domainname, User: config.User, Tty: config.Tty, OpenStdin: config.OpenStdin, StdinOnce: config.StdinOnce, Env: config.Env, Cmd: config.Cmd, Entrypoint: config.Entrypoint, WorkingDir: config.WorkingDir, Labels: config.Labels, ExposedPorts: config.ExposedPorts, Healthcheck: config.Healthcheck, StopSignal: config.StopSignal, StopTimeout: config.StopTimeout, HostConfig: pickHostConfig(host), ...(primaryNetwork ? { NetworkingConfig: { EndpointsConfig: { [primaryNetwork.name]: primaryNetwork.aliases.length ? { Aliases: primaryNetwork.aliases } : {} } } } : {}) };
   Object.keys(payload).forEach((key) => payload[key] === undefined && delete payload[key]);
-  return { originalContainerId: id, originalName: name, imageReference: reference, originalImageId: imageId, wasRunning: state.Running === true, createPayload: payload, networks: Object.entries(networks).map(([name, value]) => { const network = object(value); return { id: text(network.NetworkID) ?? name, name, aliases: strings(network.Aliases) }; }), environmentCount: strings(config.Env).length, healthcheck: Boolean(config.Healthcheck), stopTimeout: typeof config.StopTimeout === "number" ? config.StopTimeout : 30 };
+  return { originalContainerId: id, originalName: name, imageReference: reference, originalImageId: imageId, wasRunning: state.Running === true, createPayload: payload, networks: mappedNetworks, environmentCount: strings(config.Env).length, healthcheck: Boolean(config.Healthcheck), stopTimeout: typeof config.StopTimeout === "number" ? config.StopTimeout : 30 };
 }
 export function validateContainerRecreatePlan(plan: ContainerRecreatePlan): ContainerRecreatePlan { if (!plan.networks.length) throw unsupported("NetworkSettings.Networks"); return plan; }
 /**
