@@ -8,6 +8,8 @@ type RecordValue = Record<string, unknown>;
  * diagnostics. Unsupported configurations fail before the mutation boundary.
  */
 export interface ContainerRecreatePlan { originalContainerId: string; originalName: string; imageReference: string; originalImageId: string; wasRunning: boolean; createPayload: RecordValue; networks: Array<{ id: string; name: string; aliases: string[] }>; environmentCount: number; healthcheck: boolean; stopTimeout: number; }
+/** The limited inspect data needed to compare images without authorizing an update. */
+export interface ContainerImageUpdateTarget { containerName: string; imageReference: string; currentImageId: string; }
 export interface ContainerUpdateEligibility { eligible: boolean; reasonCode?: string; safeReason?: string; imageReference?: string; composeManaged?: boolean; }
 export interface ContainerUpdatePreview { containerName: string; imageReference: string; currentImageId: string; wasRunning: boolean; namedVolumeCount: number; bindMountCount: number; publishedPortCount: number; networkNames: string[]; environmentCount: number; labelCount: number; restartPolicy?: string; healthcheck: boolean; workingDirectory?: string; configuredUser?: string; stopTimeout: number; readOnlyRootFilesystem?: boolean; }
 const object = (value: unknown): RecordValue => value && typeof value === "object" && !Array.isArray(value) ? value as RecordValue : {};
@@ -28,6 +30,19 @@ export function buildContainerRecreatePlan(raw: unknown): ContainerRecreatePlan 
   return { originalContainerId: id, originalName: name, imageReference: reference, originalImageId: imageId, wasRunning: state.Running === true, createPayload: payload, networks: Object.entries(networks).map(([name, value]) => { const network = object(value); return { id: text(network.NetworkID) ?? name, name, aliases: strings(network.Aliases) }; }), environmentCount: strings(config.Env).length, healthcheck: Boolean(config.Healthcheck), stopTimeout: typeof config.StopTimeout === "number" ? config.StopTimeout : 30 };
 }
 export function validateContainerRecreatePlan(plan: ContainerRecreatePlan): ContainerRecreatePlan { if (!plan.networks.length) throw unsupported("NetworkSettings.Networks"); return plan; }
+/**
+ * Extracts an image comparison target without evaluating whether the full
+ * container can be safely recreated. Availability is deliberately distinct
+ * from eligibility: a Compose-managed container can have a newer image even
+ * though Docker Connector must not offer its standalone Update transaction.
+ */
+export function getContainerImageUpdateTarget(raw: unknown): ContainerImageUpdateTarget {
+  const item = object(raw), config = object(item.Config);
+  const name = text(item.Name)?.replace(/^\//, ""), imageReference = text(config.Image), currentImageId = text(item.Image);
+  if (!name || !imageReference || !currentImageId) throw new DockerConnectionError("CONTAINER_UPDATE_CONFIG_UNSUPPORTED", "The container image could not be identified safely.");
+  if (!isPullableImageReference(imageReference)) throw new DockerConnectionError("CONTAINER_UPDATE_IMAGE_UNPULLABLE", "The container image does not have a clear pullable repository and tag.");
+  return { containerName: name, imageReference, currentImageId };
+}
 /** Produces only safe, bounded preview data; raw inspect/configuration remains in the transaction. */
 export function containerUpdatePreview(raw: unknown, plan: ContainerRecreatePlan): ContainerUpdatePreview { const item = object(raw), config = object(item.Config), host = object(item.HostConfig), mounts = Array.isArray(item.Mounts) ? item.Mounts.map(object) : []; const bindings = object(host.PortBindings); return { containerName: plan.originalName, imageReference: plan.imageReference, currentImageId: plan.originalImageId, wasRunning: plan.wasRunning, namedVolumeCount: mounts.filter((mount) => text(mount.Type) === "volume").length, bindMountCount: mounts.filter((mount) => text(mount.Type) === "bind").length, publishedPortCount: Object.keys(bindings).length, networkNames: plan.networks.map((network) => network.name), environmentCount: plan.environmentCount, labelCount: Object.keys(object(config.Labels)).length, restartPolicy: text(object(host.RestartPolicy).Name), healthcheck: plan.healthcheck, workingDirectory: text(config.WorkingDir), configuredUser: text(config.User), stopTimeout: plan.stopTimeout, readOnlyRootFilesystem: typeof host.ReadonlyRootfs === "boolean" ? host.ReadonlyRootfs : undefined }; }
 function pickHostConfig(host: RecordValue): RecordValue { const allowed = ["Binds", "PortBindings", "RestartPolicy", "CapAdd", "CapDrop", "Dns", "DnsOptions", "DnsSearch", "ExtraHosts", "IpcMode", "PidMode", "Privileged", "PublishAllPorts", "ReadonlyRootfs", "SecurityOpt", "Tmpfs", "ShmSize", "Sysctls", "LogConfig", "NetworkMode", "Resources", "Mounts"]; return Object.fromEntries(allowed.flatMap((key) => host[key] === undefined ? [] : [[key, host[key]]])); }

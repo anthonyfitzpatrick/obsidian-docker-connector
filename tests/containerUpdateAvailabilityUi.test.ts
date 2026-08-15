@@ -13,7 +13,8 @@ describe("container image update availability UI", () => {
     expect(source).toMatch(/Image is current/);
     expect(source).toMatch(/Could not check for updates/);
     const available = source.slice(source.indexOf('if (status.state === "available")'), source.indexOf('if (status.state === "current")'));
-    expect(available).toMatch(/add\("Update"/);
+    expect(available).toMatch(/if \(eligible\) add\("Update"/);
+    expect(available).toMatch(/Update unavailable/);
     const current = source.slice(source.indexOf('if (status.state === "current")'), source.indexOf('if (status.state === "error")'));
     expect(current).not.toMatch(/add\("Update"/);
   });
