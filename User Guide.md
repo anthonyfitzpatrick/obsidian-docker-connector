@@ -64,6 +64,14 @@ On first launch there are no saved Docker connections. Open **Connections** and 
 >
 > **Capture:** Connections with no profiles and the Add Docker Host action.
 >
+> **How to capture this screenshot:**
+> 1. Use a temporary vault/profile state with **no saved Docker connections**, or temporarily remove only disposable Docker Connector profiles after confirming they can be recreated.
+> 2. Open Docker Connector and select **Connections**.
+> 3. Confirm the page shows the no-connections empty state and the **Add Docker Host** action.
+> 4. Do not expose any production connection details in this screenshot.
+> 5. Capture the complete empty-state panel and the Add Docker Host control.
+
+>
 > **Suggested filename:** `docs/images/user-guide/02-empty-connections.png`
 
 ## 6. Understanding the interface
@@ -76,6 +84,15 @@ The primary navigation contains **Overview**, **Applications**, **Containers**, 
 > **Screenshot placeholder 01**
 >
 > **Capture:** Overview with an online Current Environment, status, navigation, summary, and refresh controls.
+>
+> **How to capture this screenshot:**
+> 1. Open Obsidian and open Docker Connector.
+> 2. Select an existing **Online** connection in **Current Environment**.
+> 3. Open **Overview** and wait for the latest snapshot to finish loading.
+> 4. Make sure the header shows the current environment, **Online** status, all primary navigation tabs, summary information, and the refresh control.
+> 5. Collapse or close unrelated Obsidian sidebars if they distract from the plugin, but keep enough of the Obsidian frame visible to make it clear this is the plugin.
+> 6. Capture only after the Overview is fully populated and no transient loading message is visible.
+
 >
 > **Suggested filename:** `docs/images/user-guide/01-dashboard-overview.png`
 
@@ -94,6 +111,15 @@ The primary navigation contains **Overview**, **Applications**, **Containers**, 
 >
 > **Capture:** Friendly Name, optional metadata, Connection Type, Test Connection, and Save Host.
 >
+> **How to capture this screenshot:**
+> 1. From **Connections**, select **Add Docker Host**.
+> 2. Leave the dialog in its initial/general configuration state.
+> 3. Enter a clearly fictional or disposable **Friendly Name**; optionally fill Description and Category with harmless sample text.
+> 4. Keep the **Connection Type** control visible together with **Test Connection**, **Save Host**, and **Cancel**.
+> 5. Do not enter a real password, passphrase, private key, token, or sensitive hostname.
+> 6. Capture the whole dialog at a width where all controls are readable.
+
+>
 > **Suggested filename:** `docs/images/user-guide/04-add-docker-host.png`
 
 Testing before saving is strongly recommended. A successful test proves the selected profile can validate its endpoint and obtain safe Docker information; saving then registers the profile for the normal dashboard refresh lifecycle.
@@ -104,6 +130,14 @@ Testing before saving is strongly recommended. A successful test proves the sele
 > **Screenshot placeholder 05**
 >
 > **Capture:** All four supported connection methods in the selector.
+>
+> **How to capture this screenshot:**
+> 1. Open **Add Docker Host**.
+> 2. Open the **Connection Type** selector without selecting a new option yet.
+> 3. Position the dialog so all four options are simultaneously visible: **Local Docker Socket**, **Docker Context**, **Remote Docker via SSH**, and **Remote Docker API (Mutual TLS)**.
+> 4. Ensure no secret-bearing fields are visible with populated values.
+> 5. Capture while the selector menu is open.
+
 >
 > **Suggested filename:** `docs/images/user-guide/05-connection-type-selector.png`
 
@@ -120,6 +154,15 @@ The **Docker Endpoint** field can show the detected local Unix socket or Windows
 >
 > **Capture:** Detected local socket or named pipe and endpoint status.
 >
+> **How to capture this screenshot:**
+> 1. Start Docker Desktop or the local Docker Engine so a supported local endpoint exists.
+> 2. Open **Add Docker Host** and select **Local Docker Socket**.
+> 3. Allow endpoint discovery/validation to complete.
+> 4. Ensure the detected Unix socket or named pipe and its supported/available status are visible.
+> 5. On macOS, a path such as `~/.docker/run/docker.sock` is suitable; avoid showing unrelated personal file paths.
+> 6. Do not run a container-management action; this screenshot is configuration only.
+
+>
 > **Suggested filename:** `docs/images/user-guide/06-local-docker-socket.png`
 
 ### 8.2 Docker Context
@@ -134,6 +177,14 @@ The plugin performs bounded discovery of the Docker CLI from the current process
 > **Screenshot placeholder 08**
 >
 > **Capture:** Docker Context form showing detected Docker CLI and version.
+>
+> **How to capture this screenshot:**
+> 1. Open **Add Docker Host** and select **Docker Context**.
+> 2. Use **Discover Contexts** if needed and wait for Docker CLI discovery to finish.
+> 3. Ensure the detected Docker CLI/version message is visible.
+> 4. Use a normal test/local context setup; do not change the active Docker Context just for the screenshot.
+> 5. Capture enough of the form to show that Docker Connector found the CLI and can enumerate contexts.
+
 >
 > **Suggested filename:** `docs/images/user-guide/08-docker-cli-detected.png`
 
@@ -150,6 +201,15 @@ The saved profile and connection card still say **Docker Context**, even when th
 > **Screenshot placeholder 09**
 >
 > **Capture:** Discovered contexts, including a safe default or desktop-linux example.
+>
+> **How to capture this screenshot:**
+> 1. Open **Add Docker Host** with **Docker Context** selected.
+> 2. Run context discovery.
+> 3. Open the Docker Context selector.
+> 4. Ensure at least one safe context is visible, preferably `desktop-linux` and, if present, its **Current** marker.
+> 5. Avoid displaying private remote endpoints if they are not intended for documentation.
+> 6. Capture the selector and the selected/supported endpoint summary.
+
 >
 > **Suggested filename:** `docs/images/user-guide/09-docker-context-selector.png`
 
@@ -176,6 +236,15 @@ With **Password** selected, enter the SSH password during connection or reconnec
 >
 > **Capture:** SSH password form without a real password.
 >
+> **How to capture this screenshot:**
+> 1. Open **Add Docker Host** and select **Remote Docker via SSH**.
+> 2. Set **SSH Authentication** to **Password**.
+> 3. Populate only harmless sample host/username values if needed for layout; leave the password blank.
+> 4. Ensure SSH Host, Port, Username, Authentication, Remote Docker Socket, and password-related controls are visible.
+> 5. Never type a real password for this screenshot.
+> 6. Capture before running Test Connection.
+
+>
 > **Suggested filename:** `docs/images/user-guide/10-ssh-password.png`
 
 #### Private-key authentication
@@ -186,6 +255,15 @@ With **Private Key** selected, choose a **Private Key File** and, if required, e
 > **Screenshot placeholder 11**
 >
 > **Capture:** Private Key file and passphrase controls using a redacted path.
+>
+> **How to capture this screenshot:**
+> 1. Open **Add Docker Host** and select **Remote Docker via SSH**.
+> 2. Set **SSH Authentication** to **Private Key**.
+> 3. Select a disposable/test key path if the UI requires one, or leave the path blank if that still demonstrates the controls.
+> 4. If a path is shown, use a test path or redact identifying path components before publication.
+> 5. Leave **Private-Key Passphrase** blank.
+> 6. Capture the Private Key File and passphrase controls without exposing key contents.
+
 >
 > **Suggested filename:** `docs/images/user-guide/11-ssh-private-key.png`
 
@@ -198,6 +276,14 @@ The **Host Key Fingerprint** identifies the remote SSH server. Verifying it prot
 >
 > **Capture:** Fingerprint/trust state using a non-production fingerprint.
 >
+> **How to capture this screenshot:**
+> 1. Use the isolated SSH test endpoint rather than a production SSH server.
+> 2. Open or test its SSH profile until Docker Connector displays the host-key fingerprint/trust state.
+> 3. Ensure the fingerprint shown belongs only to the disposable test host and does not expose production identity information.
+> 4. If a trust prompt is needed, stop before accepting unless the test fingerprint has been independently verified.
+> 5. Capture the fingerprint and trust/verification message clearly.
+
+>
 > **Suggested filename:** `docs/images/user-guide/12-ssh-host-key.png`
 
 ### 8.4 Remote Docker API (Mutual TLS)
@@ -206,6 +292,15 @@ The **Host Key Fingerprint** identifies the remote SSH server. Verifying it prot
 > **Screenshot placeholder 14**
 >
 > **Capture:** Host, port, Server Name, CA, client certificate, and client key fields.
+>
+> **How to capture this screenshot:**
+> 1. Open **Add Docker Host** and select **Remote Docker API (Mutual TLS)**.
+> 2. Use the disposable mutual-TLS endpoint on `192.168.1.2:2376` or another safe test endpoint.
+> 3. Fill Docker Host, Docker API Port, and Server Name with the test values.
+> 4. Select test CA, client certificate, and client private-key files if safe to show their paths; otherwise use redacted/test-only paths.
+> 5. Leave any passphrase blank for the capture.
+> 6. Capture the form so Host, Port, Server Name, CA, client certificate, and client key fields are visible.
+
 >
 > **Suggested filename:** `docs/images/user-guide/14-mutual-tls-form.png`
 
@@ -235,6 +330,15 @@ Selected certificate and key paths may be saved as profile metadata; certificate
 >
 > **Capture:** Successful certificate/key validation with redacted file paths.
 >
+> **How to capture this screenshot:**
+> 1. Use the mutual-TLS test profile with valid test CA/client certificate/client-key files.
+> 2. Open the Add/Edit dialog and select the files.
+> 3. Wait for local file validation to report success.
+> 4. Ensure only file paths/status are visible, never certificate or private-key contents.
+> 5. Redact personal path components if needed while preserving enough of the filename to show which file is which.
+> 6. Capture the successful validation state before or after Test Connection, whichever best isolates the file-validation UI.
+
+>
 > **Suggested filename:** `docs/images/user-guide/15-mutual-tls-validation.png`
 
 ## 9. Testing a connection
@@ -248,6 +352,15 @@ A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. 
 >
 > **Capture:** Safe hostname or certificate-identity mismatch result.
 >
+> **How to capture this screenshot:**
+> 1. Use the disposable mutual-TLS test endpoint, not production.
+> 2. Open its Add/Edit dialog and temporarily set **Server Name** to a deliberately incorrect harmless value such as `invalid.example.test`.
+> 3. Select **Test Connection** and wait for the identity check to fail.
+> 4. Ensure the diagnostic clearly shows the hostname/server-identity mismatch and later Docker request stages as skipped/not run.
+> 5. Capture the error without exposing certificate contents.
+> 6. Immediately restore the correct Server Name after capturing; do not save the deliberately invalid value.
+
+>
 > **Suggested filename:** `docs/images/user-guide/17-mutual-tls-identity-failure.png`
 
 ### Screenshot 16 — Successful Mutual TLS test
@@ -255,12 +368,30 @@ A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. 
 >
 > **Capture:** Successful mutual-TLS diagnostics.
 >
+> **How to capture this screenshot:**
+> 1. Use the valid mutual-TLS test endpoint.
+> 2. Open its Add/Edit dialog and select **Test Connection**.
+> 3. Wait for all TLS identity checks and Docker API checks to finish successfully.
+> 4. Ensure server certificate verification, Server Name verification, Docker `/_ping`, Docker `/version`, and the final success state are visible as space allows.
+> 5. Do not show private-key contents or passphrases.
+> 6. Capture only after the terminal success result is stable.
+
+>
 > **Suggested filename:** `docs/images/user-guide/16-mutual-tls-success.png`
 
 ### Screenshot 07 — Successful Local Docker test
 > **Screenshot placeholder 07**
 >
 > **Capture:** Successful local Test Connection diagnostics.
+>
+> **How to capture this screenshot:**
+> 1. With the local Docker Engine running, open a Local Docker Socket Add/Edit dialog.
+> 2. Select **Test Connection**.
+> 3. Wait until the diagnostics reach a successful terminal result.
+> 4. Ensure successful endpoint validation, Docker `/_ping`, Docker `/version`, and the final successful result are visible as space permits.
+> 5. Do not include unrelated terminal windows or Docker credentials.
+> 6. Capture the diagnostics panel only after all relevant stages have completed.
+
 >
 > **Suggested filename:** `docs/images/user-guide/07-local-test-success.png`
 
@@ -273,6 +404,14 @@ Open **Connections** to manage every saved profile. The page is titled **Docker 
 >
 > **Capture:** Docker connections cards, statuses, and management actions.
 >
+> **How to capture this screenshot:**
+> 1. Open Docker Connector and select **Connections**.
+> 2. Use a safe set of saved profiles that demonstrates more than one connection method if available.
+> 3. Wait for status evaluation so the cards show stable states such as **Online** or **Authentication Required**, rather than transient Connecting where possible.
+> 4. Ensure the **Docker connections** heading, **Add Docker Host**, profile cards, status badges, and card-level actions are visible.
+> 5. If any hostnames or addresses should not be public, use disposable test profiles before capturing.
+
+>
 > **Suggested filename:** `docs/images/user-guide/03-connections-management.png`
 
 Cards expose the applicable management actions:
@@ -280,13 +419,21 @@ Cards expose the applicable management actions:
 ### Screenshot 18 — Connection actions
 > **Screenshot placeholder 18**
 >
-> **Capture:** Add, Edit, Reconnect, Retry, and Delete connection actions.
+> **Capture:** Add, Edit, Reconnect, and Delete connection actions.
+>
+> **How to capture this screenshot:**
+> 1. Open **Connections** with several safe/test profiles present.
+> 2. Choose a mix of states if available so **Edit**, **Reconnect**, and **Delete** are visible across the cards.
+> 3. Ensure **Add Docker Host** is visible at page level.
+> 4. Do not click any action while taking the screenshot.
+> 5. Capture a region wide enough to show the action layout clearly without exposing sensitive host details.
+
 >
 > **Suggested filename:** `docs/images/user-guide/18-connection-actions.png`
 
 - **Edit** opens the same profile workflow without changing the profile’s stable identity.
 - **Reconnect** appears when session-only credentials need to be entered again.
-- **Retry** appears when an offline or degraded connection can be retried.
+- **Reconnect** appears when an offline or degraded connection can be retried.
 - **Delete connection** opens a confirmation dialog.
 
 Status is information, not an action. The current states are **Unknown**, **Connecting**, **Online**, **Offline**, **Degraded**, and **Authentication Required**. Unknown means the profile has not yet been evaluated or is between registration and its first refresh; it should not be a permanent result after a completed connection attempt. Authentication Required normally means a required runtime-only secret needs to be supplied again.
@@ -295,6 +442,15 @@ Status is information, not an action. The current states are **Unknown**, **Conn
 > **Screenshot placeholder 13**
 >
 > **Capture:** A profile requiring a session-only credential and Reconnect.
+>
+> **How to capture this screenshot:**
+> 1. Use an SSH profile whose password or encrypted-key passphrase is intentionally session-only.
+> 2. Restart/reload Obsidian so the runtime credential is no longer present.
+> 3. Open **Connections** and wait for the profile to settle into **Authentication Required**.
+> 4. Ensure the **Reconnect** action is visible on the same profile card.
+> 5. Do not enter the credential before taking the screenshot.
+> 6. Capture the profile name, canonical connection method, Authentication Required badge, and Reconnect action.
+
 >
 > **Suggested filename:** `docs/images/user-guide/13-authentication-required.png`
 
@@ -306,6 +462,15 @@ Deleting a connection removes only Docker Connector’s saved profile, runtime c
 > **Screenshot placeholder 19**
 >
 > **Capture:** Confirmation scope and destructive action.
+>
+> **How to capture this screenshot:**
+> 1. Create or use a disposable Docker Connector profile that can safely be deleted.
+> 2. On **Connections**, select its **Delete** action.
+> 3. Leave the confirmation dialog open without confirming deletion yet.
+> 4. Ensure the text explaining that only the Docker Connector profile is removed—and Docker resources/external credential files are not deleted—is readable.
+> 5. Capture the dialog with both Cancel and destructive confirmation controls visible.
+> 6. After the screenshot, cancel unless you intentionally want to remove that disposable profile.
+
 >
 > **Suggested filename:** `docs/images/user-guide/19-delete-connection.png`
 
@@ -320,6 +485,15 @@ If the selected profile is deleted, Docker Connector chooses a safe remaining pr
 >
 > **Capture:** Multiple profiles and the active environment.
 >
+> **How to capture this screenshot:**
+> 1. Configure at least two safe profiles.
+> 2. Open any resource view such as **Overview**.
+> 3. Open the **Current Environment** selector.
+> 4. Ensure multiple profile names and the currently selected environment are visible.
+> 5. Avoid using sensitive production profile names if the guide will be public; create harmless test names if necessary.
+> 6. Capture the selector while it is open.
+
+>
 > **Suggested filename:** `docs/images/user-guide/20-current-environment.png`
 
 ## 12. Overview
@@ -333,6 +507,14 @@ Overview is not a metrics-history system. It shows the latest safe dashboard sna
 >
 > **Capture:** An online host’s Overview and attention items where present.
 >
+> **How to capture this screenshot:**
+> 1. Select a safe **Online** environment with a populated Docker inventory.
+> 2. Open **Overview** and run a manual refresh if needed.
+> 3. Wait until Docker version/host information, resource summary cards, refresh metadata, and any attention items are stable.
+> 4. If possible use a test host with at least one meaningful but non-sensitive attention item; otherwise a clean populated Overview is acceptable.
+> 5. Capture the full Overview content area without unrelated Obsidian panels.
+
+>
 > **Suggested filename:** `docs/images/user-guide/21-populated-overview.png`
 
 ## 13. Applications
@@ -344,6 +526,14 @@ Applications groups Docker Compose-managed containers into projects. Docker Conn
 >
 > **Capture:** Compose project cards, search, filters, and sorting.
 >
+> **How to capture this screenshot:**
+> 1. Select the test environment that contains several Docker Compose projects.
+> 2. Open **Applications** and wait for the snapshot to load.
+> 3. Ensure project cards/rows, summary cards, search, status filter, update filter, and sort controls are visible.
+> 4. Prefer the test applications such as Ghost/Umami rather than production-only projects if publication privacy matters.
+> 5. Capture the list with at least two applications visible if possible.
+
+>
 > **Suggested filename:** `docs/images/user-guide/22-applications-list.png`
 
 Application cards show a project’s services, container counts, running and stopped counts, available-update count where known, and associated networks, volumes, and images. The list supports searching, status and update filtering, sorting, and an inspector. The inspector exposes project details, services, containers, and images; selecting a listed container opens that container in **Containers**.
@@ -352,6 +542,14 @@ Application cards show a project’s services, container counts, running and sto
 > **Screenshot placeholder 23**
 >
 > **Capture:** Services, containers, images, networks, and volumes as available.
+>
+> **How to capture this screenshot:**
+> 1. Open **Applications** on the test host.
+> 2. Select a Compose project with multiple services, preferably the `juliarosedelane` test application if it remains available.
+> 3. Ensure the inspector shows project Overview plus Services, Containers, Images, Networks, and Storage/Volumes where available.
+> 4. Position the view so service names are clearly distinct from container names and image tags.
+> 5. Capture the detail panel with enough list context to identify the selected application.
+
 >
 > **Suggested filename:** `docs/images/user-guide/23-application-inspector.png`
 
@@ -368,12 +566,30 @@ The **Containers** tab is the main container inventory. It has summary cards for
 >
 > **Capture:** Updates Available card or active filter state.
 >
+> **How to capture this screenshot:**
+> 1. Ensure at least one safe test container currently has **Update available**.
+> 2. Open **Containers**.
+> 3. Click the **Updates Available** summary card so the list is filtered to containers requiring updates.
+> 4. Confirm the active filter state is visible and only matching containers remain.
+> 5. Capture the summary card/filter state plus the filtered results.
+> 6. Clear the filter after capturing.
+
+>
 > **Suggested filename:** `docs/images/user-guide/31-updates-filter.png`
 
 ### Screenshot 24 — Containers view
 > **Screenshot placeholder 24**
 >
 > **Capture:** Summary cards and populated container rows.
+>
+> **How to capture this screenshot:**
+> 1. Select an Online test environment with several containers.
+> 2. Open **Containers** and clear all active filters.
+> 3. Wait for the inventory to finish loading.
+> 4. Ensure the summary cards and several populated container rows are visible.
+> 5. If possible include both running and stopped test containers, but do not change production container state merely for this screenshot.
+> 6. Capture the main Containers list at a normal readable density.
+
 >
 > **Suggested filename:** `docs/images/user-guide/24-containers-view.png`
 
@@ -383,6 +599,14 @@ Use the toolbar to search by container information and filter by State, Health, 
 > **Screenshot placeholder 25**
 >
 > **Capture:** Search, State, Health, Network, Updates, sort, and density controls.
+>
+> **How to capture this screenshot:**
+> 1. Open **Containers** on a populated test host.
+> 2. Ensure the toolbar is fully visible.
+> 3. If necessary widen the Obsidian pane so Search, State, Health, Network, Updates, Sort, and Density controls are not clipped.
+> 4. Leave filters at their neutral/default values unless an active filter makes the control clearer.
+> 5. Capture the toolbar and enough container rows beneath it to show the controls affect an actual inventory.
+
 >
 > **Suggested filename:** `docs/images/user-guide/25-container-filters.png`
 
@@ -401,6 +625,14 @@ The inspector lets you refresh details and copy the full container ID. It does n
 >
 > **Capture:** Read-only sections and the Image update area.
 >
+> **How to capture this screenshot:**
+> 1. Open **Containers** and select a safe test container.
+> 2. Allow the detail inspector to populate.
+> 3. Ensure **Actions**, **Overview**, **State**, **Configuration**, **Networking**, **Storage**, **Metadata**, and the **Image update** area are visible as much as the layout permits.
+> 4. Use a test container whose metadata does not contain sensitive environment information.
+> 5. Capture the inspector and selected container row; do not expand anything that would expose secrets.
+
+>
 > **Suggested filename:** `docs/images/user-guide/26-container-inspector.png`
 
 ## 16. Images
@@ -413,6 +645,15 @@ Select an image for an inspector with overview data, repository tags and digests
 > **Screenshot placeholder 36**
 >
 > **Capture:** Image inventory and detail inspector.
+>
+> **How to capture this screenshot:**
+> 1. Select a populated Online test environment and open **Images**.
+> 2. Wait for image inventory and summary counts to load.
+> 3. Select a non-sensitive image so the inspector is visible.
+> 4. Ensure the inventory, tags/IDs, usage information, and inspector are readable.
+> 5. Do not expose registry credentials or private repository information not intended for publication.
+> 6. Capture the Images view with both list and inspector if the layout allows.
+
 >
 > **Suggested filename:** `docs/images/user-guide/36-images-view.png`
 
@@ -427,6 +668,15 @@ The volume inspector shows overview information, options, safe labels, and conta
 >
 > **Capture:** Named-volume inventory and inspector.
 >
+> **How to capture this screenshot:**
+> 1. Select a test environment with at least one named Docker volume.
+> 2. Open **Volumes** and wait for inventory to load.
+> 3. Select a non-sensitive named volume.
+> 4. Ensure the list shows driver/scope/use information and the inspector shows safe volume details/attached containers.
+> 5. Avoid publishing host mount paths that reveal sensitive directory structure.
+> 6. Capture the populated Volumes view and inspector.
+
+>
 > **Suggested filename:** `docs/images/user-guide/37-volumes-view.png`
 
 ## 18. Networks
@@ -439,6 +689,15 @@ Selecting a network shows driver, scope, internal and attachable settings, IPv6 
 > **Screenshot placeholder 38**
 >
 > **Capture:** Network inventory and attached-container details.
+>
+> **How to capture this screenshot:**
+> 1. Select a test environment with user-defined Docker networks.
+> 2. Open **Networks** and wait for inventory to load.
+> 3. Select a non-sensitive network with attached test containers if possible.
+> 4. Ensure driver, scope, internal/attachable/IPv6 information and attached containers are visible as available.
+> 5. Avoid exposing network ranges that should remain private; use the isolated test network if needed.
+> 6. Capture the populated Networks view and inspector.
+
 >
 > **Suggested filename:** `docs/images/user-guide/38-networks-view.png`
 
@@ -455,6 +714,15 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 >
 > **Capture:** Image update area showing Image is current and Check now.
 >
+> **How to capture this screenshot:**
+> 1. Use an eligible standalone test container whose configured image is already current.
+> 2. Enable Container management if update checking requires it.
+> 3. Open the container inspector and select **Check now**.
+> 4. Wait for the check to finish and display **Image is current**.
+> 5. Ensure **Check now/Check again** is visible and no Update action is offered for a current image.
+> 6. Capture the Image update area after the result stabilizes.
+
+>
 > **Suggested filename:** `docs/images/user-guide/29-image-current.png`
 
 > [!note] Availability is not eligibility
@@ -464,6 +732,14 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 > **Screenshot placeholder 30**
 >
 > **Capture:** Confirmed Update available state for an eligible standalone container.
+>
+> **How to capture this screenshot:**
+> 1. Use only an eligible standalone disposable test container for which a newer tagged image can safely be made available.
+> 2. Run **Check now** and wait for Docker Connector to confirm **Update available**.
+> 3. Ensure the standalone **Update** action is visible/enabled and the status clearly identifies the newer image availability.
+> 4. Do not use a Compose-managed or production container for this screenshot.
+> 5. Capture before beginning the update transaction.
+
 >
 > **Suggested filename:** `docs/images/user-guide/30-update-available.png`
 
@@ -477,6 +753,15 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > **Screenshot placeholder 39**
 >
 > **Capture:** Read-only Actions panel and enable guidance.
+>
+> **How to capture this screenshot:**
+> 1. Open Docker Connector Settings and ensure **Container management** is disabled.
+> 2. Return to **Containers** and select any test container.
+> 3. Open the **Actions** area.
+> 4. Confirm it displays the read-only message/guidance rather than lifecycle controls.
+> 5. Capture only the Actions area and enough container context to show what is being inspected.
+> 6. Do not enable management until after this screenshot is complete.
+
 >
 > **Suggested filename:** `docs/images/user-guide/39-management-disabled.png`
 
@@ -492,6 +777,15 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 >
 > **Capture:** Start action for a stopped standalone container.
 >
+> **How to capture this screenshot:**
+> 1. Use only an approved disposable standalone test container.
+> 2. Stop it using Docker outside the screenshot workflow or through a previously approved test action, then wait for Docker Connector to refresh to **Stopped/Exited**.
+> 3. Open its inspector.
+> 4. Ensure the **Start** action is visible and inappropriate running-only actions are absent/disabled according to the UI.
+> 5. Capture before starting it again.
+> 6. After capturing, return the test container to its desired normal state.
+
+>
 > **Suggested filename:** `docs/images/user-guide/28-stopped-start.png`
 
 Docker Connector asks for confirmation before lifecycle actions and coordinates a refresh after an accepted action. These controls never appear as a bulk-action interface.
@@ -500,6 +794,15 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 > **Screenshot placeholder 27**
 >
 > **Capture:** Shut down, Stop, Restart, and Update eligibility where applicable.
+>
+> **How to capture this screenshot:**
+> 1. Enable **Container management** only if you are working against an approved test container/environment.
+> 2. Select a **running standalone test container** such as the disposable test container on `192.168.1.2`.
+> 3. Open its inspector and locate **Actions**.
+> 4. Ensure **Shut down**, **Stop**, and **Restart** are visible; **Update** may also appear only if that container is eligible and has an available image.
+> 5. Do not click any lifecycle control for the screenshot.
+> 6. Capture the Actions section and container identity clearly enough to show it is a test target.
+
 >
 > **Suggested filename:** `docs/images/user-guide/27-running-actions.png`
 
@@ -516,6 +819,15 @@ An eligible Update begins with a confirmation preview. It identifies the contain
 >
 > **Capture:** Preview, configuration summary, and writable-layer warning.
 >
+> **How to capture this screenshot:**
+> 1. Use the approved disposable standalone container with a confirmed available update.
+> 2. Select **Update** to open the confirmation preview.
+> 3. Do not proceed immediately.
+> 4. Ensure the preview shows the container/image, supported configuration-preservation summary, writable-layer warning, **Cancel**, and **Proceed with update**.
+> 5. Check carefully that no environment values or credentials appear.
+> 6. Capture the complete preview dialog before selecting Proceed.
+
+>
 > **Suggested filename:** `docs/images/user-guide/32-update-preview.png`
 
 The transaction is designed for standalone containers. It inspects the original container, validates eligibility, pulls the candidate image, compares image IDs, stops the original if needed, preserves it as a backup, creates and configures a replacement, restores supported networking, starts and verifies the replacement, then cleans up the backup where safe. The exact progress view reports the stage actually in progress.
@@ -525,6 +837,15 @@ The transaction is designed for standalone containers. It inspects the original 
 >
 > **Capture:** Real in-progress transaction stages.
 >
+> **How to capture this screenshot:**
+> 1. Use only the approved disposable standalone test container.
+> 2. From the Update preview, select **Proceed with update**.
+> 3. Watch the progress view and capture while the transaction is actively between stages—not before it starts and not after it completes.
+> 4. Prefer a moment showing several completed stages plus one clearly active stage such as creating, starting, or verifying the replacement.
+> 5. Do not interrupt the transaction merely to obtain the screenshot.
+> 6. If the operation completes too quickly to capture reliably, repeat only on the disposable test target when safe.
+
+>
 > **Suggested filename:** `docs/images/user-guide/33-update-progress.png`
 
 Docker Connector attempts to preserve the supported Docker configuration needed to recreate an eligible standalone container, including its relevant mounts, ports, restart configuration, and network attachments. No update workflow can make writable-layer-only data persistent.
@@ -533,6 +854,15 @@ Docker Connector attempts to preserve the supported Docker configuration needed 
 > **Screenshot placeholder 34**
 >
 > **Capture:** Completed replacement and image identifiers.
+>
+> **How to capture this screenshot:**
+> 1. Complete a successful Update on the approved disposable standalone test container.
+> 2. Wait for the final result state and subsequent refresh.
+> 3. Ensure the result identifies successful completion and, where the UI provides them, original/replacement or image identifiers.
+> 4. Confirm the replacement container is healthy/running before capturing.
+> 5. Ensure no Update action remains if the image is now current.
+> 6. Capture the final success/result panel.
+
 >
 > **Suggested filename:** `docs/images/user-guide/34-update-success.png`
 
@@ -546,6 +876,15 @@ Rollback is a recovery attempt, not an absolute guarantee against every host, st
 > **Screenshot placeholder 35**
 >
 > **Capture:** Safe rollback, backup-retained, or manual-recovery guidance.
+>
+> **How to capture this screenshot:**
+> 1. Do **not** deliberately break a production or valued container to create this screenshot.
+> 2. Prefer an existing safe rollback/recovery result from disposable testing if one occurs naturally, or create a controlled failure only on a dedicated disposable fixture designed for recovery testing.
+> 3. Acceptable states include successful rollback, backup retained, or explicit manual-recovery guidance.
+> 4. Ensure the screenshot clearly shows the recovery outcome and any safe container/backup names needed for understanding.
+> 5. Do not expose environment values, credentials, or unrelated server data.
+> 6. If no safe real recovery result is available, leave this placeholder uncaptured rather than manufacturing a misleading screenshot.
+
 >
 > **Suggested filename:** `docs/images/user-guide/35-update-recovery.png`
 
@@ -572,12 +911,29 @@ Changing Container management is persisted safely and open Docker Connector view
 >
 > **Capture:** Automatic refresh, interval, theme integration, and Container management.
 >
+> **How to capture this screenshot:**
+> 1. Open **Settings → Community plugins → Docker Connector** (or the plugin’s settings tab in the current Obsidian UI).
+> 2. Position the settings pane so **Automatic refresh**, **Refresh interval**, **Theme integration**, and **Container management** are all visible; scroll only as needed.
+> 3. Use normal/safe values and avoid showing unrelated vault/account settings.
+> 4. If Container management is enabled for test work, either capture that current state or disable it first depending on which state best supports the surrounding text; change settings only in an isolated test configuration.
+> 5. Capture the Docker Connector settings page at a width where labels, descriptions, and controls are readable.
+
+>
 > **Suggested filename:** `docs/images/user-guide/42-settings.png`
 
 ### Screenshot 40 — Container management enabled
 > **Screenshot placeholder 40**
 >
 > **Capture:** Settings confirmation and enabled status.
+>
+> **How to capture this screenshot:**
+> 1. Open Docker Connector Settings.
+> 2. Toggle **Container management** from disabled to enabled.
+> 3. Accept the confirmation only in an isolated test environment after confirming the configured environments are understood and you intend to continue test work.
+> 4. After persistence completes, ensure the setting visibly remains enabled and any confirmation/status feedback is stable.
+> 5. Capture the enabled setting state; do not include unrelated sensitive settings.
+> 6. If desired, disable management again after all management/update screenshots are finished.
+
 >
 > **Suggested filename:** `docs/images/user-guide/40-management-enabled.png`
 
@@ -669,11 +1025,20 @@ Deletion is blocked while a container operation is active for that profile. Wait
 ### Screenshot 41 — Offline or error connection
 > **Screenshot placeholder 41**
 >
-> **Capture:** Safe error state with Retry, without secrets.
+> **Capture:** Safe error state with Reconnect, without secrets.
+>
+> **How to capture this screenshot:**
+> 1. Use a disposable/offline test profile rather than deliberately breaking production connectivity.
+> 2. Create a safe failure such as an unreachable test endpoint or use an existing offline test connection.
+> 3. Open **Connections** and wait for the profile to settle into **Offline**, **Degraded**, or another safe error state.
+> 4. Ensure the safe error summary and **Reconnect** action are visible.
+> 5. Do not display passwords, private-key material, or sensitive diagnostics.
+> 6. Capture the card and error/reconnect state; remove the disposable failure profile afterward if it is no longer needed.
+
 >
 > **Suggested filename:** `docs/images/user-guide/41-offline-connection.png`
 
-Unknown means not yet evaluated. Use Retry or refresh the profile. A completed attempt should become Online, Offline, Degraded, or Authentication Required with a safe error. If it remains Unknown after a completed refresh, collect the diagnostics and report it as a problem.
+Unknown means not yet evaluated. Use Reconnect or refresh the profile. A completed attempt should become Online, Offline, Degraded, or Authentication Required with a safe error. If it remains Unknown after a completed refresh, collect the diagnostics and report it as a problem.
 
 ### Update check or update unavailable
 
