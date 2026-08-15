@@ -19,6 +19,26 @@ describe("ContainerImageUpdateService", () => {
     await check;
     expect(service.getStatus(profile.id, id)).toBeUndefined();
   });
+  it("does not republish after deletion when an image pull completes after cancellation", async () => {
+    let releasePull: (() => void) | undefined;
+    const pullPending = new Promise<void>((resolve) => { releasePull = resolve; });
+    const request = vi.fn(async (call: { path: string }) => {
+      if (call.path.endsWith(`/containers/${id}/json`)) return inspect;
+      if (call.path.startsWith("/images/create")) { await pullPending; return ""; }
+      if (call.path === "/images/json") return [{ Id: "sha256:new", RepoTags: ["ghost:5-alpine"] }];
+      return undefined;
+    });
+    const service = new ContainerImageUpdateService({ create: vi.fn(() => ({ request })) } as never);
+    const published: string[] = [];
+    service.onStatusChange((status) => published.push(status.state));
+    const check = service.check(profile, id, true);
+    await vi.waitFor(() => expect(request.mock.calls.some(([call]) => (call as { path: string }).path.startsWith("/images/create"))).toBe(true));
+    service.clearProfile(profile.id);
+    releasePull?.();
+    await check;
+    expect(service.getStatus(profile.id, id)).toBeUndefined();
+    expect(published).not.toContain("available");
+  });
   it("publishes available when the pulled image differs without container mutation", async () => { const { service, request } = subject(); const result = await service.check(profile, id); expect(result).toMatchObject({ pullPerformed: true, status: { state: "available", currentImageId: "sha256:old", remoteImageId: "sha256:new", lastCheckedAt: new Date(1_000).toISOString(), nextCheckAt: new Date(1_000 + DEFAULT_CONTAINER_UPDATE_CHECK_INTERVAL_MS).toISOString() } }); expect(request.mock.calls.map(([call]) => call)).toEqual(expect.arrayContaining([expect.objectContaining({ method: "GET", path: `/containers/${id}/json` }), expect.objectContaining({ method: "POST", path: "/images/create?fromImage=ghost&tag=5-alpine" }), expect.objectContaining({ method: "GET", path: "/images/json" })])); expect(request.mock.calls.some(([call]) => /\/containers\/.+\/(?:start|stop|restart|rename)|\/containers\/create|DELETE/.test(call.path))).toBe(false); expect(JSON.stringify(result)).not.toContain("SECRET"); });
   it("publishes current for identical image IDs and skips a fresh duplicate check", async () => { const { service, request } = subject("sha256:old"); await expect(service.check(profile, id)).resolves.toMatchObject({ status: { state: "current" } }); await expect(service.check(profile, id)).resolves.toMatchObject({ pullPerformed: false, status: { state: "current" } }); expect(request).toHaveBeenCalledTimes(3); });
   it("coalesces duplicate checks and isolates hosts", async () => { const { service, request } = subject(); await Promise.all([service.check(profile, id, true), service.check(profile, id, true)]); expect(request.mock.calls.filter(([call]) => call.path.startsWith("/images/create")).length).toBe(1); const other = { ...profile, id: "other" }; await service.check(other, id, true); expect(request.mock.calls.filter(([call]) => call.path.startsWith("/images/create")).length).toBe(2); });

@@ -79,7 +79,12 @@ export default class DockerConnectorPlugin extends Plugin {
     this.addCommand({ id: "refresh-hosts", name: "Refresh all Docker hosts", callback: () => this.refreshAll() });
     this.addSettingTab(new DockerConnectorSettingTab(this.app, this));
     this.configureRefresh();
-    void this.refreshAll().catch(() => undefined);
+    // Obsidian recommends deferring network and other expensive startup work
+    // until the workspace is ready. Registration remains synchronous, while
+    // host inspection cannot delay opening the user's vault.
+    this.app.workspace.onLayoutReady(() => {
+      if (!this.unloading) void this.refreshAll().catch(() => undefined);
+    });
   }
 
   /**
@@ -103,8 +108,26 @@ export default class DockerConnectorPlugin extends Plugin {
   }
   async loadSettings(): Promise<void> {
     const persisted = await this.loadData() as (Partial<DockerConnectorSettings> & { hosts?: unknown[]; reportFolder?: unknown }) | null;
-    const requiresMigration = !Array.isArray(persisted?.profiles) || persisted.profiles.some((profile) => !profile || typeof profile !== "object" || !("connectionType" in profile) || ("connectionType" in profile && profile.connectionType === "ssh" && !("authentication" in profile)));
-    const profiles = requiresMigration ? migrateProfiles(persisted) : persisted.profiles ?? [];
+    const persistedProfiles = Array.isArray(persisted?.profiles) ? persisted.profiles : [];
+    const requiresMigration = !Array.isArray(persisted?.profiles) || persistedProfiles.some((profile) => !profile || typeof profile !== "object" || !("connectionType" in profile) || ("connectionType" in profile && profile.connectionType === "ssh" && !("authentication" in profile)));
+    // data.json is user-controlled input. Run every record through the
+    // migration and validation boundary, even when it appears current, so a
+    // partially edited or unknown profile cannot crash a view or reach a
+    // transport. Duplicate/blank IDs are rejected because all runtime state
+    // is keyed by this stable profile ID.
+    const migratedProfiles = migrateProfiles(persisted);
+    const seenProfileIds = new Set<string>();
+    const profiles = migratedProfiles.flatMap((profile) => {
+      try {
+        const normalized = normalizeProfile(profile);
+        if (!normalized.id || seenProfileIds.has(normalized.id)) return [];
+        seenProfileIds.add(normalized.id);
+        return [normalized];
+      } catch {
+        return [];
+      }
+    });
+    const repairedProfiles = migratedProfiles.length !== persistedProfiles.length || profiles.length !== migratedProfiles.length;
     const hasRetiredReportFolder = Boolean(persisted && Object.prototype.hasOwnProperty.call(persisted, "reportFolder"));
     const { hosts: _legacyHosts, reportFolder: _removedReportFolder, ...modernSettings } = persisted ?? {};
     // Never spread arbitrary persisted values over defaults. Old or manually
@@ -118,7 +141,7 @@ export default class DockerConnectorPlugin extends Plugin {
       containerDensity: modernSettings.containerDensity === "compact" || modernSettings.containerDensity === "comfortable" ? modernSettings.containerDensity : DEFAULT_SETTINGS.containerDensity,
       containerManagementEnabled: modernSettings.containerManagementEnabled === true
     };
-    if ((requiresMigration && profiles.length > 0) || hasRetiredReportFolder) await this.saveSettings();
+    if (requiresMigration || repairedProfiles || hasRetiredReportFolder) await this.saveSettings();
   }
   async saveSettings(): Promise<void> {
     const save = this.settingsSaveChain.then(async () => {

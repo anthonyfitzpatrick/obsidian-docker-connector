@@ -11,4 +11,5 @@ export async function runSystemSshDiagnostic(host: string, port: number, usernam
   const sshState = ssh.ok || /host key verification|permission denied|authentication failed/i.test(ssh.output) ? "reached" : "failed";
   return { nc: ncState, ssh: sshState, summary: `macOS nc: ${ncState}; system SSH: ${sshState}.` };
 }
-function execute(file: string, args: string[], timeout: number): Promise<{ ok: boolean; output: string }> { return new Promise((resolve) => execFile(file, args, { timeout }, (error, stdout, stderr) => resolve({ ok: !error, output: `${stdout}\n${stderr}` }))); }
+/** Executes only fixed diagnostic binaries with no shell and bounded output. */
+function execute(file: string, args: string[], timeout: number): Promise<{ ok: boolean; output: string }> { return new Promise((resolve) => execFile(file, args, { shell: false, timeout, maxBuffer: 16 * 1024, windowsHide: true }, (error, stdout, stderr) => resolve({ ok: !error, output: `${stdout}\n${stderr}`.slice(-16 * 1024) }))); }
