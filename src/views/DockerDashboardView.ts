@@ -144,7 +144,7 @@ export class DockerDashboardView extends ItemView {
   }
 
   private renderAuthenticationGate(root: HTMLElement, profiles: DockerConnectionProfile[]): void {
-    this.sectionIntro(root, "Reconnect Docker hosts", "Docker details remain hidden until a secure session connection succeeds.");
+    this.sectionIntro(root, "Reconnect Docker connections", "Docker details remain hidden until a secure session connection succeeds.");
     const panel = this.panel(root, "Configured servers", "Connection state for this Obsidian session", "shield-check", "docker-connector__access-panel");
     const list = panel.createDiv({ cls: "docker-connector__access-list", attr: { "aria-label": "Configured Docker server connection states" } });
     for (const profile of profiles) {

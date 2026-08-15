@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Completed the Community Plugin compliance and documentation pass: lifecycle and settings hardening, current security/release guidance, expanded README and User Guide, numbered screenshot capture specifications, troubleshooting, FAQ, and manual release-test checklists.
+
 - Expanded the README and restored a comprehensive end-user User Guide with current connection walkthroughs, dashboard coverage, update and rollback guidance, troubleshooting, FAQ material, and explicit screenshot-capture requirements.
 - Route Docker Context profiles by their freshly discovered endpoint: local Unix sockets and Windows named pipes use the local Docker transport, while SSH Contexts retain Docker CLI dial-stdio.
 - Continue blocking insecure TCP and unsupported Context endpoints without a fallback transport.

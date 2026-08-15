@@ -97,6 +97,12 @@ For manual release installation, place the release assets `main.js`, `manifest.j
 
 For complete setup walkthroughs, connection fields, diagnostics, update behavior, recovery guidance, and troubleshooting, see the [Docker Connector User Guide](User%20Guide.md).
 
+## What update checking does—and does not do
+
+For eligible standalone containers, Docker Connector can compare the running image ID with the image currently resolved for the configured tagged image. The 24-hour stale interval and **Check now** are advisory checks. A check can ask Docker to pull/resolve image metadata, but it never stops, starts, restarts, or recreates a container.
+
+An available image is not automatically eligible for a standalone update. Docker Compose-managed containers remain under Compose’s control, and unsupported configurations are blocked before any mutation. When **Update** is available, it always begins with a preview and an explicit user decision. Read the [User Guide’s update and recovery chapters](User%20Guide.md#19-image-update-checking) before using it.
+
 ## Documentation
 
 - [Docker Connector User Guide](User%20Guide.md) — complete end-user manual, troubleshooting, FAQ, and screenshot checklist.
@@ -106,6 +112,8 @@ For complete setup walkthroughs, connection fields, diagnostics, update behavior
 - [Container Management](docs/Docker%20Connector%20-%20Container%20Management.md) and [Safe Container Updates](docs/Docker%20Connector%20-%20Safe%20Container%20Updates.md) — opt-in mutation boundaries and recovery behavior.
 - [Security Review](docs/Docker%20Connector%20-%20Security%20Review.md) — security and privacy boundaries.
 - [Testing](docs/Docker%20Connector%20-%20Testing.md) — automated and manual validation scope.
+- [Release Checklist](docs/Docker%20Connector%20-%20Release%20Checklist.md) — release-candidate and marketplace gates.
+- [Community Plugin Compliance](docs/Docker%20Connector%20-%20Obsidian%20Community%20Plugin%20Compliance.md) — current compliance record and remaining manual review.
 
 ## Known limitations
 

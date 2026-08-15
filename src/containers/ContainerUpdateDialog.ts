@@ -45,4 +45,4 @@ function short(value: string | undefined): string | undefined { return value ? v
 function repository(image: string): string { return image.slice(0, image.lastIndexOf(":")); }
 function tag(image: string): string { return image.slice(image.lastIndexOf(":") + 1); }
 function elapsed(startedAt: number | undefined): string { return startedAt ? `${Math.max(0, Math.floor((Date.now() - startedAt) / 1000))}s` : "0s"; }
-function connectionLabel(profile: DockerConnectionProfile): string { return profile.connectionType === "docker-tls" ? "Docker API with TLS" : profile.connectionType === "docker-context" ? "Docker Context" : profile.connectionType === "local" ? "Local Docker" : "SSH"; }
+function connectionLabel(profile: DockerConnectionProfile): string { return profile.connectionType === "docker-tls" ? "Remote Docker API (Mutual TLS)" : profile.connectionType === "docker-context" ? "Docker Context" : profile.connectionType === "local" ? "Local Docker Socket" : "Remote Docker via SSH"; }

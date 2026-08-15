@@ -4,17 +4,40 @@ tags: [docker-connector, release]
 
 # Release Checklist
 
-- Verify Applications groups only containers carrying `com.docker.compose.project`, excludes standalone containers, and displays update availability without an application-level action.
-- Verify the README and [[User Guide]] describe only the shipped dashboard tabs and supported transports, retain the desktop-only and Docker-privilege warnings, and make no claim of automatic updates, Compose mutation, credential persistence, telemetry, or official Marketplace approval.
-- Verify `manifest.json`, `package.json`, `package-lock.json`, and `versions.json` agree on the release version. Use a matching semantic-version GitHub tag, and attach `main.js`, `manifest.json`, and `styles.css` to the release.
-- Confirm the Community directory's plugin-ID and display-name requirements and uniqueness before submission. Resolve the repository policy for the currently tracked local `main.js` before publishing source.
+Use this checklist for a release candidate. Do not mark a manual item complete from automated coverage alone.
 
-- Verify [[Docker Connector - Container Management]] remains disabled on a fresh install.
-- Enable it in Obsidian, accept the warning, and confirm the Enabled status, success notice, and persisted `containerManagementEnabled: true` value.
-- Disable it and confirm the Disabled status, success notice, and persisted false value.
-- Exercise a write failure where practical and confirm the toggle returns to the authoritative value without a false success notice.
-- Against a disposable container only, verify Start accepts Docker's `204 No Content`, refreshes the container state, and keeps safe error details visible if Docker rejects an action.
-- Verify the action grid remains compact in both wide and narrow container detail panels.
-- On a standalone disposable container using `ghost:5-alpine`, use Check now and verify Update becomes enabled only when a distinct image ID is available; verify a current image hides Update. Confirm Proceed with update starts only after the preview warning and Cancel performs no mutation.
-- On a Docker Compose-managed container, verify Update remains disabled with its visible Compose explanation.
-- Rebuild and reload the plugin bundle before manual validation.
+## Package and release assets
+
+- [ ] Confirm `manifest.json`, `package.json`, `package-lock.json`, and `versions.json` have the intended matching version/minimum app version.
+- [ ] Confirm the manifest ID, display name, description, and `isDesktopOnly: true` are current.
+- [ ] Build `main.js` and attach exactly `main.js`, `manifest.json`, and `styles.css` to the matching release tag.
+- [ ] Confirm no source, `node_modules`, fixtures, credentials, or development configuration are needed by installers.
+
+## Automated checks
+
+- [ ] `npm test`
+- [ ] `npm run lint` (the project TypeScript typecheck)
+- [ ] `npm run build`
+- [ ] `git diff --check`
+- [ ] Review `npm audit`; record any unresolved advisory and its decision. Do not use a forced breaking upgrade without review.
+- [ ] Search for debug logs, credentials, private paths, `shell: true`, disabled TLS verification, Context mutation, and insecure Docker TCP.
+
+## Documentation and submission
+
+- [ ] README links resolve and match shipped behavior.
+- [ ] The canonical [[User Guide]] is current and its 01–42 screenshot specifications match the Appendix A checklist.
+- [ ] Screenshot captures are real, redacted, reviewed, and use no fabricated/blank placeholder assets.
+- [ ] [[Docker Connector - Obsidian Community Plugin Compliance]] and [[Docker Connector - Testing]] are current.
+- [ ] Confirm Community directory plugin-ID/name uniqueness and submission requirements. Do not claim approval before it occurs.
+
+## Manual functional validation — NOT YET VERIFIED
+
+- [ ] Local Docker Socket: positive connection and missing/permission-denied endpoint.
+- [ ] Docker Context: CLI discovery, local endpoint, SSH endpoint, changed/missing Context, and no active-Context mutation.
+- [ ] Remote Docker via SSH: password, private key, encrypted key/passphrase, host-key trust/mismatch, and remote Docker permission failure.
+- [ ] Remote Docker API (Mutual TLS): valid certificate chain, cert/key mismatch, CA failure, DNS SAN failure, and IP SAN failure.
+- [ ] Connections: Add, Edit, Reconnect, Retry, Delete, delete Current Environment, and delete final profile.
+- [ ] Views: Overview, Applications, Containers, Images, Volumes, Networks, and Connections.
+- [ ] Management disabled/enabled; Start, Stop, Shut down, Restart on disposable containers only.
+- [ ] Image current, Update available, Check now, 24-hour stale behavior, successful update, rollback, and backup-retained recovery on disposable containers only.
+- [ ] Obsidian reload, profile switching/deletion cleanup, error recovery, light/dark themes, keyboard navigation, and narrow panes.

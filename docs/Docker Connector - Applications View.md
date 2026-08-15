@@ -6,7 +6,7 @@ tags: [docker-connector, applications, docker-compose]
 
 [[Docker Connector - Applications View]] is a read-only operational view of Docker Compose projects. It groups normalized snapshot containers only when Docker provides `com.docker.compose.project`; standalone containers remain exclusively in [[Docker Connector - Containers View]].
 
-The view supports Local Docker, Docker Context, SSH, and Docker API mutual TLS because it uses no transport-specific logic. It filters and sorts cached snapshot summaries, reuses existing per-container image-update state, and never starts a new image check.
+The view supports Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS) because it uses no transport-specific logic. It filters and sorts cached snapshot summaries, reuses existing per-container image-update state, and never starts a new image check.
 
 Compose identity is authoritative: the application/project comes only from `com.docker.compose.project`, and each service comes only from `com.docker.compose.service`. Docker container names and image references remain separate Docker metadata. The view displays the exact service label: it never strips prefixes or otherwise guesses Compose identity from names, networks, images, or paths. A project-labelled container without a service label appears as an unlabelled Compose container.
 
