@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 const source = async (file: string) => readFile(file, "utf8");
@@ -52,5 +52,45 @@ describe("Obsidian Community Plugin release guard", () => {
     const production = (await Promise.all(files.map(source))).join("\n");
     for (const prohibited of ["innerHTML", "outerHTML", "insertAdjacentHTML", "localStorage", "sessionStorage"]) expect(production).not.toContain(prohibited);
     expect(production).not.toMatch(/saveData\([^)]*(password|passphrase|privateKey|certificate)/i);
+  });
+
+  it("keeps lifecycle cleanup and scoped interactive UI contracts in production source", async () => {
+    const [main, dashboard, styles] = await Promise.all([source("src/main.ts"), source("src/views/DockerDashboardView.ts"), source("styles.css")]);
+    expect(main).toMatch(/containerImageUpdates\.clearAll\(\)/);
+    expect(main).toMatch(/connectionFactory\.disconnectAll\(\)/);
+    expect(main).toMatch(/workspace\.detachLeavesOfType/);
+    expect(dashboard).toMatch(/removeSettingsListener\?\.\(\)/);
+    expect(dashboard).toMatch(/window\.clearInterval\(this\.relativeTimeTimer\)/);
+    expect(styles).not.toMatch(/(^|\n)button\s*\{/);
+    expect(styles).not.toMatch(/(^|\n)(input|select)\s*\{/);
+    expect(styles).not.toMatch(/@import|https?:\/\//);
+    expect(styles).toMatch(/\.docker-connector/);
+  });
+
+  it("ships documentation with valid README links and a complete screenshot capture plan", async () => {
+    const [readme, guide] = await Promise.all([source("README.md"), source("User Guide.md")]);
+    const links = [...readme.matchAll(/\]\(([^)#]+)(?:#[^)]+)?\)/g)].map((match) => decodeURIComponent(match[1]));
+    await Promise.all(links.filter((link) => !/^[a-z]+:/i.test(link)).map((link) => access(link)));
+
+    const headings = [...guide.matchAll(/^### Screenshot (\d{2}) —/gm)].map((match) => match[1]);
+    const placeholders = [...guide.matchAll(/^> \*\*Screenshot placeholder (\d{2})\*\*/gm)].map((match) => match[1]);
+    const filenames = [...guide.matchAll(/^> \*\*Suggested filename:\*\* `[^`/]+(?:\/[^`/]+)*\/(\d{2})-[^`]+`$/gm)].map((match) => match[1]);
+    const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
+    const expected = Array.from({ length: 42 }, (_, index) => String(index + 1).padStart(2, "0"));
+    expect(headings).toEqual(expected);
+    expect(placeholders).toEqual(expected);
+    expect(filenames).toEqual(expected);
+    expect(checklist).toEqual(expected);
+    expect(guide).not.toMatch(/!\[[^\]]*\]\([^)]*user-guide\//);
+  });
+
+  it("keeps release artifacts free of embedded credential material", async () => {
+    const release = await Promise.all([source("main.js"), source("manifest.json"), source("styles.css")]);
+    const contents = release.join("\n");
+    // ssh2 emits PEM parser/formatter strings (including its fixed Ed25519
+    // capability probe) as part of the SSH implementation. Scan for project
+    // fixtures and sentinels instead of treating that dependency code as a key.
+    expect(contents).not.toContain("ssh2/test/fixtures");
+    expect(contents).not.toContain("SECRET_TOKEN=do-not-render");
   });
 });
