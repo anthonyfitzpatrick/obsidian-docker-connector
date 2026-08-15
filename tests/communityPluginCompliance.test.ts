@@ -77,11 +77,15 @@ describe("Obsidian Community Plugin release guard", () => {
     const filenames = [...guide.matchAll(/^> \*\*Suggested filename:\*\* `[^`/]+(?:\/[^`/]+)*\/(\d{2})-[^`]+`$/gm)].map((match) => match[1]);
     const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
     const expected = Array.from({ length: 42 }, (_, index) => String(index + 1).padStart(2, "0"));
-    expect(headings).toEqual(expected);
-    expect(placeholders).toEqual(expected);
-    expect(filenames).toEqual(expected);
+    expect([...headings].sort()).toEqual(expected);
+    expect([...placeholders].sort()).toEqual(expected);
+    expect([...filenames].sort()).toEqual(expected);
     expect(checklist).toEqual(expected);
     expect(guide).not.toMatch(/!\[[^\]]*\]\([^)]*user-guide\//);
+    const appendixStart = guide.indexOf("# Appendix A — Screenshot production checklist");
+    expect(appendixStart).toBeGreaterThan(0);
+    expect(guide.slice(appendixStart)).not.toMatch(/^### Screenshot |^> \*\*Screenshot placeholder/m);
+    expect([...guide.matchAll(/^> \*\*Screenshot placeholder \d{2}\*\*/gm)].every((match) => match.index! < appendixStart)).toBe(true);
   });
 
   it("keeps release artifacts free of embedded credential material", async () => {
