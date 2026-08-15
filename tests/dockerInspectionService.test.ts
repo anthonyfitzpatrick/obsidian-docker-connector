@@ -45,6 +45,21 @@ describe("DockerInspectionService", () => {
     const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(tls);
     expect(snapshot).toMatchObject({ status: "online", hostId: "tls" }); expect(calls.sort()).toEqual(Object.keys(responses).sort());
   });
+
+  it("returns a bounded degraded snapshot when one inventory endpoint fails", async () => {
+    const transport = failingAfterVersion(new DockerConnectionError("DOCKER_API_REQUEST_FAILED", "Docker rejected /networks."));
+    const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(profile);
+
+    expect(snapshot).toEqual(expect.objectContaining({ hostId: profile.id, status: "degraded", error: "Docker rejected /networks.", containers: [], images: [], volumes: [], networks: [] }));
+  });
+
+  it("contains malformed optional inventory data instead of leaking an exception", async () => {
+    const responses: Record<string, unknown> = { "/version": { Version: "1", ApiVersion: "1.0" }, "/info": { OperatingSystem: "Linux", Architecture: "x86_64", KernelVersion: "k", NCPU: 1, MemTotal: 1 }, "/containers/json?all=true": [], "/images/json": [], "/volumes": {}, "/networks": [] };
+    const transport: DockerTransport = { profile, connect: async () => undefined, disconnect: async () => undefined, isConnected: () => true, request: async (request) => responses[request.path] as never, testConnection: async () => ({ success: true, steps: [] }) };
+    const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(profile);
+
+    expect(snapshot).toMatchObject({ status: "online", volumes: [] });
+  });
 });
 
 function failingTransport(error: DockerConnectionError): DockerTransport {
@@ -54,6 +69,23 @@ function failingTransport(error: DockerConnectionError): DockerTransport {
     disconnect: async () => undefined,
     isConnected: () => false,
     request: async () => { throw error; },
+    testConnection: async () => ({ success: false, steps: [] })
+  };
+}
+
+function failingAfterVersion(error: DockerConnectionError): DockerTransport {
+  return {
+    profile,
+    connect: async () => undefined,
+    disconnect: async () => undefined,
+    isConnected: () => true,
+    request: async (request) => {
+      if (request.path === "/networks") throw error;
+      if (request.path === "/version") return { Version: "1", ApiVersion: "1.0" } as never;
+      if (request.path === "/info") return { OperatingSystem: "Linux", Architecture: "x86_64", KernelVersion: "k", NCPU: 1, MemTotal: 1 } as never;
+      if (request.path === "/volumes") return { Volumes: [] } as never;
+      return [] as never;
+    },
     testConnection: async () => ({ success: false, steps: [] })
   };
 }

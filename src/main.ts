@@ -22,6 +22,7 @@ import { connectionCapabilities } from "./connections/DockerConnectionCapabiliti
 import { DockerContainerActionService, type ContainerActionProgress, type ContainerUpdateProgressEvent } from "./services/DockerContainerActionService";
 import { getContainerUpdateEligibility, type ContainerUpdatePreview } from "./services/ContainerUpdatePlan";
 import { ContainerImageUpdateService, type ContainerImageUpdateStatus } from "./services/ContainerImageUpdateService";
+import { ProfileRefreshTracker } from "./services/ProfileRefreshTracker";
 
 /** Describes a persisted preference change that an open view may need to reflect. */
 export type DockerConnectorSettingsChange = { key: keyof DockerConnectorSettings; previousValue: unknown; value: unknown };
@@ -58,6 +59,7 @@ export default class DockerConnectorPlugin extends Plugin {
   readonly containerImageUpdates = new ContainerImageUpdateService(this.connectionFactory);
   private refreshTimer?: number;
   private refreshGeneration = 0;
+  private readonly profileRefreshes = new ProfileRefreshTracker();
   private refreshPromise?: Promise<void>;
   private unloading = false;
   private readonly settingsListeners = new Set<(change: DockerConnectorSettingsChange) => void>();
@@ -183,12 +185,17 @@ export default class DockerConnectorPlugin extends Plugin {
   }
   private async runRefresh(): Promise<void> {
     const generation = ++this.refreshGeneration;
-    const results = await Promise.all(this.settings.profiles.filter((profile) => profile.enabled && connectionCapabilities(profile).supportsAutomaticRefresh).map((profile) => this.inspectionService.inspectHost(profile)));
+    const operations = this.settings.profiles
+      .filter((profile) => profile.enabled && connectionCapabilities(profile).supportsAutomaticRefresh)
+      .map((profile) => ({ profile, token: this.profileRefreshes.begin(profile.id) }));
+    const results = await Promise.all(operations.map(({ profile }) => this.inspectionService.inspectHost(profile)));
     if (this.unloading || generation !== this.refreshGeneration) return;
-    for (const snapshot of results) {
+    for (const [index, snapshot] of results.entries()) {
+      const operation = operations[index];
       // A profile can be deleted while an earlier read-only refresh is still
-      // completing. Never republish state for a profile that no longer exists.
-      if (!this.settings.profiles.some((profile) => profile.id === snapshot.hostId)) continue;
+      // completing. An edit or a newer retry can likewise supersede this
+      // request, so never republish a stale snapshot for the stable profile ID.
+      if (!operation || snapshot.hostId !== operation.profile.id || !this.profileRefreshes.isCurrent(snapshot.hostId, operation.token) || !this.settings.profiles.some((profile) => profile.id === snapshot.hostId)) continue;
       const previous = this.snapshots.get(snapshot.hostId);
       const retained = snapshot.status === "offline" && previous?.status === "online" ? { ...previous, status: "offline" as const, stale: true, refreshedAt: snapshot.refreshedAt, error: snapshot.error } : snapshot;
       this.snapshots.set(snapshot.hostId, retained);
@@ -212,22 +219,28 @@ export default class DockerConnectorPlugin extends Plugin {
   async reconnectHost(profile: DockerConnectionProfile, credential?: string): Promise<void> {
     const normalized = normalizeProfile(profile);
     if (credential !== undefined) this.setRuntimeCredential(normalized, credential);
+    const token = this.profileRefreshes.begin(normalized.id);
     const snapshot = await this.inspectionService.inspectHost(normalized);
-    if (!this.settings.profiles.some((item) => item.id === normalized.id)) return;
+    if (!this.profileRefreshes.isCurrent(normalized.id, token) || !this.settings.profiles.some((item) => item.id === normalized.id)) return;
     this.snapshots.set(normalized.id, snapshot);
     this.refreshOpenDashboard();
   }
   async retryHost(profile: DockerConnectionProfile, scheduleUpdateChecks = true): Promise<void> {
-    const snapshot = await this.inspectionService.inspectHost(normalizeProfile(profile));
-    if (!this.settings.profiles.some((item) => item.id === profile.id)) return;
+    const normalized = normalizeProfile(profile);
+    const token = this.profileRefreshes.begin(normalized.id);
+    const snapshot = await this.inspectionService.inspectHost(normalized);
+    if (!this.profileRefreshes.isCurrent(normalized.id, token) || !this.settings.profiles.some((item) => item.id === normalized.id)) return;
     const previous = this.snapshots.get(profile.id);
     const retained = snapshot.status === "offline" && previous?.status === "online" ? { ...previous, status: "offline" as const, stale: true, refreshedAt: snapshot.refreshedAt, error: snapshot.error } : snapshot; this.snapshots.set(profile.id, retained); this.containerDetailService.invalidateHost(profile.id); this.imageDetailService.invalidateHost(profile.id); this.volumeDetailService.invalidateHost(profile.id); if (scheduleUpdateChecks) this.scheduleContainerImageUpdateChecks(profile, retained);
     this.refreshOpenDashboard();
   }
   async disconnectProfile(profileId: string): Promise<void> { await this.connectionFactory.disconnect(profileId); }
+  /** Prevents in-flight inspection of a profile's previous configuration from publishing. */
+  invalidateProfileRefresh(profileId: string): void { this.profileRefreshes.clear(profileId); }
   hasActiveContainerAction(profileId: string): boolean { return this.containerActions.hasActiveProfile(profileId); }
   /** Clears every runtime-only record owned by a deleted connection profile. */
   clearDeletedProfileState(profileId: string): void {
+    this.profileRefreshes.clear(profileId);
     this.snapshots.delete(profileId);
     this.contextLifecycle.clear(profileId);
     this.containerDetailService.invalidateHost(profileId);

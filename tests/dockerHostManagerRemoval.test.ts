@@ -5,7 +5,7 @@ import type { LocalDockerProfile } from "../src/models/DockerConnectionProfile";
 const profile = (id: string): LocalDockerProfile => ({ id, name: id, connectionType: "local", localEndpoint: { type: "unix-socket", socketPath: "/var/run/docker.sock" }, enabled: true, createdAt: "", updatedAt: "" });
 
 function subject(profiles = [profile("one"), profile("two")]) {
-  const plugin = { settings: { profiles }, saveSettings: vi.fn(async () => undefined), hasActiveContainerAction: vi.fn(() => false), disconnectProfile: vi.fn(async () => undefined), clearRuntimeCredentials: vi.fn(), clearDeletedProfileState: vi.fn(), refreshDashboard: vi.fn() };
+  const plugin = { settings: { profiles }, saveSettings: vi.fn(async () => undefined), hasActiveContainerAction: vi.fn(() => false), disconnectProfile: vi.fn(async () => undefined), invalidateProfileRefresh: vi.fn(), clearRuntimeCredentials: vi.fn(), clearDeletedProfileState: vi.fn(), refreshDashboard: vi.fn() };
   return { plugin, manager: new DockerHostManager(plugin as never) };
 }
 
@@ -15,6 +15,7 @@ describe("DockerHostManager profile deletion", () => {
     await manager.remove("one");
     expect(plugin.settings.profiles.map((item) => item.id)).toEqual(["two"]);
     expect(plugin.saveSettings).toHaveBeenCalledOnce();
+    expect(plugin.invalidateProfileRefresh).not.toHaveBeenCalled();
     expect(plugin.disconnectProfile).toHaveBeenCalledWith("one");
     expect(plugin.clearRuntimeCredentials).toHaveBeenCalledWith("one");
     expect(plugin.clearDeletedProfileState).toHaveBeenCalledWith("one");
