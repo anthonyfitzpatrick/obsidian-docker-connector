@@ -34,4 +34,10 @@ describe("DockerHostManager profile deletion", () => {
     await expect(manager.remove("one")).rejects.toThrow("currently in progress");
     expect(plugin.saveSettings).not.toHaveBeenCalled();
   });
+  it("blocks connection edits while an active container operation still needs its transport", async () => {
+    const { plugin, manager } = subject(); plugin.hasActiveContainerAction.mockReturnValue(true);
+    await expect(manager.update({ ...profile("one"), name: "Changed" })).rejects.toThrow("currently in progress");
+    expect(plugin.saveSettings).not.toHaveBeenCalled();
+    expect(plugin.disconnectProfile).not.toHaveBeenCalled();
+  });
 });

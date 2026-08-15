@@ -65,13 +65,13 @@ describe("Docker Context profile persistence", () => {
     const existing = profileFor();
     const changed = updateDockerContextProfile({ existingProfile: existing, name: "Changed", selectedContext: { ...context, name: "other" }, now: "2026-08-05T13:00:00.000Z" });
     const contextLifecycle = { clear: vi.fn() };
-    const plugin = { settings: { profiles: [existing] }, snapshots: new Map(), contextLifecycle, disconnectProfile: async () => undefined, invalidateProfileRefresh: vi.fn(), saveSettings: async () => undefined };
+    const plugin = { settings: { profiles: [existing] }, snapshots: new Map(), contextLifecycle, hasActiveContainerAction: vi.fn(() => false), disconnectProfile: async () => undefined, invalidateProfileRefresh: vi.fn(), saveSettings: async () => undefined };
     await new DockerHostManager(plugin as never).update(changed);
     expect(plugin.settings.profiles).toEqual([changed]);
     expect(contextLifecycle.clear).toHaveBeenCalledWith("context-id");
     expect(plugin.invalidateProfileRefresh).toHaveBeenCalledWith("context-id");
 
-    const failing = { settings: { profiles: [existing] }, snapshots: new Map(), contextLifecycle: { clear: vi.fn() }, disconnectProfile: async () => undefined, invalidateProfileRefresh: vi.fn(), saveSettings: async () => { throw new Error("disk unavailable"); } };
+    const failing = { settings: { profiles: [existing] }, snapshots: new Map(), contextLifecycle: { clear: vi.fn() }, hasActiveContainerAction: vi.fn(() => false), disconnectProfile: async () => undefined, invalidateProfileRefresh: vi.fn(), saveSettings: async () => { throw new Error("disk unavailable"); } };
     await expect(new DockerHostManager(failing as never).update(changed)).rejects.toThrow("disk unavailable");
     expect(failing.settings.profiles).toEqual([existing]);
   });
