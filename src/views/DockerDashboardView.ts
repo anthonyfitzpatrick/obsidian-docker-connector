@@ -280,14 +280,14 @@ export class DockerDashboardView extends ItemView {
     const header = card.createDiv({ cls: "dc-connection-card-header" });
     const identity = header.createDiv({ cls: "dc-connection-identity" });
     const icon = identity.createDiv({ cls: "dc-host-card-icon", attr: { "aria-hidden": "true" } }); setIcon(icon, "server");
-    const copy = identity.createDiv(); copy.createEl("h3", { text: profile.name });
-    copy.createSpan({ text: profile.description || profile.category || "Configured Docker host", cls: "docker-connector__muted" });
-    copy.createSpan({ text: getDockerConnectionTypeDisplayName(profile.connectionType), cls: "docker-connector__muted" });
+    const copy = identity.createDiv(); copy.createEl("h3", { text: profile.name, cls: "dc-host-card-title" });
+    copy.createSpan({ text: profile.description || profile.category || "Configured Docker host", cls: "dc-host-card-meta docker-connector__muted" });
+    copy.createSpan({ text: getDockerConnectionTypeDisplayName(profile.connectionType), cls: "dc-host-card-meta docker-connector__muted" });
     header.appendChild(this.statusPill(status));
 
     if (profile.connectionType === "docker-context") {
       const lifecycle = this.plugin.contextLifecycle.get(profile.id);
-      const endpoint = card.createDiv({ cls: "dc-connection-endpoint" });
+      const endpoint = card.createDiv({ cls: "dc-host-card-endpoint" });
       endpoint.createSpan({ text: `Context: ${profile.contextName}` });
       endpoint.createSpan({ text: `Endpoint: ${profile.contextSnapshot.endpointType} · ${profile.contextSnapshot.endpointDisplay ?? "—"}`, cls: "docker-connector__muted" });
       endpoint.createSpan({ text: `Lifecycle: ${contextLifecycleLabel(lifecycle?.state)}`, cls: "docker-connector__muted" });
@@ -304,13 +304,13 @@ export class DockerDashboardView extends ItemView {
       return;
     }
     if (profile.connectionType === "docker-tls") {
-      const endpoint = card.createDiv({ cls: "dc-connection-endpoint" }); endpoint.createSpan({ text: `${profile.host}:${profile.port}` }); endpoint.createSpan({ text: `Server name: ${profile.serverName} · ${titleCase(status)}`, cls: "docker-connector__muted" });
+      const endpoint = card.createDiv({ cls: "dc-host-card-endpoint" }); endpoint.createSpan({ text: `${profile.host}:${profile.port}` }); endpoint.createSpan({ text: `Server name: ${profile.serverName} · ${titleCase(status)}`, cls: "docker-connector__muted" });
       if (snapshot) { const inventory = card.createDiv({ cls: "dc-connection-inventory" }); [["Containers", snapshot.containers.length], ["Images", snapshot.images.length], ["Volumes", snapshot.volumes.length], ["Networks", snapshot.networks.length]].forEach(([label, value]) => { const metric = inventory.createDiv(); metric.createEl("strong", { text: String(value) }); metric.createSpan({ text: String(label) }); }); card.createDiv({ text: snapshot.system ? `Docker ${snapshot.system.dockerVersion} · API ${snapshot.system.apiVersion}` : snapshot.error ?? "Docker details unavailable", cls: "docker-connector__muted" }); }
       const footer = card.createDiv({ cls: "dc-connection-card-footer" }); const primaryActions = footer.createDiv({ cls: "dc-connection-card-actions" }); const open = primaryActions.createEl("button", { text: "Open dashboard", cls: "mod-cta" }); open.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); }; this.addEditAction(primaryActions, profile); this.addReconnectAction(primaryActions, profile, status); this.addDeleteAction(primaryActions, profile); const management = footer.createDiv({ cls: "dc-connection-card-management" }); this.addCardManagementSwitch(management, profile, status);
       return;
     }
 
-    const endpoint = card.createDiv({ cls: "dc-connection-endpoint" });
+    const endpoint = card.createDiv({ cls: "dc-host-card-endpoint" });
     const endpointIcon = endpoint.createSpan({ attr: { "aria-hidden": "true" } }); setIcon(endpointIcon, "network");
     endpoint.createSpan({ text: connectionSummary(profile) });
     if (profile.connectionType !== "ssh") endpoint.createSpan({ text: getDockerConnectionTypeDisplayName(profile.connectionType), cls: "docker-connector__muted" });

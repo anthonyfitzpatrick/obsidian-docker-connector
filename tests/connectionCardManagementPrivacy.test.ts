@@ -38,7 +38,7 @@ describe("connection card management and SSH privacy", () => {
     const summary = view.slice(view.indexOf("function connectionSummary"));
     expect(summary).toContain("`${profile.sshHost}:${profile.sshPort}`");
     expect(summary).not.toContain("sshUsername");
-    const endpointStart = view.lastIndexOf('const endpoint = card.createDiv({ cls: "dc-connection-endpoint" });');
+    const endpointStart = view.lastIndexOf('const endpoint = card.createDiv({ cls: "dc-host-card-endpoint" });');
     const endpoint = view.slice(endpointStart, view.indexOf("if (snapshot)", endpointStart));
     expect(endpoint).toContain('if (profile.connectionType !== "ssh")');
     expect(endpoint).not.toContain('"Password"');
