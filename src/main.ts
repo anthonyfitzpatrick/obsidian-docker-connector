@@ -59,7 +59,7 @@ export default class DockerConnectorPlugin extends Plugin {
   readonly publicImageReleases = new PublicImageReleaseService();
   readonly contextLifecycle = new DockerContextLifecycleCache();
   readonly managementAuthorization = new ProfileManagementAuthorization();
-  readonly containerActions = new DockerContainerActionService(this.connectionFactory, (profileId) => this.managementAuthorization.isEnabled(profileId));
+  readonly containerActions = new DockerContainerActionService(this.connectionFactory, (profileId) => this.isProfileManagementEnabled(profileId));
   readonly containerImageUpdates = new ContainerImageUpdateService(this.connectionFactory);
   private refreshTimer?: number;
   private refreshGeneration = 0;
@@ -162,10 +162,10 @@ export default class DockerConnectorPlugin extends Plugin {
     await save;
   }
   onSettingsChanged(listener: (change: DockerConnectorSettingsChange) => void): () => void { this.settingsListeners.add(listener); return () => this.settingsListeners.delete(listener); }
-  isProfileManagementEnabled(profileId: string): boolean { return this.managementAuthorization.isEnabled(profileId); }
+  isProfileManagementEnabled(profileId: string): boolean { return this.managementAuthorization.isEnabled(profileId) && this.snapshots.get(profileId)?.status === "online"; }
   setProfileManagementEnabled(profileId: string, enabled: boolean): boolean {
     const profile = this.settings.profiles.find((item) => item.id === profileId);
-    if (!profile || this.snapshots.get(profileId)?.status !== "online") return false;
+    if (!profile || this.snapshots.get(profileId)?.status !== "online" || !connectionCapabilities(profile).supportsContainerActions) return false;
     const previousValue = this.managementAuthorization.isEnabled(profileId);
     if (enabled) this.managementAuthorization.enable(profileId); else this.managementAuthorization.disable(profileId);
     this.emitSettingsChanged({ key: "managementAuthorization", previousValue, value: enabled });
@@ -203,7 +203,7 @@ export default class DockerConnectorPlugin extends Plugin {
       if (!operation || snapshot.hostId !== operation.profile.id || !this.profileRefreshes.isCurrent(snapshot.hostId, operation.token) || !this.settings.profiles.some((profile) => profile.id === snapshot.hostId)) continue;
       const previous = this.snapshots.get(snapshot.hostId);
       const retained = snapshot.status === "offline" && previous?.status === "online" ? { ...previous, status: "offline" as const, stale: true, refreshedAt: snapshot.refreshedAt, error: snapshot.error } : snapshot;
-      this.snapshots.set(snapshot.hostId, retained);
+      this.publishSnapshot(snapshot.hostId, retained);
       this.containerDetailService.invalidateHost(snapshot.hostId); this.imageDetailService.invalidateHost(snapshot.hostId); this.volumeDetailService.invalidateHost(snapshot.hostId);
       const profile = this.settings.profiles.find((item) => item.id === snapshot.hostId); if (profile) this.scheduleContainerImageUpdateChecks(profile, retained);
     }
@@ -227,7 +227,7 @@ export default class DockerConnectorPlugin extends Plugin {
     const token = this.profileRefreshes.begin(normalized.id);
     const snapshot = await this.inspectionService.inspectHost(normalized);
     if (!this.profileRefreshes.isCurrent(normalized.id, token) || !this.settings.profiles.some((item) => item.id === normalized.id)) return;
-    this.snapshots.set(normalized.id, snapshot);
+    this.publishSnapshot(normalized.id, snapshot);
     this.refreshOpenDashboard();
   }
   async retryHost(profile: DockerConnectionProfile, scheduleUpdateChecks = true): Promise<void> {
@@ -236,7 +236,7 @@ export default class DockerConnectorPlugin extends Plugin {
     const snapshot = await this.inspectionService.inspectHost(normalized);
     if (!this.profileRefreshes.isCurrent(normalized.id, token) || !this.settings.profiles.some((item) => item.id === normalized.id)) return;
     const previous = this.snapshots.get(profile.id);
-    const retained = snapshot.status === "offline" && previous?.status === "online" ? { ...previous, status: "offline" as const, stale: true, refreshedAt: snapshot.refreshedAt, error: snapshot.error } : snapshot; this.snapshots.set(profile.id, retained); this.containerDetailService.invalidateHost(profile.id); this.imageDetailService.invalidateHost(profile.id); this.volumeDetailService.invalidateHost(profile.id); if (scheduleUpdateChecks) this.scheduleContainerImageUpdateChecks(profile, retained);
+    const retained = snapshot.status === "offline" && previous?.status === "online" ? { ...previous, status: "offline" as const, stale: true, refreshedAt: snapshot.refreshedAt, error: snapshot.error } : snapshot; this.publishSnapshot(profile.id, retained); this.containerDetailService.invalidateHost(profile.id); this.imageDetailService.invalidateHost(profile.id); this.volumeDetailService.invalidateHost(profile.id); if (scheduleUpdateChecks) this.scheduleContainerImageUpdateChecks(profile, retained);
     this.refreshOpenDashboard();
   }
   async disconnectProfile(profileId: string): Promise<void> { await this.connectionFactory.disconnect(profileId); }
@@ -283,6 +283,7 @@ export default class DockerConnectorPlugin extends Plugin {
   private setRuntimeCredential(profile: DockerConnectionProfile, credential: string): void { if (profile.connectionType === "gateway") this.setRuntimeGatewayToken(profile.id, credential); else if (profile.connectionType === "ssh" && profile.authentication.type === "password") this.setRuntimePassword(profile.id, credential); else if (profile.connectionType === "ssh") this.setRuntimePrivateKeyPassphrase(profile.id, credential); else if (profile.connectionType === "docker-tls") this.setRuntimeTlsClientKeyPassphrase(profile.id, credential); }
   private scheduleContainerImageUpdateChecks(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot): void { if (this.unloading || !this.managementAuthorization.isEnabled(profile.id) || snapshot.status !== "online") return; snapshot.containers.forEach((container) => { const eligibility = getContainerUpdateEligibility(container.image, container.labels); if (eligibility.eligible && this.containerImageUpdates.isStale(profile.id, container.id)) void this.containerImageUpdates.check(profile, container.id).catch(() => undefined); }); }
   private refreshOpenDashboard(): void { this.app.workspace.getLeavesOfType(DOCKER_CONNECTOR_VIEW).forEach((leaf) => void (leaf.view as DockerDashboardView).render()); }
+  private publishSnapshot(profileId: string, snapshot: DockerHostSnapshot): void { if (this.managementAuthorization.revokeOnConnectionLoss(profileId, snapshot.status)) this.emitSettingsChanged({ key: "managementAuthorization", previousValue: true, value: false }); this.snapshots.set(profileId, snapshot); }
   private runStartupRefresh(): void { const refresh = this.startupRefresh.run(() => this.refreshAll()); if (refresh) void refresh.catch(() => undefined); }
 }
 

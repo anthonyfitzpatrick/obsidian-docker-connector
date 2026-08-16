@@ -4,9 +4,9 @@ tags: [docker-connector, container-management]
 
 # Container Management
 
-[[Docker Connector]] is read-only by default. Enable **Container management** from Overview for each trusted Docker connection. Authorization is profile-scoped, session-only, resets after restarting or reloading Obsidian, and is cleared when a connection is edited or deleted. Credentials remain session-only.
+[[Docker Connector]] is read-only by default. Use the compact **Container management** header switch for an individual Online trusted Docker connection. Authorization is profile-scoped and session-only, resets after restarting or reloading Obsidian, and is cleared on connection loss, edit, or deletion. Reconnecting never restores authorization; enable it explicitly again. Applications remain read-only and Compose-managed standalone Update remains blocked. Credentials remain session-only.
 
-The canonical persisted field is `containerManagementEnabled`. Enabling first asks for confirmation. While the setting is being written, its toggle is disabled and the Settings tab displays **Status: Saving…**. Only after persistence succeeds does Docker Connector emit the settings-change event that rerenders open Docker Connector views; no Docker refresh is needed for this UI change.
+Management authorization is never persisted. Enabling first asks for confirmation. The switch is unavailable for All Docker hosts and for any non-Online connection.
 
 The Settings tab always shows the authoritative runtime state: **Status: Disabled**, **Status: Enabled**, **Status: Saving…**, or **Status: Save failed**. A successful change shows a notice. A failed save restores both the canonical runtime value and the visual toggle to their prior value, shows a bounded safe error notice, and does not emit a success event. Enabling the setting alone performs no Docker mutation.
 

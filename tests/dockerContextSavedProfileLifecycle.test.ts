@@ -13,7 +13,7 @@ describe("saved Docker Context profile status lifecycle", () => {
   });
 
   it("publishes the resulting snapshot by profile ID and includes Contexts at startup/manual refresh", () => {
-    expect(mainSource).toContain("this.snapshots.set(profile.id, retained)");
+    expect(mainSource).toContain("this.publishSnapshot(profile.id, retained)");
     expect(mainSource).toContain("this.refreshOpenDashboard();");
     expect(mainSource).toContain("connectionCapabilities(profile).supportsAutomaticRefresh");
     expect(mainSource).toContain("this.runStartupRefresh();");

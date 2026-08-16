@@ -36,7 +36,7 @@ Plain unauthenticated Docker TCP is not supported.
 
 Docker Connector is designed to make its boundaries visible:
 
-- It is read-only until **Container management** is enabled in Settings.
+- It is read-only until **Container management** is enabled for the selected Online connection from the header switch.
 - Its normal Docker Engine client is limited to approved GET requests. Start, Stop, Shut down, Restart, and Update use dedicated, typed operations rather than a general-purpose Docker API console.
 - Passwords and private-key passphrases are runtime-only. They are kept in memory for the current Obsidian session and are not saved in plugin settings.
 - Remote Docker via SSH keeps Docker API traffic inside the SSH session. It does not require a direct Docker API listener.
@@ -751,7 +751,7 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 
 ## 20. Container management
 
-**Container management** is disabled by default and resets to disabled after restarting or reloading Obsidian. In Overview, select an individual Docker connection and enable it only for that connection when you trust it. Enabling it asks for confirmation because lifecycle and update actions change the Docker host.
+**Container management** is disabled by default and resets after restarting or reloading Obsidian. Select an individual Online Docker connection and use the header switch to enable it only for that connection when you trust it. Enabling asks for confirmation because lifecycle and update actions change the Docker host. It turns off immediately if the connection is lost and remains off after reconnecting until explicitly enabled again.
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
@@ -761,7 +761,7 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > **Capture:** Read-only Actions panel and enable guidance.
 >
 > **How to capture this screenshot:**
-> 1. Open Docker Connector Settings and ensure **Container management** is disabled.
+> 1. Select an individual Online connection and ensure the header **Container management** switch is off.
 > 2. Return to **Containers** and select any test container.
 > 3. Open the **Actions** area.
 > 4. Confirm it displays the read-only message/guidance rather than lifecycle controls.

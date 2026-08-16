@@ -16,6 +16,7 @@ describe("profile-scoped container management", () => {
     authorization.clear(); expect(authorization.isEnabled("c")).toBe(false);
   });
   it("starts every fresh authorization store read-only", () => { expect(new ProfileManagementAuthorization().isEnabled("a")).toBe(false); });
+  it("revokes only the affected authorization when its current state leaves Online", () => { const authorization = new ProfileManagementAuthorization(); authorization.enable("a"); authorization.enable("b"); for (const status of ["offline", "degraded", "authentication-required", "unknown", "connecting"] as const) { authorization.enable("a"); expect(authorization.revokeOnConnectionLoss("a", status)).toBe(true); expect(authorization.isEnabled("a")).toBe(false); expect(authorization.isEnabled("b")).toBe(true); } });
   it("removes authorization immediately when a profile is deleted", () => { const authorization = new ProfileManagementAuthorization(); authorization.enable("gone"); authorization.disable("gone"); expect(authorization.isEnabled("gone")).toBe(false); });
   it("permits multiple explicit profile authorizations without transferring them", () => { const authorization = new ProfileManagementAuthorization(); authorization.enable("a"); authorization.enable("c"); expect(["a", "b", "c"].map((id) => authorization.isEnabled(id))).toEqual([true, false, true]); });
   it("does not authorize an aggregate environment identity", () => { const authorization = new ProfileManagementAuthorization(); authorization.enable("a"); expect(authorization.isEnabled("all")).toBe(false); });
@@ -35,6 +36,6 @@ describe("profile-scoped container management", () => {
     expect(main).toMatch(/new ProfileManagementAuthorization/); expect(main).toMatch(/managementAuthorization\.clear\(\)/); expect(main).toMatch(/clearProfileManagementAuthorization\(profileId\)/);
     expect(settings).not.toMatch(/Container management/); expect(settings).not.toMatch(/containerManagementEnabled/);
     expect(actions).toMatch(/managementEnabled\(profile\.id\)/); expect(containers).toMatch(/isProfileManagementEnabled\(profile\.id\)/);
-    expect(dashboard).toMatch(/Enable management for this session/); expect(dashboard).toMatch(/selectedHostId === "all"/);
+    expect(main).toMatch(/revokeOnConnectionLoss/); expect(main).toMatch(/snapshots\.get\(profileId\)\?\.status === "online"/); expect(dashboard).toMatch(/role: "switch"/); expect(dashboard).toMatch(/selectedHostId === "all"/); expect(dashboard).not.toMatch(/renderManagementControl/);
   });
 });

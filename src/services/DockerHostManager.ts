@@ -15,7 +15,7 @@ export class DockerHostManager {
     const profiles = this.plugin.settings.profiles;
     const normalized = normalizeProfile(profile);
     this.plugin.settings.profiles = profiles.map((item) => item.id === normalized.id ? normalized : item);
-    try { await this.plugin.saveSettings(); this.plugin.invalidateProfileRefresh(profile.id); await this.plugin.disconnectProfile(profile.id); this.plugin.contextLifecycle.clear(profile.id); } catch (error) { this.plugin.settings.profiles = profiles; throw error; }
+    try { await this.plugin.saveSettings(); this.plugin.clearProfileManagementAuthorization?.(profile.id); this.plugin.invalidateProfileRefresh(profile.id); await this.plugin.disconnectProfile(profile.id); this.plugin.contextLifecycle.clear(profile.id); } catch (error) { this.plugin.settings.profiles = profiles; throw error; }
   }
   /** Removes only Docker Connector's saved profile and its runtime state. */
   async remove(profileId: string): Promise<void> {

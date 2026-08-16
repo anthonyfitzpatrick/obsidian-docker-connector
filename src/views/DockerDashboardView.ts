@@ -19,6 +19,7 @@ import { platformCapabilities } from "../platform/PlatformCapabilities";
 import { getDockerConnectionTypeDisplayName, getDockerConnectionTypePresentation } from "../connections/DockerConnectionTypePresentation";
 import { configuredServerConnection } from "./ConfiguredServerConnection";
 import { aggregateConnectionStatus, connectionStateSummary, profileConnectionStatus } from "../connections/ProfileConnectionState";
+import { connectionCapabilities } from "../connections/DockerConnectionCapabilities";
 import { OVERVIEW_METRIC_ACCENTS, type OverviewMetricAccent } from "../overview/OverviewMetricAccents";
 
 export const DOCKER_CONNECTOR_VIEW = "docker-connector-dashboard";
@@ -106,6 +107,7 @@ export class DockerDashboardView extends ItemView {
 
     const status = this.currentStatus(profiles);
     controls.appendChild(this.statusPill(status));
+    this.renderManagementSwitch(controls, profiles);
     const refreshInfo = controls.createDiv({ cls: "docker-connector__refresh-info" });
     refreshInfo.createSpan({ text: this.lastRefreshText(profiles) });
     refreshInfo.createSpan({ text: this.plugin.settings.automaticRefresh ? `Auto · ${this.plugin.settings.refreshIntervalMinutes} min` : "Auto refresh off", cls: "docker-connector__auto-refresh" });
@@ -185,26 +187,12 @@ export class DockerDashboardView extends ItemView {
 
     const grid = root.createDiv({ cls: "docker-connector__overview-grid" });
     const hasAttention = attention.length > 0;
-    this.renderManagementControl(grid, profiles);
     this.renderHostHealth(grid, profiles);
     if (hasAttention) this.renderAttention(grid, attention, true);
     if (!hasAttention) this.renderAttention(grid, attention);
   }
 
-  private renderManagementControl(root: HTMLElement, profiles: DockerConnectionProfile[]): void {
-    const panel = this.panel(root, "Container management", "Session-only authorization for explicit container actions", "shield-check");
-    if (this.selectedHostId === "all") { panel.createDiv({ text: "Container management is available only for an individual Docker connection.", cls: "docker-connector__muted" }); return; }
-    const profile = profiles.find((item) => item.id === this.selectedHostId);
-    const status = profile ? profileConnectionStatus(profile.id, this.plugin.snapshots) : undefined;
-    if (!profile) { panel.createDiv({ text: "Select a Docker connection to manage it.", cls: "docker-connector__muted" }); return; }
-    const enabled = this.plugin.isProfileManagementEnabled(profile.id);
-    panel.createEl("strong", { text: enabled ? "Enabled for this session" : "Read-only" });
-    panel.createDiv({ text: enabled ? "Lifecycle and standalone Update actions are allowed only for this connection until Obsidian restarts." : "Allows Start, Stop, Shut down, Restart and Update actions on this Docker connection for the current Obsidian session. Authorization resets when Obsidian restarts.", cls: "docker-connector__muted" });
-    const button = panel.createEl("button", { text: enabled ? "Disable management" : "Enable management for this session", cls: enabled ? "" : "mod-cta", attr: { "aria-label": `${enabled ? "Disable" : "Enable"} management for ${profile.name}` } });
-    button.disabled = !enabled && status !== "online";
-    if (!enabled && status !== "online") button.title = "Management can be enabled only while this connection is online.";
-    button.onclick = () => { if (!enabled && !globalThis.confirm("Container management allows Start, Stop, Shut down, Restart and Update actions on this Docker connection for the current Obsidian session.\n\nThis authorization resets when Obsidian restarts.")) return; this.plugin.setProfileManagementEnabled(profile.id, !enabled); };
-  }
+  private renderManagementSwitch(root: HTMLElement, profiles: DockerConnectionProfile[]): void { const profile = this.selectedHostId === "all" ? undefined : profiles.find((item) => item.id === this.selectedHostId); const available = Boolean(profile && profileConnectionStatus(profile.id, this.plugin.snapshots) === "online" && connectionCapabilities(profile).supportsContainerActions); const enabled = Boolean(profile && available && this.plugin.isProfileManagementEnabled(profile.id)); const control = root.createDiv({ cls: "dc-management-switch" }); const copy = control.createDiv(); copy.createSpan({ text: "Container management" }); copy.createEl("small", { text: !profile ? "Individual host required" : available ? enabled ? "Enabled" : "Read-only" : "Unavailable" }); const input = control.createEl("input", { type: "checkbox", attr: { role: "switch", "aria-label": "Container management" } }); input.checked = enabled; input.disabled = !available; input.title = !profile ? "Select an individual Online Docker connection." : !available ? "Container management is available only while this connection is Online." : "Enable or disable container management for this connection."; input.onchange = () => { if (!profile) return; if (input.checked && !globalThis.confirm(`Enable container management for ${profile.name}?\n\nThis allows Start, Stop, Shut down, Restart and standalone Update actions for this Docker connection during the current Obsidian session. Management turns off automatically if the connection is lost or Obsidian restarts.`)) { input.checked = false; return; } if (!this.plugin.setProfileManagementEnabled(profile.id, input.checked)) input.checked = false; void this.render(); }; }
 
   private renderHostHealth(root: HTMLElement, profiles: DockerConnectionProfile[]): void {
     const panel = this.panel(root, "Host health", "Activity and Engine details", "heart-pulse", "docker-connector__panel--wide");

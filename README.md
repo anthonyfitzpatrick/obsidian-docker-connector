@@ -2,7 +2,7 @@
 
 Docker Connector brings multi-host Docker monitoring and deliberately opt-in container management into Obsidian. Connect to local or remote Docker Engines, inspect Docker Compose applications and Docker resources, check image availability, and use explicit lifecycle actions without leaving your vault.
 
-Docker Connector works on desktop and mobile Obsidian. Desktop supports Local Docker Socket, Docker Context, SSH and mutual TLS. iPhone and iPad use the Docker Connector Gateway: an authenticated HTTPS, allowlisted, read-only companion service that talks to the local Docker socket. It never exposes Docker's raw API or an arbitrary proxy. Docker Connector is read-only by default; Container management must be enabled explicitly from Overview for each Docker connection and Obsidian session before it can change a container.
+Docker Connector works on desktop and mobile Obsidian. Desktop supports Local Docker Socket, Docker Context, SSH and mutual TLS. iPhone and iPad use the Docker Connector Gateway: an authenticated HTTPS, allowlisted, read-only companion service that talks to the local Docker socket. It never exposes Docker's raw API or an arbitrary proxy. Docker Connector is read-only by default; the header switch enables Container management explicitly for one Online Docker connection and the current Obsidian session only.
 
 ## Mobile Gateway
 
@@ -41,7 +41,7 @@ Plain unauthenticated Docker TCP is not supported.
 
 ## Read-only by default
 
-The normal Docker Engine client is restricted to approved read-only GET requests. **Container management** is disabled by default, resets to disabled after restarting or reloading Obsidian, and must be enabled in Settings before lifecycle controls appear. Even then, Docker Connector exposes only explicit typed actions—Start, Shut down, Stop, Restart, and eligible Update—not a general-purpose Docker command shell or arbitrary API interface.
+The normal Docker Engine client is restricted to approved read-only GET requests. **Container management** is disabled by default, resets after restarting or reloading Obsidian, and is enabled only from the header switch for an individual Online connection. It turns off immediately if that connection is lost and never restores automatically after reconnecting. Even then, Docker Connector exposes only explicit typed actions—Start, Shut down, Stop, Restart, and eligible Update—not a general-purpose Docker command shell or arbitrary API interface.
 
 ## Applications and Docker resources
 
