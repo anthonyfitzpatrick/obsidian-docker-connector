@@ -13,6 +13,14 @@
   --dc-danger: var(--color-red);
   --dc-info: var(--color-blue);
   --dc-inactive: var(--text-faint);
+  /* Overview-only semantic palette: seven deliberately different theme hues. */
+  --dc-overview-hosts: var(--color-blue);
+  --dc-overview-containers: var(--color-cyan);
+  --dc-overview-running: var(--color-green);
+  --dc-overview-stopped: var(--color-orange);
+  --dc-overview-images: var(--color-purple);
+  --dc-overview-volumes: var(--color-yellow);
+  --dc-overview-networks: var(--color-red);
   padding: 20px 22px 32px;
   color: var(--text-normal);
   --dc-radius: 10px;
@@ -292,6 +300,19 @@
 	box-shadow: var(--dc-card-shadow-hover);
 	transform: translateY(-2px);
 }
+
+/* Overview metric accents are semantic classes, never positional selectors. */
+.docker-connector__summary-card.dc-overview-card { --dc-overview-card-soft: color-mix(in srgb, var(--dc-overview-card-accent) 16%, transparent); border-color: color-mix(in srgb, var(--dc-overview-card-accent) 30%, var(--dc-border)); background: linear-gradient(145deg, color-mix(in srgb, var(--dc-surface-raised) 94%, var(--dc-overview-card-soft)), var(--dc-surface-raised)); }
+.docker-connector__summary-card.dc-overview-card:hover, .docker-connector__summary-card.dc-overview-card:focus-visible { border-color: color-mix(in srgb, var(--dc-overview-card-accent) 58%, var(--dc-border)); background: linear-gradient(145deg, color-mix(in srgb, var(--dc-overview-card-soft) 65%, var(--dc-surface-raised)), var(--dc-surface)); outline: 2px solid var(--dc-overview-card-accent); outline-offset: 2px; }
+.docker-connector__summary-card.dc-overview-card::before { position: absolute; top: 0; right: 12px; left: 12px; height: 3px; border-radius: 0 0 999px 999px; background: var(--dc-overview-card-accent); content: ""; }
+.docker-connector__summary-card.dc-overview-card .docker-connector__summary-icon { background: var(--dc-overview-card-soft); color: var(--dc-overview-card-accent); }
+.docker-connector__summary-card.dc-overview-card--hosts { --dc-overview-card-accent: var(--dc-overview-hosts); }
+.docker-connector__summary-card.dc-overview-card--containers { --dc-overview-card-accent: var(--dc-overview-containers); }
+.docker-connector__summary-card.dc-overview-card--running { --dc-overview-card-accent: var(--dc-overview-running); }
+.docker-connector__summary-card.dc-overview-card--stopped { --dc-overview-card-accent: var(--dc-overview-stopped); }
+.docker-connector__summary-card.dc-overview-card--images { --dc-overview-card-accent: var(--dc-overview-images); }
+.docker-connector__summary-card.dc-overview-card--volumes { --dc-overview-card-accent: var(--dc-overview-volumes); }
+.docker-connector__summary-card.dc-overview-card--networks { --dc-overview-card-accent: var(--dc-overview-networks); }
 
 .docker-connector__summary-icon {
 	top: 17px;
