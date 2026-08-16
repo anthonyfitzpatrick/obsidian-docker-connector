@@ -13,6 +13,7 @@ export class RuntimeCredentialStore {
   private readonly passwords = new Map<string, string>();
   private readonly privateKeyPassphrases = new Map<string, string>();
   private readonly tlsClientKeyPassphrases = new Map<string, string>();
+  private readonly gatewayTokens = new Map<string, string>();
 
   setPassword(profileId: string, password: string): void {
     if (password.length === 0) {
@@ -32,6 +33,8 @@ export class RuntimeCredentialStore {
   setTlsClientKeyPassphrase(profileId: string, passphrase: string): void { this.tlsClientKeyPassphrases.set(profileId, passphrase); }
   getTlsClientKeyPassphrase(profileId: string): string | undefined { return this.tlsClientKeyPassphrases.get(profileId); }
   clearTlsClientKeyPassphrase(profileId: string): void { this.tlsClientKeyPassphrases.delete(profileId); }
-  clearProfile(profileId: string): void { this.clearPassword(profileId); this.clearPrivateKeyPassphrase(profileId); this.clearTlsClientKeyPassphrase(profileId); }
-  clearAll(): void { this.passwords.clear(); this.privateKeyPassphrases.clear(); this.tlsClientKeyPassphrases.clear(); }
+  setGatewayToken(profileId: string, token: string): void { if (token) this.gatewayTokens.set(profileId, token); else this.gatewayTokens.delete(profileId); }
+  getGatewayToken(profileId: string): string | undefined { return this.gatewayTokens.get(profileId); }
+  clearProfile(profileId: string): void { this.clearPassword(profileId); this.clearPrivateKeyPassphrase(profileId); this.clearTlsClientKeyPassphrase(profileId); this.gatewayTokens.delete(profileId); }
+  clearAll(): void { this.passwords.clear(); this.privateKeyPassphrases.clear(); this.tlsClientKeyPassphrases.clear(); this.gatewayTokens.clear(); }
 }

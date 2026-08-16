@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc --noEmit && node esbuild.config.mjs production",
-    "test": "vitest run",
+    "test": "vitest run tests",
     "lint": "tsc --noEmit"
   },
   "keywords": [

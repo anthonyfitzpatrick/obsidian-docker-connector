@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 const source = async (file: string) => readFile(file, "utf8");
 
 describe("Obsidian Community Plugin release guard", () => {
-  it("keeps manifest, package, and version-map metadata aligned for the desktop-only release", async () => {
+  it("keeps manifest, package, and version-map metadata aligned for the mobile-capable release", async () => {
     const [manifestText, packageText, versionsText] = await Promise.all([source("manifest.json"), source("package.json"), source("versions.json")]);
     const manifest = JSON.parse(manifestText) as { id: string; version: string; minAppVersion: string; isDesktopOnly: boolean };
     const packageJson = JSON.parse(packageText) as { version: string; license: string };
@@ -14,7 +14,7 @@ describe("Obsidian Community Plugin release guard", () => {
     expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(packageJson.version).toBe(manifest.version);
     expect(versions[manifest.version]).toBe(manifest.minAppVersion);
-    expect(manifest.isDesktopOnly).toBe(true);
+    expect(manifest.isDesktopOnly).toBe(false);
     expect(packageJson.license).toBe("MIT");
   });
 

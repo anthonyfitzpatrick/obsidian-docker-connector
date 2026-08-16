@@ -15,7 +15,7 @@ import type { DockerImageDetails } from "./images/ImageModels";
 import { VolumeDetailService } from "./services/VolumeDetailService";
 import type { DockerVolumeDetails } from "./volumes/VolumeModels";
 import { PublicImageReleaseService } from "./services/PublicImageReleaseService";
-import { DockerContextDiscoveryService } from "./connections/DockerContextDiscovery";
+import { desktopUi } from "./platform/DesktopUiAdapter";
 import { DockerContextLifecycleCache, evaluateDockerContextLifecycle, unavailableDockerContextLifecycle } from "./connections/DockerContextLifecycle";
 import type { DockerContextProfile } from "./models/DockerConnectionProfile";
 import { connectionCapabilities } from "./connections/DockerConnectionCapabilities";
@@ -251,7 +251,7 @@ export default class DockerConnectorPlugin extends Plugin {
   }
   async refreshContextMetadata(profile: DockerContextProfile) {
     const now = new Date().toISOString();
-    try { const result = evaluateDockerContextLifecycle(profile, await new DockerContextDiscoveryService().discover(), now); this.contextLifecycle.set(profile.id, result); return result; }
+    try { const result = evaluateDockerContextLifecycle(profile, (await desktopUi().discoverContexts()).contexts, now); this.contextLifecycle.set(profile.id, result); return result; }
     catch (error) { const result = unavailableDockerContextLifecycle(profile, error, now); this.contextLifecycle.set(profile.id, result); return result; }
     finally { this.refreshOpenDashboard(); }
   }
@@ -272,8 +272,9 @@ export default class DockerConnectorPlugin extends Plugin {
   clearRuntimePassword(profileId: string): void { this.connectionFactory.clearRuntimePassword(profileId); }
   setRuntimePrivateKeyPassphrase(profileId: string, passphrase: string): void { this.connectionFactory.setRuntimePrivateKeyPassphrase(profileId, passphrase); }
   setRuntimeTlsClientKeyPassphrase(profileId: string, passphrase: string): void { this.connectionFactory.setRuntimeTlsClientKeyPassphrase(profileId, passphrase); }
+  setRuntimeGatewayToken(profileId: string, token: string): void { this.connectionFactory.setRuntimeGatewayToken(profileId, token); }
   clearRuntimeCredentials(profileId: string): void { this.connectionFactory.clearRuntimeCredentials(profileId); }
-  private setRuntimeCredential(profile: DockerConnectionProfile, credential: string): void { if (profile.connectionType === "ssh" && profile.authentication.type === "password") this.setRuntimePassword(profile.id, credential); else if (profile.connectionType === "ssh") this.setRuntimePrivateKeyPassphrase(profile.id, credential); else if (profile.connectionType === "docker-tls") this.setRuntimeTlsClientKeyPassphrase(profile.id, credential); }
+  private setRuntimeCredential(profile: DockerConnectionProfile, credential: string): void { if (profile.connectionType === "gateway") this.setRuntimeGatewayToken(profile.id, credential); else if (profile.connectionType === "ssh" && profile.authentication.type === "password") this.setRuntimePassword(profile.id, credential); else if (profile.connectionType === "ssh") this.setRuntimePrivateKeyPassphrase(profile.id, credential); else if (profile.connectionType === "docker-tls") this.setRuntimeTlsClientKeyPassphrase(profile.id, credential); }
   private scheduleContainerImageUpdateChecks(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot): void { if (this.unloading || !this.settings.containerManagementEnabled || snapshot.status !== "online") return; snapshot.containers.forEach((container) => { const eligibility = getContainerUpdateEligibility(container.image, container.labels); if (eligibility.eligible && this.containerImageUpdates.isStale(profile.id, container.id)) void this.containerImageUpdates.check(profile, container.id).catch(() => undefined); }); }
   private refreshOpenDashboard(): void { this.app.workspace.getLeavesOfType(DOCKER_CONNECTOR_VIEW).forEach((leaf) => void (leaf.view as DockerDashboardView).render()); }
 }

@@ -3,6 +3,7 @@ import { DockerConnectionFactory } from "../src/connections/DockerConnectionFact
 import { DockerContextDialStdioTransport, contextDialStdioArgs } from "../src/connections/DockerContextDialStdioTransport";
 import { LocalDockerTransport } from "../src/connections/LocalDockerTransport";
 import { SshDockerTransport } from "../src/connections/SshDockerTransport";
+import { createDesktopTransport } from "../src/connections/DesktopTransportFactory";
 import type { DockerContextProfile, LocalDockerProfile, SshDockerProfile } from "../src/models/DockerConnectionProfile";
 
 const base = { id: "id", name: "Name", enabled: true, createdAt: "", updatedAt: "" };
@@ -16,7 +17,7 @@ describe("Docker Context dial-stdio transport", () => {
     expect(() => contextDialStdioArgs("bad\ncontext")).toThrow("invalid");
   });
   it("routes Context, Local, and SSH profiles to their dedicated transports", () => {
-    const factory = new DockerConnectionFactory();
+    const factory = new DockerConnectionFactory(() => ({ createDesktopTransport }));
     expect(factory.create(context)).toBeInstanceOf(DockerContextDialStdioTransport);
     expect(factory.create(local)).toBeInstanceOf(LocalDockerTransport);
     expect(factory.create(ssh)).toBeInstanceOf(SshDockerTransport);

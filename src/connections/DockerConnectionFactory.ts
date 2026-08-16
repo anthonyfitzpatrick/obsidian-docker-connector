@@ -1,10 +1,11 @@
 import type { DockerConnectionProfile } from "../models/DockerConnectionProfile";
-import { SshDockerTransport } from "./SshDockerTransport";
 import { RuntimeCredentialStore } from "../security/RuntimeCredentialStore";
-import { LocalDockerTransport } from "./LocalDockerTransport";
 import type { DockerTransport } from "./DockerTransport";
-import { DockerContextDialStdioTransport } from "./DockerContextDialStdioTransport";
-import { DockerMutualTlsTransport } from "./DockerMutualTlsTransport";
+import { DockerConnectionError } from "./DockerTransport";
+import { GatewayDockerTransport } from "./GatewayDockerTransport";
+import { isProfileSupportedOnPlatform, platformCapabilities } from "../platform/PlatformCapabilities";
+
+type DesktopTransportModule = { createDesktopTransport(profile: Exclude<DockerConnectionProfile, { connectionType: "gateway" }>, credentials: RuntimeCredentialStore): DockerTransport };
 
 /**
  * Creates and owns one transport per persisted profile ID.
@@ -16,11 +17,16 @@ import { DockerMutualTlsTransport } from "./DockerMutualTlsTransport";
 export class DockerConnectionFactory {
   private readonly transports = new Map<string, DockerTransport>();
   private readonly credentials = new RuntimeCredentialStore();
+  constructor(private readonly loadDesktop: () => DesktopTransportModule = loadDesktopTransportModule) {}
   create(profile: DockerConnectionProfile): DockerTransport {
     const current = this.transports.get(profile.id);
     if (current && current.profile === profile) return current;
     if (current) void current.disconnect();
-    const transport = createTransport(profile, this.credentials);
+    const transport = profile.connectionType === "gateway"
+      ? new GatewayDockerTransport(profile, () => this.credentials.getGatewayToken(profile.id))
+      : !isProfileSupportedOnPlatform(profile.connectionType, platformCapabilities())
+        ? new UnsupportedDesktopTransport(profile)
+        : this.loadDesktop().createDesktopTransport(profile, this.credentials);
     this.transports.set(profile.id, transport);
     return transport;
   }
@@ -29,9 +35,17 @@ export class DockerConnectionFactory {
   clearRuntimePassword(profileId: string): void { this.credentials.clearPassword(profileId); }
   setRuntimePrivateKeyPassphrase(profileId: string, passphrase: string): void { this.credentials.setPrivateKeyPassphrase(profileId, passphrase); }
   setRuntimeTlsClientKeyPassphrase(profileId: string, passphrase: string): void { this.credentials.setTlsClientKeyPassphrase(profileId, passphrase); }
+  setRuntimeGatewayToken(profileId: string, token: string): void { this.credentials.setGatewayToken(profileId, token); }
   clearRuntimeCredentials(profileId: string): void { this.credentials.clearProfile(profileId); }
   async disconnect(profileId: string): Promise<void> { const transport = this.transports.get(profileId); this.transports.delete(profileId); await transport?.disconnect(); }
   async disconnectAll(): Promise<void> { await Promise.all([...this.transports.values()].map((transport) => transport.disconnect())); this.transports.clear(); this.credentials.clearAll(); }
 }
-function createTransport(profile: DockerConnectionProfile, credentials: RuntimeCredentialStore): DockerTransport { switch (profile.connectionType) { case "local": return new LocalDockerTransport(profile); case "ssh": return new SshDockerTransport(profile, () => ({ password: credentials.getPassword(profile.id), privateKeyPassphrase: credentials.getPrivateKeyPassphrase(profile.id) })); case "docker-context": return new DockerContextDialStdioTransport(profile); case "docker-tls": return new DockerMutualTlsTransport(profile, () => credentials.getTlsClientKeyPassphrase(profile.id)); default: return assertNever(profile); } }
-function assertNever(profile: never): never { throw new Error(`UNSUPPORTED_CONNECTION_PROFILE: ${String(profile)}`); }
+function loadDesktopTransportModule(): DesktopTransportModule { const load = (globalThis as { require?: (id: string) => unknown }).require; if (!load) throw new Error("DESKTOP_TRANSPORT_LOADER_UNAVAILABLE"); return load("./desktop-transports") as DesktopTransportModule; }
+class UnsupportedDesktopTransport implements DockerTransport {
+  constructor(readonly profile: Exclude<DockerConnectionProfile, { connectionType: "gateway" }>) {}
+  async connect(): Promise<void> { throw new DockerConnectionError("DESKTOP_CONNECTION_METHOD", "This connection method is available on desktop Obsidian only. Configure a Docker Connector Gateway to use it on mobile."); }
+  async disconnect(): Promise<void> {}
+  isConnected(): boolean { return false; }
+  async request<T>(): Promise<T> { await this.connect(); throw new Error("unreachable"); }
+  async testConnection() { return { success: false, steps: [{ id: "platform", label: "Platform capability", status: "error" as const, message: "This connection method is desktop only." }] }; }
+}

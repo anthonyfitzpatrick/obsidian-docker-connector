@@ -4,6 +4,12 @@ title: Docker Connector User Guide
 
 # Docker Connector User Guide
 
+## Mobile and tablet access
+
+Docker Connector supports desktop Obsidian plus iPhone and iPad. Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS) use desktop-only runtime capabilities such as local sockets, the Docker CLI, SSH, or certificate files. They remain visible in a synced vault but are clearly unavailable on mobile.
+
+For iPhone and iPad, add a **Docker Connector Gateway** profile. The Gateway is a separate, authenticated HTTPS service that is deployed next to Docker and exposes only Docker Connector's approved read operations. Enter its high-entropy access token only for the current Obsidian session; it is not saved in the profile. Use a trusted LAN or VPN and HTTPS. Never expose Docker's unauthenticated TCP API or disable certificate validation. The `gateway/` folder contains a constrained container example and deployment notes; mounting `docker.sock` remains highly privileged.
+
 Docker Connector is an Obsidian desktop plugin for monitoring Docker environments and, when you explicitly enable it, carrying out a small set of container-management actions. It keeps local and remote Docker environments in one Obsidian workspace without trying to replace Docker Desktop, the Docker CLI, or a full deployment platform.
 
 Docker Connector is read-only by default. You can inspect hosts, Docker Compose applications, containers, images, volumes, networks, and image-update availability without enabling container management. Lifecycle and update actions are deliberately opt-in.

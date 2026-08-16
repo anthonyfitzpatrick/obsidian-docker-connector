@@ -2,7 +2,11 @@
 
 Docker Connector brings multi-host Docker monitoring and deliberately opt-in container management into Obsidian. Connect to local or remote Docker Engines, inspect Docker Compose applications and Docker resources, check image availability, and use explicit lifecycle actions without leaving your vault.
 
-It is a desktop-only Obsidian plugin. Docker Connector is read-only by default; Container management must be enabled explicitly before it can change a container.
+Docker Connector works on desktop and mobile Obsidian. Desktop supports Local Docker Socket, Docker Context, SSH and mutual TLS. iPhone and iPad use the Docker Connector Gateway: an authenticated HTTPS, allowlisted, read-only companion service that talks to the local Docker socket. It never exposes Docker's raw API or an arbitrary proxy. Docker Connector is read-only by default; Container management must be enabled explicitly before it can change a container.
+
+## Mobile Gateway
+
+Run the separate component in [`gateway/`](gateway/) only on a trusted LAN or VPN (for example Tailscale, NetBird, or WireGuard) behind HTTPS. Give it a high-entropy `GATEWAY_TOKEN`; enter that token in the host dialog for the current session only. Do not expose Docker on TCP port 2375, disable TLS verification, or publish the gateway to the public Internet. Mounting `docker.sock` is highly privileged even though the gateway only permits its fixed read endpoints.
 
 > **Docker access is highly privileged.** A user or process that can control Docker can often gain extensive control of that Docker host. Connect only to Docker hosts, Docker Contexts, and credentials you trust.
 

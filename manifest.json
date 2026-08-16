@@ -3,7 +3,7 @@
   "name": "Docker Connector",
   "version": "1.0.0",
   "minAppVersion": "1.7.0",
-  "description": "A desktop Docker environment dashboard with optional, explicitly enabled container management.",
+  "description": "A responsive Docker environment dashboard for desktop and mobile, with secure Gateway access on iPhone and iPad.",
   "author": "Wolf 359 Press AB",
-  "isDesktopOnly": true
+  "isDesktopOnly": false
 }

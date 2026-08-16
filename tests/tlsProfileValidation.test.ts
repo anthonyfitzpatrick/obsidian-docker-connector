@@ -3,6 +3,7 @@ import { createDockerTlsProfile, validateDockerTlsHost, validateDockerTlsPort, v
 import { RuntimeCredentialStore } from "../src/security/RuntimeCredentialStore";
 import { DockerConnectionFactory } from "../src/connections/DockerConnectionFactory";
 import { DockerMutualTlsTransport } from "../src/connections/DockerMutualTlsTransport";
+import { createDesktopTransport } from "../src/connections/DesktopTransportFactory";
 
 const validation = { caCertificateFingerprint: "ca", clientCertificateFingerprint: "client", clientCertificateSubject: "CN=client", clientCertificateIssuer: "CN=ca", clientCertificateValidFrom: "2026-01-01T00:00:00.000Z", clientCertificateValidTo: "2027-01-01T00:00:00.000Z" };
 describe("Docker mutual-TLS profiles", () => {
@@ -16,5 +17,5 @@ describe("Docker mutual-TLS profiles", () => {
     expect(profile.connectionType).toBe("docker-tls"); const serialized = JSON.stringify(profile); ["BEGIN CERTIFICATE", "PRIVATE KEY", "passphrase", "password"].forEach((secret) => expect(serialized).not.toContain(secret));
   });
   it("keeps TLS client-key passphrases separate and runtime-only", () => { const store = new RuntimeCredentialStore(); store.setTlsClientKeyPassphrase("tls", "secret"); expect(store.getTlsClientKeyPassphrase("tls")).toBe("secret"); expect(JSON.stringify(store)).not.toContain("secret"); store.clearProfile("tls"); expect(store.getTlsClientKeyPassphrase("tls")).toBeUndefined(); });
-  it("routes TLS profiles to the dedicated verified HTTPS transport", () => { const profile = createDockerTlsProfile({ id: "tls", name: "TLS", host: "docker.example.com", port: 2376, serverName: "docker.example.com", caCertificatePath: "/tmp/ca.pem", clientCertificatePath: "/tmp/client.pem", clientKeyPath: "/tmp/key.pem", validation, now: "2026-08-05T00:00:00.000Z" }); expect(new DockerConnectionFactory().create(profile)).toBeInstanceOf(DockerMutualTlsTransport); });
+  it("routes TLS profiles to the dedicated verified HTTPS transport", () => { const profile = createDockerTlsProfile({ id: "tls", name: "TLS", host: "docker.example.com", port: 2376, serverName: "docker.example.com", caCertificatePath: "/tmp/ca.pem", clientCertificatePath: "/tmp/client.pem", clientKeyPath: "/tmp/key.pem", validation, now: "2026-08-05T00:00:00.000Z" }); expect(new DockerConnectionFactory(() => ({ createDesktopTransport })).create(profile)).toBeInstanceOf(DockerMutualTlsTransport); });
 });
