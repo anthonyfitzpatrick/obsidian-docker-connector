@@ -136,9 +136,9 @@ export class DockerDashboardView extends ItemView {
    * so the user can reconnect without exposing an old or unavailable snapshot.
    */
   private requiresAuthenticationGate(profiles: DockerConnectionProfile[]): boolean {
-    if (this.selectedHostId === "all") {
-      return profiles.some((profile) => this.plugin.snapshots.get(profile.id)?.status === "authentication-required");
-    }
+    // An aggregate dashboard must retain each connection's independent status:
+    // one password-authenticated host cannot mask an already-online mTLS host.
+    if (this.selectedHostId === "all") return false;
     return this.plugin.snapshots.get(this.selectedHostId)?.status === "authentication-required";
   }
 
