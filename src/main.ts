@@ -83,6 +83,10 @@ export default class DockerConnectorPlugin extends Plugin {
     this.addCommand({ id: "refresh-hosts", name: "Refresh all Docker hosts", callback: () => this.refreshAll() });
     this.addSettingTab(new DockerConnectorSettingTab(this.app, this));
     this.configureRefresh();
+    // A plugin reload can occur after Obsidian has already completed layout.
+    // Start the normal read-only refresh immediately as well as registering the
+    // layout-ready path; refreshAll deduplicates overlapping calls.
+    void this.refreshAll().catch(() => undefined);
     // Obsidian recommends deferring network and other expensive startup work
     // until the workspace is ready. Registration remains synchronous, while
     // host inspection cannot delay opening the user's vault.

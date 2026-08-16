@@ -45,6 +45,11 @@ describe("DockerInspectionService", () => {
     const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(tls);
     expect(snapshot).toMatchObject({ status: "online", hostId: "tls" }); expect(calls.sort()).toEqual(Object.keys(responses).sort());
   });
+  it("classifies an encrypted TLS key without its session passphrase as authentication required", async () => {
+    const tls: DockerTlsProfile = { id: "tls", name: "TLS", enabled: true, createdAt: "", updatedAt: "", connectionType: "docker-tls", host: "docker.example.test", port: 2376, serverName: "docker.example.test", caCertificatePath: "/tmp/ca", clientCertificatePath: "/tmp/cert", clientKeyPath: "/tmp/key", tlsSnapshot: { serverName: "docker.example.test", importedAt: "" } };
+    const snapshot = await new DockerInspectionService({ create: () => failingTransport(new DockerConnectionError("DOCKER_TLS_CLIENT_KEY_PASSPHRASE_REQUIRED", "Passphrase required.")) } as never).inspectHost(tls);
+    expect(snapshot).toMatchObject({ status: "authentication-required", error: "Client Key Passphrase required to reconnect." });
+  });
 
   it("returns a bounded degraded snapshot when one inventory endpoint fails", async () => {
     const transport = failingAfterVersion(new DockerConnectionError("DOCKER_API_REQUEST_FAILED", "Docker rejected /networks."));
