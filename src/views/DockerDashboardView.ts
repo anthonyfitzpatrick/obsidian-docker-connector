@@ -285,59 +285,46 @@ export class DockerDashboardView extends ItemView {
     copy.createSpan({ text: getDockerConnectionTypeDisplayName(profile.connectionType), cls: "dc-host-card-meta docker-connector__muted" });
     header.appendChild(this.statusPill(status));
 
-    if (profile.connectionType === "docker-context") {
-      const lifecycle = this.plugin.contextLifecycle.get(profile.id);
-      const endpoint = card.createDiv({ cls: "dc-host-card-endpoint" });
-      endpoint.createSpan({ text: `Context: ${profile.contextName}` });
-      endpoint.createSpan({ text: `Endpoint: ${profile.contextSnapshot.endpointType} · ${profile.contextSnapshot.endpointDisplay ?? "—"}`, cls: "docker-connector__muted" });
-      endpoint.createSpan({ text: `Lifecycle: ${contextLifecycleLabel(lifecycle?.state)}`, cls: "docker-connector__muted" });
-      endpoint.createSpan({ text: `Imported: ${profile.contextSnapshot.importedAt}${lifecycle?.checkedAt ? ` · Checked: ${lifecycle.checkedAt}` : ""}`, cls: "docker-connector__muted" });
-      const details = card.createEl("details", { cls: "docker-connector__host-details" }); details.createEl("summary", { text: "View Context Details" }); const grid = details.createDiv({ cls: "docker-connector__detail-grid" }); [["Saved endpoint", profile.contextSnapshot.endpointDisplay ?? "—"], ["TLS verification", profile.contextSnapshot.skipTlsVerify ? "Skipped" : "Enforced"], ["Supported", profile.contextSnapshot.supported ? "Yes" : "No"], ["Lifecycle", contextLifecycleLabel(lifecycle?.state)], ["Error", lifecycle?.errorCode ?? "—"]].forEach(([label, value]) => { const item = grid.createDiv(); item.createSpan({ text: label }); item.createEl("strong", { text: value }); }); lifecycle?.changes.forEach((change) => details.createDiv({ text: `${change.field}: ${String(change.previousValue ?? "—")} → ${String(change.currentValue ?? "—")} (${change.severity})`, cls: "docker-connector__muted", attr: { "aria-label": `Context change ${change.field}` } }));
-      const footer = card.createDiv({ cls: "dc-connection-card-footer" });
-      const primaryActions = footer.createDiv({ cls: "dc-connection-card-actions" });
-      this.addEditAction(primaryActions, profile);
-      const refresh = primaryActions.createEl("button", { text: "Refresh Context Metadata", attr: { "aria-label": `Refresh Context metadata for ${profile.name}` } }); refresh.onclick = () => void this.plugin.refreshContextMetadata(profile);
-      this.addReconnectAction(primaryActions, profile, status);
-      this.addDeleteAction(primaryActions, profile);
-      const management = footer.createDiv({ cls: "dc-connection-card-management" });
-      this.addCardManagementSwitch(management, profile, status);
-      return;
-    }
-    if (profile.connectionType === "docker-tls") {
-      const endpoint = card.createDiv({ cls: "dc-host-card-endpoint" }); endpoint.createSpan({ text: `${profile.host}:${profile.port}` }); endpoint.createSpan({ text: `Server name: ${profile.serverName} · ${titleCase(status)}`, cls: "docker-connector__muted" });
-      if (snapshot) { const inventory = card.createDiv({ cls: "dc-connection-inventory" }); [["Containers", snapshot.containers.length], ["Images", snapshot.images.length], ["Volumes", snapshot.volumes.length], ["Networks", snapshot.networks.length]].forEach(([label, value]) => { const metric = inventory.createDiv(); metric.createEl("strong", { text: String(value) }); metric.createSpan({ text: String(label) }); }); card.createDiv({ text: snapshot.system ? `Docker ${snapshot.system.dockerVersion} · API ${snapshot.system.apiVersion}` : snapshot.error ?? "Docker details unavailable", cls: "docker-connector__muted" }); }
-      const footer = card.createDiv({ cls: "dc-connection-card-footer" }); const primaryActions = footer.createDiv({ cls: "dc-connection-card-actions" }); const open = primaryActions.createEl("button", { text: "Open dashboard", cls: "mod-cta" }); open.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); }; this.addEditAction(primaryActions, profile); this.addReconnectAction(primaryActions, profile, status); this.addDeleteAction(primaryActions, profile); const management = footer.createDiv({ cls: "dc-connection-card-management" }); this.addCardManagementSwitch(management, profile, status);
-      return;
-    }
-
     const endpoint = card.createDiv({ cls: "dc-host-card-endpoint" });
     const endpointIcon = endpoint.createSpan({ attr: { "aria-hidden": "true" } }); setIcon(endpointIcon, "network");
-    endpoint.createSpan({ text: connectionSummary(profile) });
-    if (profile.connectionType !== "ssh") endpoint.createSpan({ text: getDockerConnectionTypeDisplayName(profile.connectionType), cls: "docker-connector__muted" });
+    this.connectionCardEndpointDetails(profile).forEach((detail) => endpoint.createSpan({ text: detail }));
     if (profile.category) endpoint.createSpan({ text: profile.category, cls: "dc-connection-category" });
 
-    if (snapshot) {
-      const inventory = card.createDiv({ cls: "dc-connection-inventory", attr: { "aria-label": `${profile.name} Docker inventory` } });
-      [["Containers", snapshot.containers.length, "container"], ["Images", snapshot.images.length, "layers-3"], ["Volumes", snapshot.volumes.length, "database"], ["Networks", snapshot.networks.length, "network"]].forEach(([label, value, iconName]) => {
-        const metric = inventory.createDiv(); const metricIcon = metric.createSpan({ attr: { "aria-hidden": "true" } }); setIcon(metricIcon, String(iconName));
-        metric.createEl("strong", { text: String(value) }); metric.createSpan({ text: String(label) });
-      });
-      const engine = card.createDiv({ cls: "dc-connection-engine" });
-      engine.createSpan({ text: snapshot.system ? `Docker ${snapshot.system.dockerVersion}` : "Docker details unavailable" });
-      engine.createSpan({ text: snapshot.system ? `${snapshot.system.operatingSystem} · ${snapshot.system.architecture}` : this.lastRefreshText([profile]) });
-    } else {
-      card.createDiv({ text: "Docker inventory is available after a successful connection.", cls: "dc-connection-unavailable" });
-    }
+    const inventory = card.createDiv({ cls: "dc-host-card-inventory dc-connection-inventory", attr: { "aria-label": `${profile.name} Docker inventory` } });
+    [["Containers", snapshot?.containers.length ?? 0, "container"], ["Images", snapshot?.images.length ?? 0, "layers-3"], ["Volumes", snapshot?.volumes.length ?? 0, "database"], ["Networks", snapshot?.networks.length ?? 0, "network"]].forEach(([label, value, iconName]) => {
+      const metric = inventory.createDiv(); const metricIcon = metric.createSpan({ attr: { "aria-hidden": "true" } }); setIcon(metricIcon, String(iconName));
+      metric.createEl("strong", { text: String(value) }); metric.createSpan({ text: String(label) });
+    });
+    const engine = card.createDiv({ cls: "dc-host-card-runtime dc-connection-engine" });
+    engine.createSpan({ text: snapshot?.system ? `Docker ${snapshot.system.dockerVersion} · API ${snapshot.system.apiVersion}` : "Docker details unavailable" });
+    engine.createSpan({ text: snapshot?.system ? `${snapshot.system.operatingSystem} · ${snapshot.system.architecture}` : this.lastRefreshText([profile]) });
 
     const footer = card.createDiv({ cls: "dc-connection-card-footer" });
     const primaryActions = footer.createDiv({ cls: "dc-connection-card-actions" });
     const action = primaryActions.createEl("button", { text: "Open dashboard", cls: "mod-cta" });
     action.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); };
     this.addEditAction(primaryActions, profile);
+    this.addConnectionSpecificAction(primaryActions, profile);
     this.addReconnectAction(primaryActions, profile, status);
     this.addDeleteAction(primaryActions, profile);
     const management = footer.createDiv({ cls: "dc-connection-card-management" });
     this.addCardManagementSwitch(management, profile, status);
+  }
+
+  /** Supplies safe, transport-relevant values to the shared host-card endpoint slot. */
+  private connectionCardEndpointDetails(profile: DockerConnectionProfile): string[] {
+    if (profile.connectionType === "docker-context") {
+      const lifecycle = this.plugin.contextLifecycle.get(profile.id);
+      return [`Context: ${profile.contextName}`, `Endpoint: ${profile.contextSnapshot.endpointType} · ${profile.contextSnapshot.endpointDisplay ?? "—"}`, `Lifecycle: ${contextLifecycleLabel(lifecycle?.state)}`, `Imported: ${profile.contextSnapshot.importedAt}${lifecycle?.checkedAt ? ` · Checked: ${lifecycle.checkedAt}` : ""}`];
+    }
+    if (profile.connectionType === "docker-tls") return [`${profile.host}:${profile.port}`, `Server name: ${profile.serverName}`];
+    return [connectionSummary(profile)];
+  }
+
+  private addConnectionSpecificAction(actions: HTMLElement, profile: DockerConnectionProfile): void {
+    if (profile.connectionType !== "docker-context") return;
+    const refresh = actions.createEl("button", { text: "Refresh Context Metadata", attr: { "aria-label": `Refresh Context metadata for ${profile.name}` } });
+    refresh.onclick = () => void this.plugin.refreshContextMetadata(profile);
   }
 
   private addEditAction(actions: HTMLElement, profile: DockerConnectionProfile): void {

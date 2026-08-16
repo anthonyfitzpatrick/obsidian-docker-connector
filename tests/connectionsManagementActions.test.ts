@@ -13,9 +13,9 @@ describe("Connections management actions", () => {
     expect(view).toContain('"No Docker connections configured"');
   });
   it("uses shared Edit, Reconnect, and Delete actions for every card branch", () => {
-    expect((view.match(/this\.addEditAction\(primaryActions, profile\)/g) ?? []).length).toBe(3);
-    expect((view.match(/this\.addReconnectAction\(primaryActions, profile, status\)/g) ?? []).length).toBe(3);
-    expect((view.match(/this\.addDeleteAction\(primaryActions, profile\)/g) ?? []).length).toBe(3);
+    expect((view.match(/this\.addEditAction\(primaryActions, profile\)/g) ?? []).length).toBe(1);
+    expect((view.match(/this\.addReconnectAction\(primaryActions, profile, status\)/g) ?? []).length).toBe(1);
+    expect((view.match(/this\.addDeleteAction\(primaryActions, profile\)/g) ?? []).length).toBe(1);
     expect(view).toContain('setIcon(button, "pencil")');
     expect(view).toContain('setIcon(button, "refresh-cw")');
     expect(view).toContain('new ReconnectPasswordModal(this.plugin, profile, () => this.render()).open()');

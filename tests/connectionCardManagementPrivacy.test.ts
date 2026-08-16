@@ -7,7 +7,7 @@ const css = readFileSync(resolve(process.cwd(), "styles.css"), "utf8");
 
 describe("connection card management and SSH privacy", () => {
   it("places each shared management switch in its own centered footer row", () => {
-    expect((view.match(/this\.addCardManagementSwitch\(management, profile, status\)/g) ?? []).length).toBe(3);
+    expect((view.match(/this\.addCardManagementSwitch\(management, profile, status\)/g) ?? []).length).toBe(1);
     expect(view).toContain('role: "switch", "aria-label": `Container management for ${profile.name}`');
     expect(view).toContain("this.plugin.setProfileManagementEnabled(profile.id, input.checked)");
     expect(view).toContain('cls: "dc-connection-card-footer"');
@@ -28,9 +28,9 @@ describe("connection card management and SSH privacy", () => {
   });
 
   it("keeps Delete, Reconnect, and Retry in the action row rather than the management row", () => {
-    expect((view.match(/this\.addReconnectAction\(primaryActions, profile, status\);\s*this\.addDeleteAction\(primaryActions, profile\);\s*const management = footer\.createDiv\(\{ cls: "dc-connection-card-management" \}\);/g) ?? []).length).toBe(3);
+    expect((view.match(/this\.addReconnectAction\(primaryActions, profile, status\);\s*this\.addDeleteAction\(primaryActions, profile\);\s*const management = footer\.createDiv\(\{ cls: "dc-connection-card-management" \}\);/g) ?? []).length).toBe(1);
     const managementRows = view.match(/const management = footer\.createDiv\(\{ cls: "dc-connection-card-management" \}\);\s*this\.addCardManagementSwitch\(management, profile, status\);/g) ?? [];
-    expect(managementRows).toHaveLength(3);
+    expect(managementRows).toHaveLength(1);
     expect(managementRows.join("\n")).not.toContain("addDeleteAction");
   });
 
@@ -39,11 +39,13 @@ describe("connection card management and SSH privacy", () => {
     expect(summary).toContain("`${profile.sshHost}:${profile.sshPort}`");
     expect(summary).not.toContain("sshUsername");
     const endpointStart = view.lastIndexOf('const endpoint = card.createDiv({ cls: "dc-host-card-endpoint" });');
-    const endpoint = view.slice(endpointStart, view.indexOf("if (snapshot)", endpointStart));
-    expect(endpoint).toContain('if (profile.connectionType !== "ssh")');
+    const endpoint = view.slice(endpointStart, view.indexOf('const inventory = card.createDiv', endpointStart));
+    expect(endpoint).toContain("this.connectionCardEndpointDetails(profile)");
     expect(endpoint).not.toContain('"Password"');
     expect(endpoint).not.toContain("Private Key File");
     expect(endpoint).not.toContain("Passphrase");
+    const adapter = view.slice(view.indexOf("private connectionCardEndpointDetails"), view.indexOf("private addEditAction"));
+    expect(adapter).toContain("return [connectionSummary(profile)]");
     expect(view).toContain("this.username = editingProfile.sshUsername");
     expect(view).toContain("sshUsername: clean(this.username)");
     expect(view).toContain('setName(this.privateKeyPath ? "Selected Private Key File" : "Private Key File")');

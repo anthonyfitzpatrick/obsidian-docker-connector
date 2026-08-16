@@ -30,7 +30,9 @@ describe("connection host card icon", () => {
     const title = 'copy.createEl("h3", { text: profile.name, cls: "dc-host-card-title" })';
     expect(card).toContain(title);
     expect((card.match(/dc-host-card-meta docker-connector__muted/g) ?? [])).toHaveLength(2);
-    expect((card.match(/cls: "dc-host-card-endpoint"/g) ?? [])).toHaveLength(3);
+    expect((card.match(/cls: "dc-host-card-endpoint"/g) ?? [])).toHaveLength(1);
+    expect(card).toContain('cls: "dc-host-card-inventory dc-connection-inventory"');
+    expect(card).toContain('cls: "dc-host-card-runtime dc-connection-engine"');
     expect(card.indexOf(title)).toBeLessThan(card.indexOf('if (profile.connectionType === "docker-context")'));
     expect(card).not.toMatch(/dc-(ssh|tls|context|local|gateway)-host-card/);
   });
@@ -49,5 +51,27 @@ describe("connection host card icon", () => {
     expect(style).toContain(".dc-host-card-endpoint");
     expect(style).toContain(".dc-connection-card .docker-connector__status");
     expect(style).toContain(".dc-connection-card .dc-card-management-switch");
+  });
+
+  it("renders one canonical endpoint, inventory, runtime, action, and management body for every profile", () => {
+    const card = view.slice(view.indexOf("private renderConnectionRow"), view.indexOf("private connectionCardEndpointDetails"));
+    expect((card.match(/dc-host-card-endpoint/g) ?? [])).toHaveLength(1);
+    expect((card.match(/dc-host-card-inventory dc-connection-inventory/g) ?? [])).toHaveLength(1);
+    expect((card.match(/dc-host-card-runtime dc-connection-engine/g) ?? [])).toHaveLength(1);
+    expect((card.match(/dc-connection-card-actions/g) ?? [])).toHaveLength(1);
+    expect((card.match(/dc-connection-card-management/g) ?? [])).toHaveLength(1);
+    expect(card).toContain("this.connectionCardEndpointDetails(profile)");
+    expect(card).not.toContain('profile.connectionType === "docker-tls"');
+    expect(card).not.toContain('profile.connectionType === "docker-context"');
+  });
+
+  it("adapts only safe, transport-relevant endpoint details", () => {
+    const adapter = view.slice(view.indexOf("private connectionCardEndpointDetails"), view.indexOf("private addConnectionSpecificAction"));
+    expect(adapter).toContain("`Context: ${profile.contextName}`");
+    expect(adapter).toContain("`Server name: ${profile.serverName}`");
+    expect(adapter).toContain("return [connectionSummary(profile)]");
+    expect(adapter).not.toContain("sshUsername");
+    expect(adapter).not.toContain('"Password"');
+    expect(adapter).not.toContain("privateKeyPath");
   });
 });

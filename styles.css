@@ -197,7 +197,7 @@
 .dc-connection-inventory { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--dc-border); border-radius: 9px; background: var(--dc-surface); }
 .dc-connection-inventory > div { display: grid; grid-template-columns: auto 1fr; column-gap: 5px; align-items: center; min-width: 0; padding: 9px 7px; border-right: 1px solid var(--dc-border); }
 .dc-connection-inventory > div:last-child { border-right: 0; }
-.dc-connection-inventory svg { width: 14px; height: 14px; color: var(--dc-accent); }
+.dc-host-card-inventory svg { width: 14px; height: 14px; color: var(--dc-host-card-icon-color); }
 .dc-connection-inventory strong { color: var(--text-normal); font-family: var(--font-interface); font-size: var(--dc-host-card-metric-value-size); line-height: 1; }
 .dc-connection-inventory span { grid-column: 1 / -1; margin-top: 3px; overflow: hidden; color: var(--dc-text-muted); font-family: var(--font-interface); font-size: var(--dc-host-card-label-size); line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
 .dc-connection-engine { display: grid; gap: 3px; color: var(--dc-text-muted); font-family: var(--font-interface); font-size: var(--dc-host-card-meta-size); line-height: var(--dc-host-card-meta-line-height); }

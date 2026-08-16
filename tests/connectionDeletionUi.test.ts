@@ -6,7 +6,7 @@ const source = readFileSync(resolve(process.cwd(), "src/views/DockerDashboardVie
 
 describe("saved connection deletion UI", () => {
   it("places one accessible Delete action on every connection-card branch", () => {
-    expect((source.match(/this\.addDeleteAction\(primaryActions, profile\)/g) ?? []).length).toBe(3);
+    expect((source.match(/this\.addDeleteAction\(primaryActions, profile\)/g) ?? []).length).toBe(1);
     expect(source).toContain('"aria-label": `Delete connection ${profile.name}`');
     expect(source).toContain('setIcon(button, "trash-2")');
   });
