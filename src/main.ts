@@ -3,7 +3,7 @@ import { DockerHostManager } from "./services/DockerHostManager";
 import { DockerInspectionService } from "./services/DockerInspectionService";
 import { DockerConnectionFactory } from "./connections/DockerConnectionFactory";
 import { DEFAULT_SETTINGS, DockerConnectorSettings, DockerConnectorSettingTab } from "./settings/settings";
-import { withSessionSafeContainerManagement } from "./settings/sessionManagement";
+import { ProfileManagementAuthorization } from "./security/ProfileManagementAuthorization";
 import type { DockerConnectionProfile, DockerHostSnapshot } from "./models/DockerConnectionProfile";
 import { migrateProfiles } from "./settings/migration";
 import { DockerApiClient } from "./services/DockerApiClient";
@@ -26,7 +26,7 @@ import { ContainerImageUpdateService, type ContainerImageUpdateStatus } from "./
 import { ProfileRefreshTracker } from "./services/ProfileRefreshTracker";
 
 /** Describes a persisted preference change that an open view may need to reflect. */
-export type DockerConnectorSettingsChange = { key: keyof DockerConnectorSettings; previousValue: unknown; value: unknown };
+export type DockerConnectorSettingsChange = { key: keyof DockerConnectorSettings | "managementAuthorization"; previousValue: unknown; value: unknown };
 
 /**
  * Docker Connector plugin entry point.
@@ -56,7 +56,8 @@ export default class DockerConnectorPlugin extends Plugin {
   private readonly volumeDetailService = new VolumeDetailService(this.connectionFactory);
   readonly publicImageReleases = new PublicImageReleaseService();
   readonly contextLifecycle = new DockerContextLifecycleCache();
-  readonly containerActions = new DockerContainerActionService(this.connectionFactory, () => this.settings.containerManagementEnabled);
+  readonly managementAuthorization = new ProfileManagementAuthorization();
+  readonly containerActions = new DockerContainerActionService(this.connectionFactory, (profileId) => this.managementAuthorization.isEnabled(profileId));
   readonly containerImageUpdates = new ContainerImageUpdateService(this.connectionFactory);
   private refreshTimer?: number;
   private refreshGeneration = 0;
@@ -97,7 +98,7 @@ export default class DockerConnectorPlugin extends Plugin {
    */
   async onunload(): Promise<void> {
     this.unloading = true;
-    this.settings.containerManagementEnabled = false;
+    this.managementAuthorization.clear();
     if (this.refreshTimer) window.clearInterval(this.refreshTimer);
     await this.containerActions.recoverActiveUpdates();
     this.containerActions.clear();
@@ -137,39 +138,33 @@ export default class DockerConnectorPlugin extends Plugin {
     // Never spread arbitrary persisted values over defaults. Old or manually
     // edited data.json files are untrusted input and must not create invalid
     // timer values or silently enable container management.
-    this.settings = withSessionSafeContainerManagement({
+    this.settings = {
       profiles,
       automaticRefresh: typeof modernSettings.automaticRefresh === "boolean" ? modernSettings.automaticRefresh : DEFAULT_SETTINGS.automaticRefresh,
       refreshIntervalMinutes: validRefreshInterval(modernSettings.refreshIntervalMinutes),
       integrateWithTheme: typeof modernSettings.integrateWithTheme === "boolean" ? modernSettings.integrateWithTheme : DEFAULT_SETTINGS.integrateWithTheme,
       containerDensity: modernSettings.containerDensity === "compact" || modernSettings.containerDensity === "comfortable" ? modernSettings.containerDensity : DEFAULT_SETTINGS.containerDensity,
-      // Historical persisted true values must never grant a new session mutation authority.
-      containerManagementEnabled: modernSettings.containerManagementEnabled === true
-    });
+    };
     if (requiresMigration || repairedProfiles || hasRetiredReportFolder) await this.saveSettings();
   }
   async saveSettings(): Promise<void> {
     const save = this.settingsSaveChain.then(async () => {
-      await this.saveData(withSessionSafeContainerManagement(this.settings));
+      await this.saveData(this.settings);
     });
     this.settingsSaveChain = save.catch(() => undefined);
     await save;
   }
   onSettingsChanged(listener: (change: DockerConnectorSettingsChange) => void): () => void { this.settingsListeners.add(listener); return () => this.settingsListeners.delete(listener); }
-  async setContainerManagementEnabled(value: boolean): Promise<boolean> {
-    const previousValue = this.settings.containerManagementEnabled;
-    if (previousValue === value) return value;
-    this.settings.containerManagementEnabled = value;
-    try {
-      await this.saveSettings();
-      if (this.settings.containerManagementEnabled !== value) throw new Error("Container management setting did not retain the requested value.");
-    } catch (error) {
-      this.settings.containerManagementEnabled = previousValue;
-      throw error;
-    }
-    this.emitSettingsChanged({ key: "containerManagementEnabled", previousValue, value });
-    return this.settings.containerManagementEnabled;
+  isProfileManagementEnabled(profileId: string): boolean { return this.managementAuthorization.isEnabled(profileId); }
+  setProfileManagementEnabled(profileId: string, enabled: boolean): boolean {
+    const profile = this.settings.profiles.find((item) => item.id === profileId);
+    if (!profile || this.snapshots.get(profileId)?.status !== "online") return false;
+    const previousValue = this.managementAuthorization.isEnabled(profileId);
+    if (enabled) this.managementAuthorization.enable(profileId); else this.managementAuthorization.disable(profileId);
+    this.emitSettingsChanged({ key: "managementAuthorization", previousValue, value: enabled });
+    return true;
   }
+  clearProfileManagementAuthorization(profileId: string): void { const previousValue = this.managementAuthorization.isEnabled(profileId); this.managementAuthorization.disable(profileId); if (previousValue) this.emitSettingsChanged({ key: "managementAuthorization", previousValue, value: false }); }
   private emitSettingsChanged(change: DockerConnectorSettingsChange): void { for (const listener of this.settingsListeners) listener(change); }
   refreshDashboard(): void { this.refreshOpenDashboard(); }
   configureRefresh(): void {
@@ -243,6 +238,7 @@ export default class DockerConnectorPlugin extends Plugin {
   hasActiveContainerAction(profileId: string): boolean { return this.containerActions.hasActiveProfile(profileId); }
   /** Clears every runtime-only record owned by a deleted connection profile. */
   clearDeletedProfileState(profileId: string): void {
+    this.clearProfileManagementAuthorization(profileId);
     this.profileRefreshes.clear(profileId);
     this.snapshots.delete(profileId);
     this.contextLifecycle.clear(profileId);
@@ -278,7 +274,7 @@ export default class DockerConnectorPlugin extends Plugin {
   setRuntimeGatewayToken(profileId: string, token: string): void { this.connectionFactory.setRuntimeGatewayToken(profileId, token); }
   clearRuntimeCredentials(profileId: string): void { this.connectionFactory.clearRuntimeCredentials(profileId); }
   private setRuntimeCredential(profile: DockerConnectionProfile, credential: string): void { if (profile.connectionType === "gateway") this.setRuntimeGatewayToken(profile.id, credential); else if (profile.connectionType === "ssh" && profile.authentication.type === "password") this.setRuntimePassword(profile.id, credential); else if (profile.connectionType === "ssh") this.setRuntimePrivateKeyPassphrase(profile.id, credential); else if (profile.connectionType === "docker-tls") this.setRuntimeTlsClientKeyPassphrase(profile.id, credential); }
-  private scheduleContainerImageUpdateChecks(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot): void { if (this.unloading || !this.settings.containerManagementEnabled || snapshot.status !== "online") return; snapshot.containers.forEach((container) => { const eligibility = getContainerUpdateEligibility(container.image, container.labels); if (eligibility.eligible && this.containerImageUpdates.isStale(profile.id, container.id)) void this.containerImageUpdates.check(profile, container.id).catch(() => undefined); }); }
+  private scheduleContainerImageUpdateChecks(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot): void { if (this.unloading || !this.managementAuthorization.isEnabled(profile.id) || snapshot.status !== "online") return; snapshot.containers.forEach((container) => { const eligibility = getContainerUpdateEligibility(container.image, container.labels); if (eligibility.eligible && this.containerImageUpdates.isStale(profile.id, container.id)) void this.containerImageUpdates.check(profile, container.id).catch(() => undefined); }); }
   private refreshOpenDashboard(): void { this.app.workspace.getLeavesOfType(DOCKER_CONNECTOR_VIEW).forEach((leaf) => void (leaf.view as DockerDashboardView).render()); }
 }
 

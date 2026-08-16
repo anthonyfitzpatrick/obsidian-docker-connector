@@ -8,7 +8,7 @@ export class DockerHostManager {
   async add(profile: DockerConnectionProfile): Promise<void> {
     const profiles = this.plugin.settings.profiles;
     this.plugin.settings.profiles = [...profiles, normalizeProfile(profile)];
-    try { await this.plugin.saveSettings(); this.plugin.invalidateProfileRefresh(profile.id); await this.plugin.disconnectProfile(profile.id); this.plugin.contextLifecycle.clear(profile.id); } catch (error) { this.plugin.settings.profiles = profiles; throw error; }
+    try { await this.plugin.saveSettings(); this.plugin.clearProfileManagementAuthorization?.(profile.id); this.plugin.invalidateProfileRefresh(profile.id); await this.plugin.disconnectProfile(profile.id); this.plugin.contextLifecycle.clear(profile.id); } catch (error) { this.plugin.settings.profiles = profiles; throw error; }
   }
   async update(profile: DockerConnectionProfile): Promise<void> {
     if (this.plugin.hasActiveContainerAction(profile.id)) throw new Error("A container operation is currently in progress for this connection. Wait for it to finish before editing the connection.");

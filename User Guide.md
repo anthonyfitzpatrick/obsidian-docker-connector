@@ -751,7 +751,7 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 
 ## 20. Container management
 
-**Container management** is disabled by default and resets to disabled after restarting or reloading Obsidian. Enable it in Docker Connector Settings only for Docker hosts you trust. Enabling it asks for confirmation because lifecycle and update actions change the Docker host.
+**Container management** is disabled by default and resets to disabled after restarting or reloading Obsidian. In Overview, select an individual Docker connection and enable it only for that connection when you trust it. Enabling it asks for confirmation because lifecycle and update actions change the Docker host.
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
@@ -910,7 +910,7 @@ Docker Connector Settings provide:
 - **Theme integration** — use Obsidian’s native theme variables.
 - **Container management** — enable or disable explicit Start, Shut down, Stop, Restart, and Update actions.
 
-Changing Container management updates open Docker Connector views immediately for the current session. It does not retroactively run any Docker action and does not persist authorization across a restart.
+Changing Container management in Overview updates open Docker Connector views immediately for that connection and current session. It does not retroactively run any Docker action, does not affect other connections, and does not persist authorization across a restart.
 
 ### Screenshot 42 — Settings page
 > **Screenshot placeholder 42**
@@ -934,7 +934,7 @@ Changing Container management updates open Docker Connector views immediately fo
 >
 > **How to capture this screenshot:**
 > 1. Open Docker Connector Settings.
-> 2. Toggle **Container management** from disabled to enabled.
+> 2. In Overview, select the test connection and choose **Enable management for this session**.
 > 3. Accept the confirmation only in an isolated test environment after confirming the configured environments are understood and you intend to continue test work.
 > 4. After persistence completes, ensure the setting visibly remains enabled and any confirmation/status feedback is stable.
 > 5. Capture the enabled setting state; do not include unrelated sensitive settings.

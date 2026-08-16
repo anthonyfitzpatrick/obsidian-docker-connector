@@ -58,7 +58,7 @@ export class DockerDashboardView extends ItemView {
   getViewType(): string { return DOCKER_CONNECTOR_VIEW; }
   getDisplayText(): string { return "Docker Connector"; }
   getIcon(): string { return "container"; }
-  async onOpen(): Promise<void> { this.closed = false; this.removeSettingsListener = this.plugin.onSettingsChanged((change) => { if (change.key === "containerManagementEnabled" && !this.closed) void this.render(); }); /* The view owns this presentation-only timer, so registerInterval ties it to ItemView disposal as well as the explicit close path. */ this.relativeTimeTimer = this.registerInterval(window.setInterval(() => { if (this.page === "containers") void this.render(); }, 60_000)); await this.render(); }
+  async onOpen(): Promise<void> { this.closed = false; this.removeSettingsListener = this.plugin.onSettingsChanged((change) => { if (change.key === "managementAuthorization" && !this.closed) void this.render(); }); /* The view owns this presentation-only timer, so registerInterval ties it to ItemView disposal as well as the explicit close path. */ this.relativeTimeTimer = this.registerInterval(window.setInterval(() => { if (this.page === "containers") void this.render(); }, 60_000)); await this.render(); }
   async onClose(): Promise<void> { this.closed = true; this.removeSettingsListener?.(); this.removeSettingsListener = undefined; this.attentionReleaseChecks.clear(); if (this.relativeTimeTimer) window.clearInterval(this.relativeTimeTimer); this.containersTab.dispose(); this.applicationsTab.dispose(); this.imagesTab.dispose(); this.volumesTab.dispose(); }
 
   async render(): Promise<void> {
@@ -182,9 +182,25 @@ export class DockerDashboardView extends ItemView {
 
     const grid = root.createDiv({ cls: "docker-connector__overview-grid" });
     const hasAttention = attention.length > 0;
+    this.renderManagementControl(grid, profiles);
     this.renderHostHealth(grid, profiles);
     if (hasAttention) this.renderAttention(grid, attention, true);
     if (!hasAttention) this.renderAttention(grid, attention);
+  }
+
+  private renderManagementControl(root: HTMLElement, profiles: DockerConnectionProfile[]): void {
+    const panel = this.panel(root, "Container management", "Session-only authorization for explicit container actions", "shield-check");
+    if (this.selectedHostId === "all") { panel.createDiv({ text: "Container management is available only for an individual Docker connection.", cls: "docker-connector__muted" }); return; }
+    const profile = profiles.find((item) => item.id === this.selectedHostId);
+    const status = profile && this.plugin.snapshots.get(profile.id)?.status;
+    if (!profile) { panel.createDiv({ text: "Select a Docker connection to manage it.", cls: "docker-connector__muted" }); return; }
+    const enabled = this.plugin.isProfileManagementEnabled(profile.id);
+    panel.createEl("strong", { text: enabled ? "Enabled for this session" : "Read-only" });
+    panel.createDiv({ text: enabled ? "Lifecycle and standalone Update actions are allowed only for this connection until Obsidian restarts." : "Allows Start, Stop, Shut down, Restart and Update actions on this Docker connection for the current Obsidian session. Authorization resets when Obsidian restarts.", cls: "docker-connector__muted" });
+    const button = panel.createEl("button", { text: enabled ? "Disable management" : "Enable management for this session", cls: enabled ? "" : "mod-cta", attr: { "aria-label": `${enabled ? "Disable" : "Enable"} management for ${profile.name}` } });
+    button.disabled = !enabled && status !== "online";
+    if (!enabled && status !== "online") button.title = "Management can be enabled only while this connection is online.";
+    button.onclick = () => { if (!enabled && !globalThis.confirm("Container management allows Start, Stop, Shut down, Restart and Update actions on this Docker connection for the current Obsidian session.\n\nThis authorization resets when Obsidian restarts.")) return; this.plugin.setProfileManagementEnabled(profile.id, !enabled); };
   }
 
   private renderHostHealth(root: HTMLElement, profiles: DockerConnectionProfile[]): void {
