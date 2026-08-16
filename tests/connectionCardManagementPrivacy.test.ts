@@ -6,17 +6,17 @@ const view = readFileSync(resolve(process.cwd(), "src/views/DockerDashboardView.
 const css = readFileSync(resolve(process.cwd(), "styles.css"), "utf8");
 
 describe("connection card management and SSH privacy", () => {
-  it("keeps each shared management switch compactly grouped with the footer controls", () => {
-    expect((view.match(/this\.addCardManagementSwitch\(footerControls, profile, status\)/g) ?? []).length).toBe(3);
+  it("places each shared management switch in its own centered footer row", () => {
+    expect((view.match(/this\.addCardManagementSwitch\(management, profile, status\)/g) ?? []).length).toBe(3);
     expect(view).toContain('role: "switch", "aria-label": `Container management for ${profile.name}`');
     expect(view).toContain("this.plugin.setProfileManagementEnabled(profile.id, input.checked)");
-    expect(view).toContain('cls: "dc-connection-action-group"');
-    expect(view).toContain('cls: "dc-connection-footer-controls"');
+    expect(view).toContain('cls: "dc-connection-card-footer"');
+    expect(view).toContain('cls: "dc-connection-card-actions"');
+    expect(view).toContain('cls: "dc-connection-card-management"');
     expect(css).toContain(".dc-card-management-switch");
     expect(css).toContain("white-space: nowrap");
-    expect(css).toContain(".dc-connection-footer-controls { margin-left: auto; flex-wrap: nowrap; }");
-    expect(css).toContain("justify-content: space-between");
-    expect(css).toContain(".dc-connection-footer-controls { width: 100%; justify-content: space-between; margin-left: 0;");
+    expect(css).toContain(".dc-connection-card-management { display: flex; align-items: center; justify-content: center;");
+    expect(css).toContain(".dc-connection-card-actions { display: flex; align-items: center; justify-content: flex-start;");
     expect(css).not.toContain(".dc-card-management-switch { width: 100%");
   });
 
@@ -25,6 +25,13 @@ describe("connection card management and SSH privacy", () => {
     expect(managementSwitch).toContain('available ? enabled ? "Enabled" : "Read-only" : "Unavailable"');
     expect(managementSwitch).toContain('cls: "dc-card-management-switch"');
     expect(managementSwitch).not.toContain("createDiv()");
+  });
+
+  it("keeps Delete, Reconnect, and Retry in the action row rather than the management row", () => {
+    expect((view.match(/this\.addReconnectAction\(primaryActions, profile, status\);\s*this\.addDeleteAction\(primaryActions, profile\);\s*const management = footer\.createDiv\(\{ cls: "dc-connection-card-management" \}\);/g) ?? []).length).toBe(3);
+    const managementRows = view.match(/const management = footer\.createDiv\(\{ cls: "dc-connection-card-management" \}\);\s*this\.addCardManagementSwitch\(management, profile, status\);/g) ?? [];
+    expect(managementRows).toHaveLength(3);
+    expect(managementRows.join("\n")).not.toContain("addDeleteAction");
   });
 
   it("does not expose SSH usernames or authentication modes in ordinary card metadata", () => {

@@ -293,20 +293,20 @@ export class DockerDashboardView extends ItemView {
       endpoint.createSpan({ text: `Lifecycle: ${contextLifecycleLabel(lifecycle?.state)}`, cls: "docker-connector__muted" });
       endpoint.createSpan({ text: `Imported: ${profile.contextSnapshot.importedAt}${lifecycle?.checkedAt ? ` · Checked: ${lifecycle.checkedAt}` : ""}`, cls: "docker-connector__muted" });
       const details = card.createEl("details", { cls: "docker-connector__host-details" }); details.createEl("summary", { text: "View Context Details" }); const grid = details.createDiv({ cls: "docker-connector__detail-grid" }); [["Saved endpoint", profile.contextSnapshot.endpointDisplay ?? "—"], ["TLS verification", profile.contextSnapshot.skipTlsVerify ? "Skipped" : "Enforced"], ["Supported", profile.contextSnapshot.supported ? "Yes" : "No"], ["Lifecycle", contextLifecycleLabel(lifecycle?.state)], ["Error", lifecycle?.errorCode ?? "—"]].forEach(([label, value]) => { const item = grid.createDiv(); item.createSpan({ text: label }); item.createEl("strong", { text: value }); }); lifecycle?.changes.forEach((change) => details.createDiv({ text: `${change.field}: ${String(change.previousValue ?? "—")} → ${String(change.currentValue ?? "—")} (${change.severity})`, cls: "docker-connector__muted", attr: { "aria-label": `Context change ${change.field}` } }));
-      const actions = card.createDiv({ cls: "dc-connection-actions" });
-      const primaryActions = actions.createDiv({ cls: "dc-connection-action-group" });
+      const footer = card.createDiv({ cls: "dc-connection-card-footer" });
+      const primaryActions = footer.createDiv({ cls: "dc-connection-card-actions" });
       this.addEditAction(primaryActions, profile);
       const refresh = primaryActions.createEl("button", { text: "Refresh Context Metadata", attr: { "aria-label": `Refresh Context metadata for ${profile.name}` } }); refresh.onclick = () => void this.plugin.refreshContextMetadata(profile);
       this.addReconnectAction(primaryActions, profile, status);
-      const footerControls = actions.createDiv({ cls: "dc-connection-footer-controls" });
-      this.addCardManagementSwitch(footerControls, profile, status);
-      this.addDeleteAction(footerControls, profile);
+      this.addDeleteAction(primaryActions, profile);
+      const management = footer.createDiv({ cls: "dc-connection-card-management" });
+      this.addCardManagementSwitch(management, profile, status);
       return;
     }
     if (profile.connectionType === "docker-tls") {
       const endpoint = card.createDiv({ cls: "dc-connection-endpoint" }); endpoint.createSpan({ text: `${profile.host}:${profile.port}` }); endpoint.createSpan({ text: `Server name: ${profile.serverName} · ${titleCase(status)}`, cls: "docker-connector__muted" });
       if (snapshot) { const inventory = card.createDiv({ cls: "dc-connection-inventory" }); [["Containers", snapshot.containers.length], ["Images", snapshot.images.length], ["Volumes", snapshot.volumes.length], ["Networks", snapshot.networks.length]].forEach(([label, value]) => { const metric = inventory.createDiv(); metric.createEl("strong", { text: String(value) }); metric.createSpan({ text: String(label) }); }); card.createDiv({ text: snapshot.system ? `Docker ${snapshot.system.dockerVersion} · API ${snapshot.system.apiVersion}` : snapshot.error ?? "Docker details unavailable", cls: "docker-connector__muted" }); }
-      const actions = card.createDiv({ cls: "dc-connection-actions" }); const primaryActions = actions.createDiv({ cls: "dc-connection-action-group" }); const open = primaryActions.createEl("button", { text: "Open dashboard", cls: "mod-cta" }); open.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); }; this.addEditAction(primaryActions, profile); this.addReconnectAction(primaryActions, profile, status); const footerControls = actions.createDiv({ cls: "dc-connection-footer-controls" }); this.addCardManagementSwitch(footerControls, profile, status); this.addDeleteAction(footerControls, profile);
+      const footer = card.createDiv({ cls: "dc-connection-card-footer" }); const primaryActions = footer.createDiv({ cls: "dc-connection-card-actions" }); const open = primaryActions.createEl("button", { text: "Open dashboard", cls: "mod-cta" }); open.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); }; this.addEditAction(primaryActions, profile); this.addReconnectAction(primaryActions, profile, status); this.addDeleteAction(primaryActions, profile); const management = footer.createDiv({ cls: "dc-connection-card-management" }); this.addCardManagementSwitch(management, profile, status);
       return;
     }
 
@@ -329,15 +329,15 @@ export class DockerDashboardView extends ItemView {
       card.createDiv({ text: "Docker inventory is available after a successful connection.", cls: "dc-connection-unavailable" });
     }
 
-    const actions = card.createDiv({ cls: "dc-connection-actions" });
-    const primaryActions = actions.createDiv({ cls: "dc-connection-action-group" });
+    const footer = card.createDiv({ cls: "dc-connection-card-footer" });
+    const primaryActions = footer.createDiv({ cls: "dc-connection-card-actions" });
     const action = primaryActions.createEl("button", { text: "Open dashboard", cls: "mod-cta" });
     action.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); };
     this.addEditAction(primaryActions, profile);
     this.addReconnectAction(primaryActions, profile, status);
-    const footerControls = actions.createDiv({ cls: "dc-connection-footer-controls" });
-    this.addCardManagementSwitch(footerControls, profile, status);
-    this.addDeleteAction(footerControls, profile);
+    this.addDeleteAction(primaryActions, profile);
+    const management = footer.createDiv({ cls: "dc-connection-card-management" });
+    this.addCardManagementSwitch(management, profile, status);
   }
 
   private addEditAction(actions: HTMLElement, profile: DockerConnectionProfile): void {

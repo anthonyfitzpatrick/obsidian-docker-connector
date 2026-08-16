@@ -432,7 +432,7 @@ Cards expose the applicable management actions:
 > 2. Choose a mix of states if available so **Edit**, **Reconnect**, and **Delete** are visible across the cards.
 > 3. Ensure **Add Docker Host** is visible at page level.
 > 4. Do not click any action while taking the screenshot.
-> 5. Capture a region wide enough to show the grouped action layout clearly: actions on the left and the compact per-card management switch with Delete on the right, without exposing sensitive host details.
+> 5. Capture a region wide enough to show the two-row footer clearly: actions, including Delete, in the first row and the centered compact per-card management switch in the second, without exposing sensitive host details.
 
 >
 > **Suggested filename:** `docs/images/user-guide/18-connection-actions.png`
