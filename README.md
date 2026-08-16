@@ -13,7 +13,8 @@ Run the separate component in [`gateway/`](gateway/) only on a trusted LAN or VP
 ## Features
 
 - Connect multiple Docker environments and switch the **Current Environment** at any time.
-- Use four clear connection methods: Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS).
+- Use Local Docker Socket, Docker Context, Remote Docker via SSH, Remote Docker API (Mutual TLS), or the mobile-safe Docker Connector Gateway.
+- Read consistent host cards: the same purple host identity, safe endpoint details, inventory/runtime preview, action row, and synchronized per-profile management row for every transport.
 - Manage saved connections from **Connections**: add, edit, reconnect or retry when relevant, inspect status, and delete the plugin-only profile safely.
 - Browse host Overview data, Docker Compose **Applications**, **Containers**, **Images**, **Volumes**, and **Networks**.
 - Inspect container, image, volume, network, and Compose application details without opening a separate Docker dashboard.
@@ -34,6 +35,7 @@ Release screenshots will be added as the UI is finalized. The full [User Guide](
 | Docker Context | Existing Docker CLI configurations | Context-defined | Depends on Context |
 | Remote Docker via SSH | Most remote Docker hosts | Password or private key | No |
 | Remote Docker API (Mutual TLS) | Direct secured Docker Engine API access | CA + client certificate + private key | Yes |
+| Docker Connector Gateway | Authenticated iPhone/iPad access through a trusted companion service | Session-only Gateway token over HTTPS | No raw Docker API exposure |
 
 **Local Docker Socket** discovers and validates local Unix sockets or Windows named pipes. **Docker Context** uses an existing Docker CLI Context without changing your active Context; local Context endpoints route through the local transport, while supported SSH Contexts use Docker CLI’s secure Context transport. **Remote Docker via SSH** carries Docker traffic through SSH, so the Docker API does not need to be exposed directly. **Remote Docker API (Mutual TLS)** requires a trusted CA, client certificate, client private key, and mandatory server identity verification.
 
@@ -58,7 +60,7 @@ When a newer image is confirmed and a standalone container is eligible, **Update
 ## Security and privacy
 
 - Docker access remains privileged; use least-privileged access where possible.
-- SSH passwords, SSH private-key passphrases, and TLS client-key passphrases are session-only and are never saved in plugin settings.
+- SSH passwords, SSH private-key passphrases, TLS client-key passphrases, and Gateway tokens are session-only and are never saved in plugin settings. Passive cards hide SSH usernames, authentication labels, credential paths, and secrets.
 - Selected key and certificate paths can be saved; their file contents are not copied into settings.
 - Mutual TLS requires server-certificate and Server Name verification. There is no insecure verification bypass.
 - Docker Contexts are discovered and used without `docker context use`, create, update, remove, import, or export commands.
@@ -72,7 +74,7 @@ For details, read the [Security Review](docs/Docker%20Connector%20-%20Security%2
 
 | Requirement | Details |
 | --- | --- |
-| Obsidian | Desktop Obsidian 1.7.0 or later. Mobile is unsupported. |
+| Obsidian | Obsidian 1.7.0 or later. Desktop supports local/Context/SSH/mTLS; iPhone/iPad use Gateway. |
 | Local Docker Socket | A local Docker Engine/Docker Desktop and permission to access its Unix socket or Windows named pipe. |
 | Docker Context | Local Docker CLI and an existing Context. |
 | Remote Docker via SSH | SSH access and Docker access for the remote account; no interactive `sudo`. |
@@ -121,7 +123,7 @@ An available image is not automatically eligible for a standalone update. Docker
 
 ## Known limitations
 
-- Desktop-only; Obsidian mobile is unsupported.
+- Local Socket, Docker Context, SSH, and mutual TLS require desktop Obsidian; iPhone/iPad use Docker Connector Gateway.
 - Insecure unauthenticated Docker TCP is unsupported.
 - Compose applications are read-only at the project level.
 - Standalone Update is blocked for Compose-managed and other unsupported containers.

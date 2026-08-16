@@ -8,7 +8,7 @@ tags: [docker-connector, container-management]
 
 Management authorization is never persisted. Enabling first asks for confirmation. The switch is unavailable for All Docker hosts and for any non-Online connection.
 
-The Settings tab always shows the authoritative runtime state: **Status: Disabled**, **Status: Enabled**, **Status: Saving…**, or **Status: Save failed**. A successful change shows a notice. A failed save restores both the canonical runtime value and the visual toggle to their prior value, shows a bounded safe error notice, and does not emit a success event. Enabling the setting alone performs no Docker mutation.
+The corresponding switch on each Connections card represents the same profile-scoped runtime authorization as the header. Enabling either updates the other. Only an individual Online profile can be enabled; **All Docker hosts** and Offline, Degraded, Authentication Required, Unknown, Connecting, or unsupported profiles remain unavailable. If an enabled profile leaves Online, its authorization is cleared immediately and does not return on reconnect. The typed backend mutation gate also rechecks that the profile is still Online.
 
 When enabled, the container detail panel shows state-appropriate actions and requires confirmation before Start, Stop, Shut down, or Restart. Shut down uses Docker's graceful stop endpoint with a 30 second wait; Stop uses 10 seconds. Every accepted action triggers a coordinated refresh.
 

@@ -21,7 +21,7 @@ Docker Connector is read-only by default. You can inspect hosts, Docker Compose 
 
 Docker Connector supports multiple saved Docker environments. Each saved connection has its own status, inventory, cached dashboard data, and runtime credentials. Select one environment as the **Current Environment** to view its Overview, Applications, Containers, Images, Volumes, and Networks.
 
-The current release supports four connection methods:
+The current release supports five connection methods. Desktop methods use the local desktop runtime; Gateway is the mobile-safe HTTPS option:
 
 | Method | Best for | Authentication | Direct Docker API exposure |
 | --- | --- | --- | --- |
@@ -29,6 +29,7 @@ The current release supports four connection methods:
 | Docker Context | An existing Docker CLI configuration | Defined by the selected Context | Depends on the Context |
 | Remote Docker via SSH | Most remote Docker hosts | Password or private key | No |
 | Remote Docker API (Mutual TLS) | A deliberately secured direct Docker Engine API | CA certificate, client certificate, and client private key | Yes |
+| Docker Connector Gateway | iPhone/iPad access to a trusted Docker host | Session-only Gateway token over HTTPS | No raw Docker API exposure |
 
 Plain unauthenticated Docker TCP is not supported.
 
@@ -46,7 +47,7 @@ Docker Connector is designed to make its boundaries visible:
 
 ## 3. Requirements
 
-Docker Connector is a desktop-only plugin (`isDesktopOnly: true`). It is supported on desktop Obsidian for macOS, Windows, and Linux. It is not supported on Obsidian mobile because it needs desktop Node/Electron capabilities for local sockets or named pipes, file selection, SSH, TLS, and bounded Docker CLI processes.
+Docker Connector supports desktop Obsidian on macOS, Windows, and Linux, plus responsive iPhone/iPad layouts. Local Docker Socket, Docker Context, SSH, and mutual TLS require desktop capabilities. On mobile, use an authenticated HTTPS **Docker Connector Gateway** profile; desktop-only profiles remain visible but unavailable there.
 
 You also need appropriate access for the method you select:
 
@@ -59,7 +60,7 @@ You also need appropriate access for the method you select:
 
 When Docker Connector is available through Obsidian Community Plugins, install it from **Settings → Community plugins → Browse**, search for **Docker Connector**, then install and enable it. If it is not yet listed in the Community Plugin directory, use the project’s release instructions rather than copying source files into your vault.
 
-For a manual release installation, the plugin directory needs the release assets `main.js`, `manifest.json`, and `styles.css`. Source files, test fixtures, and `node_modules` are not required for normal use.
+For a manual release installation, the plugin directory needs `main.js`, `desktop-transports.js`, `desktop-ui.js`, `manifest.json`, and `styles.css`. Source files, test fixtures, and `node_modules` are not required for normal use.
 
 ## 5. First launch
 
@@ -82,20 +83,20 @@ On first launch there are no saved Docker connections. Open **Connections** and 
 
 ## 6. Understanding the interface
 
-The header identifies the Current Environment and its connection status. Use the refresh control for an immediate read-only snapshot refresh. When automatic refresh is enabled, Docker Connector also refreshes configured hosts in the background at the interval chosen in Settings.
+The header identifies the Current Environment and its connection status. Use the refresh control for an immediate read-only snapshot refresh. When automatic refresh is enabled, Docker Connector also refreshes configured hosts in the background at the interval chosen in Settings. With one individual **Online** host selected, the compact header **Container management** switch is available: **Read-only** is off and **Enabled** is on for that profile only. It is unavailable for **All Docker hosts** and for any non-Online profile.
 
 The primary navigation contains **Overview**, **Applications**, **Containers**, **Images**, **Volumes**, **Networks**, and **Connections**. The resource tabs show data for the Current Environment; their search, filter, sort, and detail controls never mutate Docker resources.
 
 ### Screenshot 01 — Main Docker Connector dashboard
 > **Screenshot placeholder 01**
 >
-> **Capture:** Overview with an online Current Environment, status, navigation, summary, and refresh controls.
+> **Capture:** Overview with an Online Current Environment, status, navigation, summary, refresh control, and the compact read-only management switch.
 >
 > **How to capture this screenshot:**
 > 1. Open Obsidian and open Docker Connector.
 > 2. Select an existing **Online** connection in **Current Environment**.
 > 3. Open **Overview** and wait for the latest snapshot to finish loading.
-> 4. Make sure the header shows the current environment, **Online** status, all primary navigation tabs, summary information, and the refresh control.
+> 4. Make sure the header shows the current environment, **Online** status, all primary navigation tabs, summary information, refresh control, and **Container management — Read-only** for the selected host.
 > 5. Collapse or close unrelated Obsidian sidebars if they distract from the plugin, but keep enough of the Obsidian frame visible to make it clear this is the plugin.
 > 6. Capture only after the Overview is fully populated and no transient loading message is visible.
 
@@ -135,12 +136,12 @@ Testing before saving is strongly recommended. A successful test proves the sele
 ### Screenshot 05 — Connection Type selector
 > **Screenshot placeholder 05**
 >
-> **Capture:** All four supported connection methods in the selector.
+> **Capture:** All desktop connection methods in the selector.
 >
 > **How to capture this screenshot:**
 > 1. Open **Add Docker Host**.
 > 2. Open the **Connection Type** selector without selecting a new option yet.
-> 3. Position the dialog so all four options are simultaneously visible: **Local Docker Socket**, **Docker Context**, **Remote Docker via SSH**, and **Remote Docker API (Mutual TLS)**.
+> 3. On desktop, position the dialog so all five options are simultaneously visible: **Local Docker Socket**, **Docker Context**, **Remote Docker via SSH**, **Remote Docker API (Mutual TLS)**, and **Docker Connector Gateway**. On iPhone/iPad, capture the single Gateway option instead.
 > 4. Ensure no secret-bearing fields are visible with populated values.
 > 5. Capture while the selector menu is open.
 
@@ -403,18 +404,18 @@ A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. 
 
 ## 10. Managing saved connections
 
-Open **Connections** to manage every saved profile. The page is titled **Docker connections** and provides **Add Docker Host** at the top. Every profile uses one uniform card structure: purple Docker host identity, textual connection method, transport-relevant safe endpoint details, inventory, runtime details, actions, and management row. Only the safe profile data and status vary by connection method.
+Open **Connections** to manage every saved profile. The page begins with summary cards for **Configured hosts**, **Online**, and **Needs sign-in**; Needs sign-in counts only profiles in **Authentication Required**. For example, three configured profiles may show one Online and two Needs sign-in without changing either healthy profile’s state. It then provides **Add Docker Host** and a card for every profile. Each card uses one uniform structure: purple Docker host identity, textual connection method, transport-relevant safe endpoint details, inventory, runtime details, actions, and management row. Only the safe profile data and status vary by connection method.
 
 ### Screenshot 03 — Connections management view
 > **Screenshot placeholder 03**
 >
-> **Capture:** Docker connections cards, statuses, and management actions.
+> **Capture:** Docker connections summary cards, profile cards, statuses, and management actions.
 >
 > **How to capture this screenshot:**
 > 1. Open Docker Connector and select **Connections**.
 > 2. Use a safe set of saved profiles that demonstrates more than one connection method if available.
 > 3. Wait for status evaluation so the cards show stable states such as **Online** or **Authentication Required**, rather than transient Connecting where possible.
-> 4. Ensure the **Docker connections** heading, **Add Docker Host**, profile cards, status badges, inventory/runtime sections, left action group, and compact per-card **Container management** switch are visible. Each host card should use the same purple host icon, typography, and structure while showing only transport-relevant safe details. SSH cards should show only their `host:port` endpoint, without a username or passive Password/Private Key label.
+> 4. Ensure the **Configured hosts**, **Online**, and **Needs sign-in** summary cards, **Docker connections** heading, **Add Docker Host**, profile cards, status badges, inventory/runtime sections, left action group, and compact per-card **Container management** switch are visible. Each host card should use the same purple host icon, typography, and structure while showing only transport-relevant safe details. SSH cards should show only their `host:port` endpoint, without a username or passive Password/Private Key label.
 > 5. If any hostnames or addresses should not be public, use disposable test profiles before capturing.
 
 >
@@ -751,7 +752,9 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 
 ## 20. Container management
 
-**Container management** is disabled by default and resets after restarting or reloading Obsidian. Select an individual Online Docker connection and use the header switch to enable it only for that connection when you trust it. Enabling asks for confirmation because lifecycle and update actions change the Docker host. It turns off immediately if the connection is lost and remains off after reconnecting until explicitly enabled again.
+**Container management** is disabled by default, per connection, and session-only. Select an individual **Online** Docker connection and use either its header switch or its Connections-card switch to enable it only for that profile when you trust it. The two switches stay synchronized; more than one profile can be authorized independently. Enabling asks for confirmation because lifecycle and update actions change the Docker host.
+
+Authorization is valid only while the profile remains continuously verified as **Online**. It is immediately cleared if that profile becomes Offline, Degraded, Authentication Required, Unknown, Connecting, or unsupported; other authorized profiles are unaffected. A successful reconnect returns that profile to **Read-only**—it never restores authorization automatically. The backend also refuses a mutation unless the profile is still Online when the action runs.
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
@@ -770,6 +773,22 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 
 >
 > **Suggested filename:** `docs/images/user-guide/39-management-disabled.png`
+
+### Screenshot 40 — Per-profile Container management enabled
+> **Screenshot placeholder 40**
+>
+> **Capture:** An individual Online host with management enabled in the compact header and on its matching Connections card.
+>
+> **How to capture this screenshot:**
+> 1. Select an individual known-safe **Online** test host in Docker Connector; do not use **All Docker hosts**.
+> 2. Turn on **Container management** from either the header or that host’s Connections card.
+> 3. Accept the confirmation only in an isolated test environment after confirming the configured environments are understood and you intend to continue test work.
+> 4. Confirm the matching header/card controls are synchronized and show **Enabled** for that profile only.
+> 5. Capture the enabled profile state; do not include credentials, unrelated settings, or Docker actions in progress.
+> 6. If desired, disable management again after all management/update screenshots are finished.
+
+>
+> **Suggested filename:** `docs/images/user-guide/40-management-enabled.png`
 
 ### Start, Stop, Shut down, and Restart
 
@@ -908,40 +927,23 @@ Docker Connector Settings provide:
 - **Automatic refresh** — refresh configured hosts in the background.
 - **Refresh interval** — minutes between background refreshes.
 - **Theme integration** — use Obsidian’s native theme variables.
-- **Container management** — enable or disable explicit Start, Shut down, Stop, Restart, and Update actions.
 
-Changing Container management in Overview updates open Docker Connector views immediately for that connection and current session. It does not retroactively run any Docker action, does not affect other connections, and does not persist authorization across a restart.
+Container management is intentionally not a Setting. It is controlled only by the synchronized per-profile header/card switches and never persists across a restart or reload.
 
 ### Screenshot 42 — Settings page
 > **Screenshot placeholder 42**
 >
-> **Capture:** Automatic refresh, interval, theme integration, and Container management.
+> **Capture:** Automatic refresh, interval, and theme integration.
 >
 > **How to capture this screenshot:**
 > 1. Open **Settings → Community plugins → Docker Connector** (or the plugin’s settings tab in the current Obsidian UI).
-> 2. Position the settings pane so **Automatic refresh**, **Refresh interval**, **Theme integration**, and **Container management** are all visible; scroll only as needed.
+> 2. Position the settings pane so **Automatic refresh**, **Refresh interval**, and **Theme integration** are all visible; scroll only as needed.
 > 3. Use normal/safe values and avoid showing unrelated vault/account settings.
-> 4. If Container management is enabled for test work, either capture that current state or disable it first depending on which state best supports the surrounding text; change settings only in an isolated test configuration.
+> 4. Do not look for or capture Container management here: it is not a Setting. Capture only the persistent refresh and theme controls.
 > 5. Capture the Docker Connector settings page at a width where labels, descriptions, and controls are readable.
 
 >
 > **Suggested filename:** `docs/images/user-guide/42-settings.png`
-
-### Screenshot 40 — Container management enabled
-> **Screenshot placeholder 40**
->
-> **Capture:** Settings confirmation and enabled status.
->
-> **How to capture this screenshot:**
-> 1. Open Docker Connector Settings.
-> 2. In Overview, select the test connection and choose **Enable management for this session**.
-> 3. Accept the confirmation only in an isolated test environment after confirming the configured environments are understood and you intend to continue test work.
-> 4. After persistence completes, ensure the setting visibly remains enabled and any confirmation/status feedback is stable.
-> 5. Capture the enabled setting state; do not include unrelated sensitive settings.
-> 6. If desired, disable management again after all management/update screenshots are finished.
-
->
-> **Suggested filename:** `docs/images/user-guide/40-management-enabled.png`
 
 ## 25. Security model and saved information
 
@@ -1056,7 +1058,7 @@ An image can be current, unavailable from a registry, untagged, inaccessible, Co
 
 **Does it store Mutual TLS passphrases or certificate contents?** No. It can save selected certificate/key paths, but not certificate contents or the client-key passphrase.
 
-**Can I use it on mobile?** No. Docker Connector is desktop-only.
+**Can I use it on mobile?** Yes, with a Docker Connector Gateway profile over trusted HTTPS. Local sockets, Docker Context, SSH, and mutual TLS remain desktop-only.
 
 **Does it change my active Docker Context?** No. It discovers and uses the selected context without running Context mutation commands.
 
@@ -1082,7 +1084,7 @@ An image can be current, unavailable from a registry, untagged, inaccessible, Co
 
 ## 28. Known limitations
 
-- Docker Connector is desktop-only.
+- Local sockets, Docker Context, SSH, and mutual TLS are desktop-only; mobile uses Docker Connector Gateway over trusted HTTPS.
 - Plain insecure Docker TCP is not supported.
 - Applications is a Compose-aware read-only view; it does not deploy, edit, start, stop, or update Compose projects.
 - Standalone transactional Update is intentionally blocked for Compose-managed and otherwise unsupported containers.
@@ -1130,7 +1132,7 @@ No screenshots are included in this repository yet. This is an index and capture
 | 02 | `02-empty-connections.png` | First launch | Empty state |
 | 03 | `03-connections-management.png` | Connections | Profiles and actions |
 | 04 | `04-add-docker-host.png` | Add | Host dialog |
-| 05 | `05-connection-type-selector.png` | Add | Four methods |
+| 05 | `05-connection-type-selector.png` | Add | Desktop methods / mobile Gateway |
 | 06 | `06-local-docker-socket.png` | Local | Endpoint |
 | 07 | `07-local-test-success.png` | Local | Test success |
 | 08 | `08-docker-cli-detected.png` | Context | CLI |
@@ -1164,7 +1166,7 @@ No screenshots are included in this repository yet. This is an index and capture
 | 36 | `36-images-view.png` | Images | Inventory |
 | 37 | `37-volumes-view.png` | Volumes | Inventory |
 | 38 | `38-networks-view.png` | Networks | Inventory |
-| 39 | `39-management-disabled.png` | Settings | Disabled |
-| 40 | `40-management-enabled.png` | Settings | Enabled |
+| 39 | `39-management-disabled.png` | Container management | Read-only |
+| 40 | `40-management-enabled.png` | Container management | Per-profile enabled |
 | 41 | `41-offline-connection.png` | Connections | Error |
 | 42 | `42-settings.png` | Settings | Full page |
