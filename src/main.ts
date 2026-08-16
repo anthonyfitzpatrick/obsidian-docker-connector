@@ -3,6 +3,7 @@ import { DockerHostManager } from "./services/DockerHostManager";
 import { DockerInspectionService } from "./services/DockerInspectionService";
 import { DockerConnectionFactory } from "./connections/DockerConnectionFactory";
 import { DEFAULT_SETTINGS, DockerConnectorSettings, DockerConnectorSettingTab } from "./settings/settings";
+import { withSessionSafeContainerManagement } from "./settings/sessionManagement";
 import type { DockerConnectionProfile, DockerHostSnapshot } from "./models/DockerConnectionProfile";
 import { migrateProfiles } from "./settings/migration";
 import { DockerApiClient } from "./services/DockerApiClient";
@@ -96,6 +97,7 @@ export default class DockerConnectorPlugin extends Plugin {
    */
   async onunload(): Promise<void> {
     this.unloading = true;
+    this.settings.containerManagementEnabled = false;
     if (this.refreshTimer) window.clearInterval(this.refreshTimer);
     await this.containerActions.recoverActiveUpdates();
     this.containerActions.clear();
@@ -135,19 +137,20 @@ export default class DockerConnectorPlugin extends Plugin {
     // Never spread arbitrary persisted values over defaults. Old or manually
     // edited data.json files are untrusted input and must not create invalid
     // timer values or silently enable container management.
-    this.settings = {
+    this.settings = withSessionSafeContainerManagement({
       profiles,
       automaticRefresh: typeof modernSettings.automaticRefresh === "boolean" ? modernSettings.automaticRefresh : DEFAULT_SETTINGS.automaticRefresh,
       refreshIntervalMinutes: validRefreshInterval(modernSettings.refreshIntervalMinutes),
       integrateWithTheme: typeof modernSettings.integrateWithTheme === "boolean" ? modernSettings.integrateWithTheme : DEFAULT_SETTINGS.integrateWithTheme,
       containerDensity: modernSettings.containerDensity === "compact" || modernSettings.containerDensity === "comfortable" ? modernSettings.containerDensity : DEFAULT_SETTINGS.containerDensity,
+      // Historical persisted true values must never grant a new session mutation authority.
       containerManagementEnabled: modernSettings.containerManagementEnabled === true
-    };
+    });
     if (requiresMigration || repairedProfiles || hasRetiredReportFolder) await this.saveSettings();
   }
   async saveSettings(): Promise<void> {
     const save = this.settingsSaveChain.then(async () => {
-      await this.saveData(this.settings);
+      await this.saveData(withSessionSafeContainerManagement(this.settings));
     });
     this.settingsSaveChain = save.catch(() => undefined);
     await save;

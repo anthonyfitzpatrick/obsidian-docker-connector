@@ -66,7 +66,7 @@ export class DockerConnectorSettingTab extends PluginSettingTab {
         this.plugin.settings.integrateWithTheme = value;
         await this.plugin.saveSettings();
       }));
-    const managementSetting = new Setting(containerEl).setName("Container management").setDesc("Allow explicit Start, Shut down, Stop, Restart and Update actions for containers. Docker access is highly privileged.");
+    const managementSetting = new Setting(containerEl).setName("Container management").setDesc("Enable Start, Shut down, Stop, Restart and Update for this Obsidian session. For safety, this resets to disabled when Obsidian restarts.");
     const status = managementSetting.settingEl.createDiv({ cls: "docker-connector__settings-status", attr: { "aria-live": "polite" } });
     const renderStatus = () => {
       const text = this.containerManagementStatus === "saving"

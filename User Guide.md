@@ -751,7 +751,7 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 
 ## 20. Container management
 
-**Container management** is disabled by default. Enable it in Docker Connector Settings only for Docker hosts you trust. Enabling it asks for confirmation because lifecycle and update actions change the Docker host.
+**Container management** is disabled by default and resets to disabled after restarting or reloading Obsidian. Enable it in Docker Connector Settings only for Docker hosts you trust. Enabling it asks for confirmation because lifecycle and update actions change the Docker host.
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
@@ -910,7 +910,7 @@ Docker Connector Settings provide:
 - **Theme integration** — use Obsidian’s native theme variables.
 - **Container management** — enable or disable explicit Start, Shut down, Stop, Restart, and Update actions.
 
-Changing Container management is persisted safely and open Docker Connector views update their action controls. It does not retroactively run any Docker action.
+Changing Container management updates open Docker Connector views immediately for the current session. It does not retroactively run any Docker action and does not persist authorization across a restart.
 
 ### Screenshot 42 — Settings page
 > **Screenshot placeholder 42**

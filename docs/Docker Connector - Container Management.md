@@ -4,7 +4,7 @@ tags: [docker-connector, container-management]
 
 # Container Management
 
-[[Docker Connector]] is read-only by default. Enable **Container management** in Settings only for trusted Docker hosts. The setting is persisted, applies to open container details immediately without restarting Obsidian, and credentials remain session-only.
+[[Docker Connector]] is read-only by default. Enable **Container management** in Settings only for trusted Docker hosts. Authorization applies to open container details immediately, is session-only, and resets to disabled after restarting or reloading Obsidian. Credentials remain session-only.
 
 The canonical persisted field is `containerManagementEnabled`. Enabling first asks for confirmation. While the setting is being written, its toggle is disabled and the Settings tab displays **Status: Saving…**. Only after persistence succeeds does Docker Connector emit the settings-change event that rerenders open Docker Connector views; no Docker refresh is needed for this UI change.
 
