@@ -19,6 +19,9 @@ describe("Connections management actions", () => {
     expect(view).toContain('setIcon(button, "pencil")');
     expect(view).toContain('setIcon(button, "refresh-cw")');
     expect(view).toContain('new ReconnectPasswordModal(this.plugin, profile, () => this.render()).open()');
+    expect(view).toContain('if (status === "authentication-required")');
+    expect(view).toContain('text: "Reconnect", cls: "dc-connection-reconnect"');
+    expect(view).not.toContain('managementAuthorization.isEnabled(profile.id)');
     expect(view).toContain('private readonly editingProfile?: DockerConnectionProfile');
     expect(view).toContain('this.connectionType = editingProfile.connectionType');
   });

@@ -19,7 +19,7 @@ describe("Obsidian Community Plugin release guard", () => {
   });
 
   it("ships the required Community Plugin release artifacts", async () => {
-    await expect(Promise.all([source("main.js"), source("manifest.json"), source("styles.css")])).resolves.toHaveLength(3);
+    await expect(Promise.all([source("main.js"), source("desktop-transports.js"), source("desktop-ui.js"), source("manifest.json"), source("styles.css")])).resolves.toHaveLength(5);
   });
 
   it("keeps prohibited Docker, TLS, and child-process patterns out of production source", async () => {

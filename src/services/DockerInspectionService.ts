@@ -20,6 +20,10 @@ export class DockerInspectionService {
 
   async inspectHost(host: DockerConnectionProfile): Promise<DockerHostSnapshot> {
     const refreshedAt = new Date().toISOString();
+    const authenticationRequired = this.connections.authenticationRequirement?.(host);
+    if (authenticationRequired) {
+      return { hostId: host.id, status: "authentication-required", refreshedAt, error: authenticationRequired, containers: [], images: [], volumes: [], networks: [] };
+    }
     try {
       const [version, info, containers, images, volumes, networks] = await Promise.all([
         new DockerApiClient(this.connections.create(host)).get<EngineVersion>("/version"),
@@ -56,21 +60,37 @@ export class DockerInspectionService {
  * could not authenticate or complete its Docker inventory request.
  */
 export function classifyHostFailure(error: unknown): Pick<DockerHostSnapshot, "status" | "error"> {
-  if (!(error instanceof DockerConnectionError)) {
+  const failure = connectionFailure(error);
+  if (!failure) {
     return { status: "degraded", error: error instanceof Error ? error.message : String(error) };
   }
 
-  if (error.code === "SSH_PASSWORD_REQUIRED") {
+  if (failure.code === "SSH_PASSWORD_REQUIRED") {
     return { status: "authentication-required", error: "Password required to reconnect." };
   }
-  if (error.code === "DOCKER_TLS_CLIENT_KEY_PASSPHRASE_REQUIRED") return { status: "authentication-required", error: "Client Key Passphrase required to reconnect." };
-  if (AUTHENTICATION_ERROR_CODES.has(error.code)) {
-    return { status: "authentication-required", error: error.message };
+  if (failure.code === "DOCKER_TLS_CLIENT_KEY_PASSPHRASE_REQUIRED") return { status: "authentication-required", error: "Client Key Passphrase required to reconnect." };
+  if (AUTHENTICATION_ERROR_CODES.has(failure.code)) {
+    return { status: "authentication-required", error: failure.message };
   }
-  if (OFFLINE_ERROR_CODES.has(error.code)) {
-    return { status: "offline", error: error.message };
+  if (OFFLINE_ERROR_CODES.has(failure.code)) {
+    return { status: "offline", error: failure.message };
   }
-  return { status: "degraded", error: error.message };
+  return { status: "degraded", error: failure.message };
+}
+
+/**
+ * Desktop transports are emitted into a separate plugin artifact. Their
+ * DockerConnectionError has a different JavaScript constructor from main.js,
+ * so `instanceof` cannot safely cross that artifact boundary. Codes/messages
+ * are the stable internal error contract shared by both bundles.
+ */
+function connectionFailure(error: unknown): { code: string; message: string } | undefined {
+  if (error instanceof DockerConnectionError) return error;
+  if (!error || typeof error !== "object") return undefined;
+  const candidate = error as { code?: unknown; message?: unknown };
+  return typeof candidate.code === "string" && typeof candidate.message === "string"
+    ? { code: candidate.code, message: candidate.message }
+    : undefined;
 }
 
 const AUTHENTICATION_ERROR_CODES = new Set([

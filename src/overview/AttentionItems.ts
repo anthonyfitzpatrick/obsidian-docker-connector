@@ -1,6 +1,7 @@
 import type { DockerContainerSummary } from "../containers/ContainerModels";
 import type { DockerConnectionProfile, DockerHostSnapshot } from "../models/DockerConnectionProfile";
 import type { PublicImageRelease } from "../services/PublicImageReleaseService";
+import { profileConnectionStatus } from "../connections/ProfileConnectionState";
 
 export type AttentionSeverity = "danger" | "warning" | "info";
 export type AttentionTarget = "host" | "container" | "image";
@@ -25,8 +26,9 @@ export function selectAttentionItems(
 ): DashboardAttentionItem[] {
   const hosts = profiles.flatMap((profile) => {
     const snapshot = snapshots.get(profile.id);
-    if (!snapshot || snapshot.status === "online") return [];
-    const label = snapshot.status === "authentication-required" ? "Authentication required" : "Host attention";
+    const status = profileConnectionStatus(profile.id, snapshots);
+    if (!snapshot || status === "online") return [];
+    const label = status === "authentication-required" ? "Authentication required" : "Host attention";
     return [{ id: `host:${profile.id}`, target: "host" as const, severity: hostSeverity(snapshot.status), label, title: profile.name, description: snapshot.error ?? "This Docker host requires attention.", hostProfileId: profile.id }];
   });
 

@@ -6,6 +6,7 @@ import { GatewayDockerTransport } from "./GatewayDockerTransport";
 import { isProfileSupportedOnPlatform, platformCapabilities } from "../platform/PlatformCapabilities";
 
 type DesktopTransportModule = { createDesktopTransport(profile: Exclude<DockerConnectionProfile, { connectionType: "gateway" }>, credentials: RuntimeCredentialStore): DockerTransport };
+type DesktopTransportLoader = (artifactPath?: string) => DesktopTransportModule;
 
 /**
  * Creates and owns one transport per persisted profile ID.
@@ -17,7 +18,7 @@ type DesktopTransportModule = { createDesktopTransport(profile: Exclude<DockerCo
 export class DockerConnectionFactory {
   private readonly transports = new Map<string, DockerTransport>();
   private readonly credentials = new RuntimeCredentialStore();
-  constructor(private readonly loadDesktop: () => DesktopTransportModule = loadDesktopTransportModule) {}
+  constructor(private readonly loadDesktop: DesktopTransportLoader = loadDesktopTransportModule, private readonly desktopTransportArtifactPath?: string) {}
   create(profile: DockerConnectionProfile): DockerTransport {
     const current = this.transports.get(profile.id);
     if (current && current.profile === profile) return current;
@@ -26,12 +27,22 @@ export class DockerConnectionFactory {
       ? new GatewayDockerTransport(profile, () => this.credentials.getGatewayToken(profile.id))
       : !isProfileSupportedOnPlatform(profile.connectionType, platformCapabilities())
         ? new UnsupportedDesktopTransport(profile)
-        : this.loadDesktop().createDesktopTransport(profile, this.credentials);
+        : this.loadDesktop(this.desktopTransportArtifactPath).createDesktopTransport(profile, this.credentials);
     this.transports.set(profile.id, transport);
     return transport;
   }
   setRuntimePassword(profileId: string, password: string): void { this.credentials.setPassword(profileId, password); }
   hasRuntimePassword(profileId: string): boolean { return this.credentials.hasPassword(profileId); }
+  /**
+   * Password-authenticated SSH profiles can be classified before creating a
+   * desktop transport. This prevents a missing session secret from being
+   * mistaken for a host or Docker failure during startup refresh.
+   */
+  authenticationRequirement(profile: DockerConnectionProfile): string | undefined {
+    return profile.connectionType === "ssh" && profile.authentication.type === "password" && !this.credentials.hasPassword(profile.id)
+      ? "Enter the SSH password to connect. Passwords are kept only for the current Obsidian session."
+      : undefined;
+  }
   clearRuntimePassword(profileId: string): void { this.credentials.clearPassword(profileId); }
   setRuntimePrivateKeyPassphrase(profileId: string, passphrase: string): void { this.credentials.setPrivateKeyPassphrase(profileId, passphrase); }
   setRuntimeTlsClientKeyPassphrase(profileId: string, passphrase: string): void { this.credentials.setTlsClientKeyPassphrase(profileId, passphrase); }
@@ -40,7 +51,13 @@ export class DockerConnectionFactory {
   async disconnect(profileId: string): Promise<void> { const transport = this.transports.get(profileId); this.transports.delete(profileId); await transport?.disconnect(); }
   async disconnectAll(): Promise<void> { await Promise.all([...this.transports.values()].map((transport) => transport.disconnect())); this.transports.clear(); this.credentials.clearAll(); }
 }
-function loadDesktopTransportModule(): DesktopTransportModule { const load = (globalThis as { require?: (id: string) => unknown }).require; if (!load) throw new Error("DESKTOP_TRANSPORT_LOADER_UNAVAILABLE"); return load("./desktop-transports") as DesktopTransportModule; }
+export function loadDesktopTransportModule(artifactPath?: string): DesktopTransportModule {
+  const load = (globalThis as { require?: (id: string) => unknown }).require;
+  if (!load || !artifactPath) throw new DockerConnectionError("DESKTOP_TRANSPORT_ARTIFACT_UNAVAILABLE", "Desktop transport runtime is unavailable. Reinstall Docker Connector and try again.");
+  const fs = load("node:fs") as { existsSync(path: string): boolean };
+  if (!fs.existsSync(artifactPath)) throw new DockerConnectionError("DESKTOP_TRANSPORT_ARTIFACT_UNAVAILABLE", "Desktop transport runtime is unavailable. Reinstall Docker Connector and try again.");
+  return load(artifactPath) as DesktopTransportModule;
+}
 class UnsupportedDesktopTransport implements DockerTransport {
   constructor(readonly profile: Exclude<DockerConnectionProfile, { connectionType: "gateway" }>) {}
   async connect(): Promise<void> { throw new DockerConnectionError("DESKTOP_CONNECTION_METHOD", "This connection method is available on desktop Obsidian only. Configure a Docker Connector Gateway to use it on mobile."); }

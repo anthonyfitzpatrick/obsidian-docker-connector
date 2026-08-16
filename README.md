@@ -86,7 +86,7 @@ When Docker Connector is available in Obsidian Community Plugins:
 2. Search for **Docker Connector**.
 3. Install and enable it.
 
-For manual release installation, place the release assets `main.js`, `manifest.json`, and `styles.css` in your vault’s `.obsidian/plugins/docker-connector/` directory, then enable the plugin in Obsidian. Do not install source files, test fixtures, or `node_modules` for normal use.
+For manual release installation, place the release assets `main.js`, `desktop-transports.js`, `desktop-ui.js`, `manifest.json`, and `styles.css` in your vault’s `.obsidian/plugins/docker-connector/` directory, then enable the plugin in Obsidian. Do not install source files, test fixtures, or `node_modules` for normal use.
 
 ## Quick start
 

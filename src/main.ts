@@ -23,7 +23,9 @@ import { connectionCapabilities } from "./connections/DockerConnectionCapabiliti
 import { DockerContainerActionService, type ContainerActionProgress, type ContainerUpdateProgressEvent } from "./services/DockerContainerActionService";
 import { getContainerUpdateEligibility, type ContainerUpdatePreview } from "./services/ContainerUpdatePlan";
 import { ContainerImageUpdateService, type ContainerImageUpdateStatus } from "./services/ContainerImageUpdateService";
+import { StartupRefreshCoordinator } from "./lifecycle/StartupRefreshCoordinator";
 import { ProfileRefreshTracker } from "./services/ProfileRefreshTracker";
+import { desktopPluginArtifactPath } from "./platform/DesktopPluginArtifact";
 
 /** Describes a persisted preference change that an open view may need to reflect. */
 export type DockerConnectorSettingsChange = { key: keyof DockerConnectorSettings | "managementAuthorization"; previousValue: unknown; value: unknown };
@@ -49,7 +51,7 @@ export default class DockerConnectorPlugin extends Plugin {
   settings: DockerConnectorSettings = DEFAULT_SETTINGS;
   readonly snapshots = new Map<string, DockerHostSnapshot>();
   readonly hostManager = new DockerHostManager(this);
-  private readonly connectionFactory = new DockerConnectionFactory();
+  private readonly connectionFactory = new DockerConnectionFactory(undefined, desktopPluginArtifactPath(this.app.vault.adapter, this.manifest.dir, "desktop-transports.js"));
   private readonly inspectionService = new DockerInspectionService(this.connectionFactory);
   private readonly containerDetailService = new ContainerDetailService(this.connectionFactory);
   private readonly imageDetailService = new ImageDetailService(this.connectionFactory);
@@ -62,6 +64,7 @@ export default class DockerConnectorPlugin extends Plugin {
   private refreshTimer?: number;
   private refreshGeneration = 0;
   private readonly profileRefreshes = new ProfileRefreshTracker();
+  private readonly startupRefresh = new StartupRefreshCoordinator();
   private refreshPromise?: Promise<void>;
   private unloading = false;
   private readonly settingsListeners = new Set<(change: DockerConnectorSettingsChange) => void>();
@@ -86,12 +89,12 @@ export default class DockerConnectorPlugin extends Plugin {
     // A plugin reload can occur after Obsidian has already completed layout.
     // Start the normal read-only refresh immediately as well as registering the
     // layout-ready path; refreshAll deduplicates overlapping calls.
-    void this.refreshAll().catch(() => undefined);
+    this.runStartupRefresh();
     // Obsidian recommends deferring network and other expensive startup work
     // until the workspace is ready. Registration remains synchronous, while
     // host inspection cannot delay opening the user's vault.
     this.app.workspace.onLayoutReady(() => {
-      if (!this.unloading) void this.refreshAll().catch(() => undefined);
+      if (!this.unloading) this.runStartupRefresh();
     });
   }
 
@@ -254,7 +257,7 @@ export default class DockerConnectorPlugin extends Plugin {
   }
   async refreshContextMetadata(profile: DockerContextProfile) {
     const now = new Date().toISOString();
-    try { const result = evaluateDockerContextLifecycle(profile, (await desktopUi().discoverContexts()).contexts, now); this.contextLifecycle.set(profile.id, result); return result; }
+    try { const result = evaluateDockerContextLifecycle(profile, (await desktopUi(this).discoverContexts()).contexts, now); this.contextLifecycle.set(profile.id, result); return result; }
     catch (error) { const result = unavailableDockerContextLifecycle(profile, error, now); this.contextLifecycle.set(profile.id, result); return result; }
     finally { this.refreshOpenDashboard(); }
   }
@@ -280,6 +283,7 @@ export default class DockerConnectorPlugin extends Plugin {
   private setRuntimeCredential(profile: DockerConnectionProfile, credential: string): void { if (profile.connectionType === "gateway") this.setRuntimeGatewayToken(profile.id, credential); else if (profile.connectionType === "ssh" && profile.authentication.type === "password") this.setRuntimePassword(profile.id, credential); else if (profile.connectionType === "ssh") this.setRuntimePrivateKeyPassphrase(profile.id, credential); else if (profile.connectionType === "docker-tls") this.setRuntimeTlsClientKeyPassphrase(profile.id, credential); }
   private scheduleContainerImageUpdateChecks(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot): void { if (this.unloading || !this.managementAuthorization.isEnabled(profile.id) || snapshot.status !== "online") return; snapshot.containers.forEach((container) => { const eligibility = getContainerUpdateEligibility(container.image, container.labels); if (eligibility.eligible && this.containerImageUpdates.isStale(profile.id, container.id)) void this.containerImageUpdates.check(profile, container.id).catch(() => undefined); }); }
   private refreshOpenDashboard(): void { this.app.workspace.getLeavesOfType(DOCKER_CONNECTOR_VIEW).forEach((leaf) => void (leaf.view as DockerDashboardView).render()); }
+  private runStartupRefresh(): void { const refresh = this.startupRefresh.run(() => this.refreshAll()); if (refresh) void refresh.catch(() => undefined); }
 }
 
 /** Keeps corrupted persisted values from creating a zero, negative, or runaway refresh loop. */

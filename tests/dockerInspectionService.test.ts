@@ -21,6 +21,31 @@ describe("DockerInspectionService", () => {
     expect(snapshot).toMatchObject({ status: "authentication-required", error: "Password required to reconnect." });
   });
 
+  it("classifies a password profile before creating a transport when the session credential is absent", async () => {
+    let created = false;
+    const snapshot = await new DockerInspectionService({
+      authenticationRequirement: () => "Enter the SSH password to connect. Passwords are kept only for the current Obsidian session.",
+      create: () => { created = true; throw new Error("must not create a transport"); }
+    } as never).inspectHost(profile);
+
+    expect(created).toBe(false);
+    expect(snapshot).toMatchObject({ status: "authentication-required", error: "Enter the SSH password to connect. Passwords are kept only for the current Obsidian session." });
+  });
+
+  it("recognizes authentication errors emitted by the separately bundled desktop transport", async () => {
+    const desktopBundleError = Object.assign(new Error("Enter the SSH password to connect."), { name: "DockerConnectionError", code: "SSH_PASSWORD_REQUIRED" });
+    const snapshot = await new DockerInspectionService({ create: () => failingTransport(desktopBundleError as DockerConnectionError) } as never).inspectHost(profile);
+
+    expect(snapshot).toMatchObject({ status: "authentication-required", error: "Password required to reconnect." });
+  });
+
+  it("keeps an encrypted SSH private-key passphrase request actionable across the desktop artifact boundary", async () => {
+    const desktopBundleError = Object.assign(new Error("The selected private key requires a passphrase."), { name: "DockerConnectionError", code: "SSH_PRIVATE_KEY_PASSPHRASE_REQUIRED" });
+    const snapshot = await new DockerInspectionService({ create: () => failingTransport(desktopBundleError as DockerConnectionError) } as never).inspectHost(profile);
+
+    expect(snapshot).toMatchObject({ status: "authentication-required", error: "The selected private key requires a passphrase." });
+  });
+
   it("marks rejected SSH credentials as authentication required instead of offline", async () => {
     const transport = failingTransport(new DockerConnectionError("SSH_PASSWORD_REJECTED", "The SSH server rejected the username or password."));
     const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(profile);
