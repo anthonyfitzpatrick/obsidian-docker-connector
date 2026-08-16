@@ -2,7 +2,7 @@
 
 Docker Connector brings multi-host Docker monitoring and deliberately opt-in container management into Obsidian. Connect to local or remote Docker Engines, inspect Docker Compose applications and Docker resources, check image availability, and use explicit lifecycle actions without leaving your vault.
 
-Docker Connector works on desktop and mobile Obsidian. Desktop supports Local Docker Socket, Docker Context, SSH and mutual TLS. iPhone and iPad use the Docker Connector Gateway: an authenticated HTTPS, allowlisted, read-only companion service that talks to the local Docker socket. It never exposes Docker's raw API or an arbitrary proxy. Docker Connector is read-only by default; the header switch enables Container management explicitly for one Online Docker connection and the current Obsidian session only.
+Docker Connector works on desktop and mobile Obsidian. Desktop supports Local Docker Socket, Docker Context, SSH and mutual TLS. iPhone and iPad use the Docker Connector Gateway: an authenticated HTTPS, allowlisted, read-only companion service that talks to the local Docker socket. It never exposes Docker's raw API or an arbitrary proxy. Docker Connector is read-only by default; the header and connection-card switches control the same session-only management authorization for one Online Docker connection. SSH usernames are shown only while adding or editing a host, not in normal dashboard cards.
 
 ## Mobile Gateway
 
