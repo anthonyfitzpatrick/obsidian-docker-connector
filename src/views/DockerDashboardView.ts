@@ -294,23 +294,26 @@ export class DockerDashboardView extends ItemView {
       endpoint.createSpan({ text: `Imported: ${profile.contextSnapshot.importedAt}${lifecycle?.checkedAt ? ` · Checked: ${lifecycle.checkedAt}` : ""}`, cls: "docker-connector__muted" });
       const details = card.createEl("details", { cls: "docker-connector__host-details" }); details.createEl("summary", { text: "View Context Details" }); const grid = details.createDiv({ cls: "docker-connector__detail-grid" }); [["Saved endpoint", profile.contextSnapshot.endpointDisplay ?? "—"], ["TLS verification", profile.contextSnapshot.skipTlsVerify ? "Skipped" : "Enforced"], ["Supported", profile.contextSnapshot.supported ? "Yes" : "No"], ["Lifecycle", contextLifecycleLabel(lifecycle?.state)], ["Error", lifecycle?.errorCode ?? "—"]].forEach(([label, value]) => { const item = grid.createDiv(); item.createSpan({ text: label }); item.createEl("strong", { text: value }); }); lifecycle?.changes.forEach((change) => details.createDiv({ text: `${change.field}: ${String(change.previousValue ?? "—")} → ${String(change.currentValue ?? "—")} (${change.severity})`, cls: "docker-connector__muted", attr: { "aria-label": `Context change ${change.field}` } }));
       const actions = card.createDiv({ cls: "dc-connection-actions" });
-      this.addEditAction(actions, profile);
-      const refresh = actions.createEl("button", { text: "Refresh Context Metadata", attr: { "aria-label": `Refresh Context metadata for ${profile.name}` } }); refresh.onclick = () => void this.plugin.refreshContextMetadata(profile);
-      this.addReconnectAction(actions, profile, status); this.addCardManagementSwitch(actions, profile, status);
-      this.addDeleteAction(actions, profile);
+      const primaryActions = actions.createDiv({ cls: "dc-connection-action-group" });
+      this.addEditAction(primaryActions, profile);
+      const refresh = primaryActions.createEl("button", { text: "Refresh Context Metadata", attr: { "aria-label": `Refresh Context metadata for ${profile.name}` } }); refresh.onclick = () => void this.plugin.refreshContextMetadata(profile);
+      this.addReconnectAction(primaryActions, profile, status);
+      const footerControls = actions.createDiv({ cls: "dc-connection-footer-controls" });
+      this.addCardManagementSwitch(footerControls, profile, status);
+      this.addDeleteAction(footerControls, profile);
       return;
     }
     if (profile.connectionType === "docker-tls") {
       const endpoint = card.createDiv({ cls: "dc-connection-endpoint" }); endpoint.createSpan({ text: `${profile.host}:${profile.port}` }); endpoint.createSpan({ text: `Server name: ${profile.serverName} · ${titleCase(status)}`, cls: "docker-connector__muted" });
       if (snapshot) { const inventory = card.createDiv({ cls: "dc-connection-inventory" }); [["Containers", snapshot.containers.length], ["Images", snapshot.images.length], ["Volumes", snapshot.volumes.length], ["Networks", snapshot.networks.length]].forEach(([label, value]) => { const metric = inventory.createDiv(); metric.createEl("strong", { text: String(value) }); metric.createSpan({ text: String(label) }); }); card.createDiv({ text: snapshot.system ? `Docker ${snapshot.system.dockerVersion} · API ${snapshot.system.apiVersion}` : snapshot.error ?? "Docker details unavailable", cls: "docker-connector__muted" }); }
-      const actions = card.createDiv({ cls: "dc-connection-actions" }); const open = actions.createEl("button", { text: "Open dashboard", cls: "mod-cta" }); open.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); }; this.addEditAction(actions, profile); this.addReconnectAction(actions, profile, status); this.addCardManagementSwitch(actions, profile, status); this.addDeleteAction(actions, profile);
+      const actions = card.createDiv({ cls: "dc-connection-actions" }); const primaryActions = actions.createDiv({ cls: "dc-connection-action-group" }); const open = primaryActions.createEl("button", { text: "Open dashboard", cls: "mod-cta" }); open.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); }; this.addEditAction(primaryActions, profile); this.addReconnectAction(primaryActions, profile, status); const footerControls = actions.createDiv({ cls: "dc-connection-footer-controls" }); this.addCardManagementSwitch(footerControls, profile, status); this.addDeleteAction(footerControls, profile);
       return;
     }
 
     const endpoint = card.createDiv({ cls: "dc-connection-endpoint" });
     const endpointIcon = endpoint.createSpan({ attr: { "aria-hidden": "true" } }); setIcon(endpointIcon, "network");
     endpoint.createSpan({ text: connectionSummary(profile) });
-    endpoint.createSpan({ text: profile.connectionType === "ssh" ? profile.authentication.type === "password" ? "Password" : `Private Key File · ${shortPath(profile.authentication.privateKeyPath)}` : getDockerConnectionTypeDisplayName(profile.connectionType), cls: "docker-connector__muted" });
+    if (profile.connectionType !== "ssh") endpoint.createSpan({ text: getDockerConnectionTypeDisplayName(profile.connectionType), cls: "docker-connector__muted" });
     if (profile.category) endpoint.createSpan({ text: profile.category, cls: "dc-connection-category" });
 
     if (snapshot) {
@@ -327,11 +330,14 @@ export class DockerDashboardView extends ItemView {
     }
 
     const actions = card.createDiv({ cls: "dc-connection-actions" });
-    const action = actions.createEl("button", { text: "Open dashboard", cls: "mod-cta" });
+    const primaryActions = actions.createDiv({ cls: "dc-connection-action-group" });
+    const action = primaryActions.createEl("button", { text: "Open dashboard", cls: "mod-cta" });
     action.onclick = () => { this.selectedHostId = profile.id; this.navigate("overview"); };
-    this.addEditAction(actions, profile);
-    this.addReconnectAction(actions, profile, status); this.addCardManagementSwitch(actions, profile, status);
-    this.addDeleteAction(actions, profile);
+    this.addEditAction(primaryActions, profile);
+    this.addReconnectAction(primaryActions, profile, status);
+    const footerControls = actions.createDiv({ cls: "dc-connection-footer-controls" });
+    this.addCardManagementSwitch(footerControls, profile, status);
+    this.addDeleteAction(footerControls, profile);
   }
 
   private addEditAction(actions: HTMLElement, profile: DockerConnectionProfile): void {
@@ -351,7 +357,7 @@ export class DockerDashboardView extends ItemView {
     button.onclick = (event) => { event.preventDefault(); event.stopPropagation(); void this.plugin.retryHost(profile); };
   }
 
-  private addCardManagementSwitch(actions: HTMLElement, profile: DockerConnectionProfile, status: HostConnectionStatus): void { const available = status === "online" && connectionCapabilities(profile).supportsContainerActions; const enabled = available && this.plugin.isProfileManagementEnabled(profile.id); const control = actions.createDiv({ cls: "dc-card-management-switch" }); const copy = control.createDiv(); copy.createSpan({ text: "Container management" }); copy.createEl("small", { text: available ? enabled ? "Enabled" : "Read-only" : "Unavailable" }); const input = control.createEl("input", { type: "checkbox", attr: { role: "switch", "aria-label": `Container management for ${profile.name}` } }); input.checked = enabled; input.disabled = !available; input.onchange = () => { if (input.checked && !globalThis.confirm(`Enable container management for ${profile.name}?\n\nThis allows Start, Stop, Shut down, Restart and standalone Update actions for this Docker connection during the current Obsidian session. Management turns off automatically if the connection is lost or Obsidian restarts.`)) { input.checked = false; return; } if (!this.plugin.setProfileManagementEnabled(profile.id, input.checked)) input.checked = false; void this.render(); }; }
+  private addCardManagementSwitch(actions: HTMLElement, profile: DockerConnectionProfile, status: HostConnectionStatus): void { const available = status === "online" && connectionCapabilities(profile).supportsContainerActions; const enabled = available && this.plugin.isProfileManagementEnabled(profile.id); const control = actions.createDiv({ cls: "dc-card-management-switch" }); control.createSpan({ text: "Container management" }); control.createEl("small", { text: available ? enabled ? "Enabled" : "Read-only" : "Unavailable" }); const input = control.createEl("input", { type: "checkbox", attr: { role: "switch", "aria-label": `Container management for ${profile.name}` } }); input.checked = enabled; input.disabled = !available; input.onchange = () => { if (input.checked && !globalThis.confirm(`Enable container management for ${profile.name}?\n\nThis allows Start, Stop, Shut down, Restart and standalone Update actions for this Docker connection during the current Obsidian session. Management turns off automatically if the connection is lost or Obsidian restarts.`)) { input.checked = false; return; } if (!this.plugin.setProfileManagementEnabled(profile.id, input.checked)) input.checked = false; void this.render(); }; }
 
   private addDeleteAction(actions: HTMLElement, profile: DockerConnectionProfile): void {
     const button = actions.createEl("button", { cls: "docker-connector__icon-button mod-warning", attr: { "aria-label": `Delete connection ${profile.name}`, title: "Delete connection" } });

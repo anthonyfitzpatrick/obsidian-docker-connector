@@ -13,9 +13,9 @@ describe("Connections management actions", () => {
     expect(view).toContain('"No Docker connections configured"');
   });
   it("uses shared Edit, Reconnect, and Delete actions for every card branch", () => {
-    expect((view.match(/this\.addEditAction\(actions, profile\)/g) ?? []).length).toBe(3);
-    expect((view.match(/this\.addReconnectAction\(actions, profile, status\)/g) ?? []).length).toBe(3);
-    expect((view.match(/this\.addDeleteAction\(actions, profile\)/g) ?? []).length).toBe(3);
+    expect((view.match(/this\.addEditAction\(primaryActions, profile\)/g) ?? []).length).toBe(3);
+    expect((view.match(/this\.addReconnectAction\(primaryActions, profile, status\)/g) ?? []).length).toBe(3);
+    expect((view.match(/this\.addDeleteAction\(footerControls, profile\)/g) ?? []).length).toBe(3);
     expect(view).toContain('setIcon(button, "pencil")');
     expect(view).toContain('setIcon(button, "refresh-cw")');
     expect(view).toContain('new ReconnectPasswordModal(this.plugin, profile, () => this.render()).open()');
@@ -31,7 +31,7 @@ describe("Connections management actions", () => {
     expect(css).toContain('.docker-connector__nav-item.is-active { background: var(--dc-surface-raised); color: var(--dc-accent);');
     expect(css).toContain('opacity: 1; pointer-events: auto;');
     expect(css).toContain('.dc-connections-page-header { align-items: flex-start; flex-direction: column; }');
-    expect(css).toContain('.dc-connection-actions { width: 100%; }');
+    expect(css).toContain('.dc-connection-actions { width: 100%; align-items: stretch; }');
     expect(view).toContain('if (this.page !== "connections" && this.requiresAuthenticationGate(profiles))');
   });
 });

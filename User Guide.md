@@ -414,7 +414,7 @@ Open **Connections** to manage every saved profile. The page is titled **Docker 
 > 1. Open Docker Connector and select **Connections**.
 > 2. Use a safe set of saved profiles that demonstrates more than one connection method if available.
 > 3. Wait for status evaluation so the cards show stable states such as **Online** or **Authentication Required**, rather than transient Connecting where possible.
-> 4. Ensure the **Docker connections** heading, **Add Docker Host**, profile cards, status badges, and card-level actions are visible.
+> 4. Ensure the **Docker connections** heading, **Add Docker Host**, profile cards, status badges, left action group, and compact per-card **Container management** switch are visible. SSH cards should show only their `host:port` endpoint, without a username or passive Password/Private Key label.
 > 5. If any hostnames or addresses should not be public, use disposable test profiles before capturing.
 
 >
@@ -432,7 +432,7 @@ Cards expose the applicable management actions:
 > 2. Choose a mix of states if available so **Edit**, **Reconnect**, and **Delete** are visible across the cards.
 > 3. Ensure **Add Docker Host** is visible at page level.
 > 4. Do not click any action while taking the screenshot.
-> 5. Capture a region wide enough to show the action layout clearly without exposing sensitive host details.
+> 5. Capture a region wide enough to show the grouped action layout clearly: actions on the left and the compact per-card management switch with Delete on the right, without exposing sensitive host details.
 
 >
 > **Suggested filename:** `docs/images/user-guide/18-connection-actions.png`
