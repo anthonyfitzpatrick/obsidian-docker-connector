@@ -1,7 +1,7 @@
 import { checkServerIdentity, type PeerCertificate } from "node:tls";
 import { describe, expect, it } from "vitest";
 import { DockerConnectionError } from "../src/connections/DockerTransport";
-import { DockerMutualTlsTransport, tlsDiagnosticFailureStep, tlsServername } from "../src/connections/DockerMutualTlsTransport";
+import { DockerMutualTlsTransport, dockerRequestTimeout, tlsDiagnosticFailureStep, tlsServername } from "../src/connections/DockerMutualTlsTransport";
 import type { DockerTlsProfile } from "../src/models/DockerConnectionProfile";
 
 const certificate = (subjectaltname: string): PeerCertificate => ({ subjectaltname } as PeerCertificate);
@@ -33,6 +33,13 @@ describe("mutual-TLS server identity", () => {
     expect(tlsDiagnosticFailureStep("DOCKER_TLS_HOSTNAME_MISMATCH")).toBe(6);
     expect(tlsDiagnosticFailureStep("DOCKER_TLS_CA_UNTRUSTED")).toBe(5);
     expect(tlsDiagnosticFailureStep("DOCKER_PING_FAILED")).toBe(8);
+  });
+
+  it("waits beyond Docker's requested graceful-stop window before timing out mTLS", () => {
+    const id = "a".repeat(64);
+    expect(dockerRequestTimeout(`/containers/${id}/stop?t=30`)).toBe(40_000);
+    expect(dockerRequestTimeout(`/containers/${id}/stop?t=60`)).toBe(70_000);
+    expect(dockerRequestTimeout(`/containers/${id}/start`)).toBe(20_000);
   });
 
   it("marks only completed diagnostic stages successful", async () => {
