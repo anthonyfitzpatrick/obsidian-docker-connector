@@ -279,7 +279,7 @@ export class DockerDashboardView extends ItemView {
     const card = root.createEl("article", { cls: `dc-connection-card status-${status}` });
     const header = card.createDiv({ cls: "dc-connection-card-header" });
     const identity = header.createDiv({ cls: "dc-connection-identity" });
-    const icon = identity.createDiv({ cls: "dc-resource-icon is-connection" }); setIcon(icon, "server");
+    const icon = identity.createDiv({ cls: "dc-host-card-icon", attr: { "aria-hidden": "true" } }); setIcon(icon, "server");
     const copy = identity.createDiv(); copy.createEl("h3", { text: profile.name });
     copy.createSpan({ text: profile.description || profile.category || "Configured Docker host", cls: "docker-connector__muted" });
     copy.createSpan({ text: getDockerConnectionTypeDisplayName(profile.connectionType), cls: "docker-connector__muted" });

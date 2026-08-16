@@ -6,7 +6,7 @@ title: Docker Connector - Connections View
 
 The **Connections** tab is the saved-profile management surface. Its heading is **Docker connections** and the page-level **Add Docker Host** action opens the canonical Add Docker Host dialog.
 
-Each saved connection card uses one canonical display name: **Local Docker Socket**, **Docker Context**, **Remote Docker via SSH**, or **Remote Docker API (Mutual TLS)**. A card also shows a safe endpoint and the profile’s runtime status. SSH cards show only `host:port` in passive metadata: they do not expose the SSH username, password/private-key mode, or credential paths.
+Each saved connection card uses one canonical display name: **Local Docker Socket**, **Docker Context**, **Remote Docker via SSH**, or **Remote Docker API (Mutual TLS)**. Every card uses the same decorative purple Docker host icon regardless of connection method, while its text continues to communicate the method. A card also shows a safe endpoint and the profile’s runtime status. SSH cards show only `host:port` in passive metadata: they do not expose the SSH username, password/private-key mode, or credential paths.
 
 Available status values are **Unknown**, **Connecting**, **Online**, **Offline**, **Degraded**, and **Authentication Required**. Unknown is the transient state before a profile has completed its first connection evaluation; it is not a substitute for an error after a completed refresh.
 

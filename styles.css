@@ -174,7 +174,7 @@
 .dc-connections-summary-card > div:last-child { display: grid; gap: 2px; min-width: 0; }
 .dc-connections-summary-card span { color: var(--dc-text-muted); font-size: .78em; }
 .dc-connections-summary-card strong { color: var(--text-normal); font-size: 1.42em; line-height: 1; }
-.dc-resource-icon.is-connection { color: var(--dc-accent); background: var(--dc-accent-soft); }
+.dc-host-card-icon { display: grid; place-items: center; flex: 0 0 auto; width: 36px; height: 36px; border-radius: 11px; background: var(--dc-accent-soft); color: var(--dc-accent); }
 .dc-connections-panel { padding: 18px; border: 1px solid var(--dc-border); border-radius: 16px; background: var(--dc-surface); box-shadow: var(--dc-shadow-soft); }
 .dc-connections-panel-header { display: flex; align-items: center; gap: 11px; margin-bottom: 14px; }
 .dc-connections-panel-header > div:last-child { min-width: 0; }
