@@ -192,20 +192,24 @@ With the option off, an Obsidian restart returns the profile to **Authentication
 
 #### Private-key authentication
 
-With **Private Key** selected, choose a **Private Key File** and, if required, enter its **Private-Key Passphrase**. The profile can save the file path, not a copy of the key material. An encrypted key’s passphrase remains in memory only for the current session; an unencrypted key simply has no passphrase to enter.
+With **Private Key** selected, use **Browse…** to choose an existing key or **Generate SSH Key** to open a child setup dialog. It visibly progresses through preparing, generating the Ed25519 key, validating the private key, resolving the matching public key, and verifying the pair. On success it stays open with the public SHA-256 fingerprint until **Close** returns the fully validated selection to the host form. Generated keys use collision-safe names under `~/.ssh/` and Docker Connector never overwrites an existing key. Leave the passphrase blank to create an unencrypted key that can reconnect from its saved path after restart; an entered nonblank passphrase encrypts the key and remains in memory for the current session only. A passphrase is never saved, displayed, or included in diagnostics. Failures remain visible with **Retry** and do not change the host form.
+
+For any selected private key, Docker Connector derives its public identity from that private key at install time and checks a sibling `<private-key>.pub` when present. A mismatched `.pub` file blocks installation; a missing one is derived in memory without changing the private key. **Install public key** opens a confirmation dialog and shows only the matching public fingerprint. Enter the current session-only SSH password there. Docker Connector sends only that public-key line through strict host-key verification and SFTP, then appends it to `~/.ssh/authorized_keys` only when its key type and base64 identity are missing. Existing entries are preserved. It never transfers the private key, uses `ssh-copy-id`, edits `known_hosts`, or bypasses a first-seen or changed host key. Test the selected private key successfully before saving the profile.
+
+The profile can save the private-key file path, not a copy of the key material. An encrypted key’s passphrase remains in memory only for the current session; an unencrypted key simply has no passphrase to enter. Remembered SSH passwords never apply to private-key passphrases or public-key installation.
 
 ### Screenshot 11 — Remote Docker via SSH private key
 > **Screenshot placeholder 11**
 >
-> **Capture:** Private Key file and passphrase controls using a redacted path.
+> **Capture:** Private Key controls with Browse, Generate SSH Key, and the generated-public-key installation action using a redacted path.
 >
 > **How to capture this screenshot:**
 > 1. Open **Add Docker Host** and select **Remote Docker via SSH**.
 > 2. Set **SSH Authentication** to **Private Key**.
-> 3. Select a disposable/test key path if the UI requires one, or leave the path blank if that still demonstrates the controls.
+> 3. Select **Generate SSH Key** or choose a disposable/test key path; never show key contents, a passphrase, or an identifying local path.
 > 4. If a path is shown, use a test path or redact identifying path components before publication.
-> 5. Leave **Private-Key Passphrase** blank.
-> 6. Capture the Private Key File and passphrase controls without exposing key contents.
+> 5. Leave **Private-Key Passphrase** blank and do not run installation against a production host.
+> 6. Capture the Private Key File, generation, and passphrase controls without exposing key contents.
 >
 > **Suggested filename:** `docs/images/user-guide/11-ssh-private-key.png`
 
@@ -914,7 +918,7 @@ Docker Connector validates symlinks and reports missing, broken, non-socket, loo
 
 ### SSH authentication or host-key error
 
-Verify the host, port, username, password/key, passphrase, remote Docker socket path, and Docker permissions for the remote account. A password or passphrase must be re-entered after an Obsidian restart. For a host-key mismatch, independently verify the new fingerprint before trusting it.
+Verify the host, port, username, password/key, passphrase, remote Docker socket path, and Docker permissions for the remote account. Password authentication requires re-entry after an Obsidian restart unless **Remember password on this device** was explicitly enabled. An unencrypted private key reconnects automatically from its saved path; an encrypted private key requires its session-only passphrase again after restart. For a host-key mismatch, independently verify the new fingerprint before trusting it.
 
 ### Docker Context missing or changed
 
@@ -988,7 +992,7 @@ An image can be current, unavailable from a registry, untagged, inaccessible, Co
 - Plain insecure Docker TCP is not supported.
 - Applications is a Compose-aware read-only view; it does not deploy, edit, start, stop, or update Compose projects.
 - Standalone transactional Update is intentionally blocked for Compose-managed and otherwise unsupported containers.
-- Passwords and passphrases are session-only by default, so reconnecting after restarting Obsidian can require them again. Only an explicitly remembered SSH password can be rehydrated; passphrases are never remembered.
+- Passwords and passphrases are session-only by default. Only an explicitly remembered SSH password can be rehydrated; private-key passphrases are never remembered. A saved unencrypted private key needs no runtime passphrase and reconnects automatically after restart.
 - Some Docker Context endpoint types are blocked when they cannot be routed through an existing secure transport.
 - Docker permissions, Docker Engine availability, registry access, and remote host policy ultimately control what the plugin can inspect or change.
 

@@ -12,11 +12,23 @@ describe("StartupRefreshCoordinator", () => {
     expect(calls).toBe(1);
   });
 
-  it("does not repeat a failed startup request from the second startup hook", async () => {
+  it("retries from the layout-ready hook when the early startup request fails", async () => {
     const coordinator = new StartupRefreshCoordinator();
-    const refresh = () => Promise.reject(new Error("EPROTO"));
+    let calls = 0;
+    const refresh = () => ++calls === 1 ? Promise.reject(new Error("EPROTO")) : Promise.resolve("online");
 
     await expect(coordinator.run(refresh)).rejects.toThrow("EPROTO");
-    expect(coordinator.run(refresh)).toBeUndefined();
+    await expect(coordinator.run(refresh)).resolves.toBe("online");
+    expect(calls).toBe(2);
+  });
+
+  it("does not overlap refresh attempts while the first startup request is running", async () => {
+    const coordinator = new StartupRefreshCoordinator();
+    let resolve!: (value: string) => void;
+    const first = coordinator.run(() => new Promise<string>((done) => { resolve = done; }));
+
+    expect(coordinator.run(() => Promise.resolve("second"))).toBeUndefined();
+    resolve("first");
+    await expect(first).resolves.toBe("first");
   });
 });

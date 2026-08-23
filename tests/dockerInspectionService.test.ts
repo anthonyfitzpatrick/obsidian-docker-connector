@@ -5,6 +5,7 @@ import type { SshDockerProfile } from "../src/models/DockerConnectionProfile";
 import type { DockerTlsProfile } from "../src/models/DockerConnectionProfile";
 
 const profile: SshDockerProfile = { id: "wolf-359", name: "Wolf 359", enabled: true, createdAt: "", updatedAt: "", sshHost: "46.62.226.180", sshPort: 22, sshUsername: "obsidian", authentication: { type: "password" }, remoteSocketPath: "/var/run/docker.sock" };
+const privateKeyProfile: SshDockerProfile = { ...profile, id: "private-key", authentication: { type: "private-key", privateKeyPath: "/tmp/id_ed25519" } };
 
 describe("DockerInspectionService", () => {
   it("marks a saved host as authentication required when its runtime password is absent", async () => {
@@ -32,6 +33,17 @@ describe("DockerInspectionService", () => {
     expect(snapshot).toMatchObject({ status: "authentication-required", error: "Enter the SSH password to connect. Passwords are kept only for the current Obsidian session." });
   });
 
+  it("does not preflight a saved private-key profile without a runtime passphrase", async () => {
+    let created = false;
+    const snapshot = await new DockerInspectionService({
+      authenticationRequirement: () => undefined,
+      create: () => { created = true; return onlineTransport(privateKeyProfile); }
+    } as never).inspectHost(privateKeyProfile);
+
+    expect(created).toBe(true);
+    expect(snapshot.status).toBe("online");
+  });
+
   it("recognizes authentication errors emitted by the separately bundled desktop transport", async () => {
     const desktopBundleError = Object.assign(new Error("Enter the SSH password to connect."), { name: "DockerConnectionError", code: "SSH_PASSWORD_REQUIRED" });
     const snapshot = await new DockerInspectionService({ create: () => failingTransport(desktopBundleError as DockerConnectionError) } as never).inspectHost(profile);
@@ -51,10 +63,25 @@ describe("DockerInspectionService", () => {
     const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(profile);
     expect(snapshot).toMatchObject({ status: "authentication-required", error: "The SSH server rejected the username or password." });
   });
+  it("keeps a rejected private key distinct from a missing runtime passphrase", async () => {
+    const snapshot = await new DockerInspectionService({ create: () => failingTransport(new DockerConnectionError("SSH_PRIVATE_KEY_REJECTED", "The SSH server rejected the selected private key.")) } as never).inspectHost(privateKeyProfile);
+    expect(snapshot).toMatchObject({ status: "degraded", error: "The SSH server rejected the selected private key." });
+  });
+  it("keeps missing and invalid private-key files distinct from authentication-required", async () => {
+    for (const code of ["SSH_PRIVATE_KEY_NOT_FOUND", "SSH_PRIVATE_KEY_UNSUPPORTED_FORMAT"]) {
+      const snapshot = await new DockerInspectionService({ create: () => failingTransport(new DockerConnectionError(code, "Private-key file error.")) } as never).inspectHost(privateKeyProfile);
+      expect(snapshot).toMatchObject({ status: "degraded", error: "Private-key file error." });
+    }
+  });
   it("keeps an untrusted SSH host key actionable rather than degrading the connection", async () => {
     const transport = failingTransport(new DockerConnectionError("SSH_HOST_KEY_UNTRUSTED", "Verify the received fingerprint."));
     const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(profile);
     expect(snapshot).toMatchObject({ status: "authentication-required", error: "SSH host key verification required. Open Edit to verify and explicitly trust the received fingerprint." });
+  });
+
+  it("keeps an SSH host-key mismatch distinct from a missing credential", async () => {
+    const snapshot = await new DockerInspectionService({ create: () => failingTransport(new DockerConnectionError("SSH_HOST_KEY_MISMATCH", "SSH host key changed.")) } as never).inspectHost(privateKeyProfile);
+    expect(snapshot).toMatchObject({ status: "degraded", error: "SSH host key changed." });
   });
 
   it("marks Docker-side failures as degraded instead of offline", async () => {
@@ -106,6 +133,11 @@ function failingTransport(error: DockerConnectionError): DockerTransport {
     request: async () => { throw error; },
     testConnection: async () => ({ success: false, steps: [] })
   };
+}
+
+function onlineTransport(host: SshDockerProfile): DockerTransport {
+  const responses: Record<string, unknown> = { "/version": { Version: "1", ApiVersion: "1.0" }, "/info": { OperatingSystem: "Linux", Architecture: "x86_64", KernelVersion: "k", NCPU: 1, MemTotal: 1 }, "/containers/json?all=true": [], "/images/json": [], "/volumes": { Volumes: [] }, "/networks": [] };
+  return { profile: host, connect: async () => undefined, disconnect: async () => undefined, isConnected: () => true, request: async (request) => responses[request.path] as never, testConnection: async () => ({ success: true, steps: [] }) };
 }
 
 function failingAfterVersion(error: DockerConnectionError): DockerTransport {

@@ -96,7 +96,6 @@ function connectionFailure(error: unknown): { code: string; message: string } | 
 
 const AUTHENTICATION_ERROR_CODES = new Set([
   "SSH_PASSWORD_REJECTED",
-  "SSH_PRIVATE_KEY_REJECTED",
   "SSH_PRIVATE_KEY_PASSPHRASE_REQUIRED",
   "SSH_KEYBOARD_INTERACTIVE_REJECTED",
   "SSH_AUTHENTICATION_FAILED",

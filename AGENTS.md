@@ -16,7 +16,7 @@
 ## Safety Boundaries
 
 - Preserve read-only-by-default behavior. Container actions must stay typed, explicitly enabled per online profile, session-only, validated in the service layer, and covered by focused tests. Connection loss revokes management authorization.
-- Do not add insecure Docker TCP, TLS-verification or SSH host-key bypasses, Docker Context mutation, shell execution, telemetry, persisted passphrases, tokens, private keys, or certificate contents. The sole password exception is the explicitly opted-in, profile-ID-scoped SSH password record in unencrypted plugin data; keep it separate from profiles, documented, and covered by focused tests.
+- Do not add insecure Docker TCP, TLS-verification or SSH host-key bypasses, Docker Context mutation, arbitrary shell execution, telemetry, persisted passphrases, tokens, private keys, or certificate contents. The sole password exception is the explicitly opted-in, profile-ID-scoped SSH password record in unencrypted plugin data; keep it separate from profiles, documented, and covered by focused tests. The sole process exception is the desktop-only fixed-argument `ssh-keygen` key generator, with shell disabled and passphrases only on stdin.
 - Use only non-secret fixtures and diagnostics. Run any Docker mutation validation only against disposable local containers, never a production host.
 - Keep the Gateway a token-authenticated, GET-only allowlist, never an arbitrary Docker or mutation proxy. Keep Compose-managed containers protected from standalone Update.
 

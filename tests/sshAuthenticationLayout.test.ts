@@ -26,6 +26,54 @@ describe("SSH Authentication field layout", () => {
     expect(modal).toContain("forgetRememberedSshPassword");
   });
 
+  it("offers desktop-only key generation and strict public-key installation", () => {
+    expect(modal).toContain('setButtonText("Generate SSH Key")');
+    expect(modal).toContain('setButtonText("Install public key")');
+    expect(modal).toContain("resolvePublicKeyForPrivateKey(this.privateKeyPath, this.privateKeyPassphrase || undefined)");
+    expect(modal).toContain("this.resolvedPublicKey = undefined");
+    expect(modal).not.toContain("generatedPublicKey");
+    const generation = readFileSync(new URL("../src/security/SshKeyGenerationService.ts", import.meta.url), "utf8");
+    const installation = readFileSync(new URL("../src/security/SshPublicKeyInstallService.ts", import.meta.url), "utf8");
+    expect(generation).toContain('spawn("ssh-keygen"');
+    expect(generation).toContain("shell: false");
+    expect(generation).toContain('["-N", ""]');
+    expect(generation).toContain("if (passphrase === undefined) child.stdin?.end();");
+    expect(installation).toContain("HostKeyVerifier");
+    expect(installation).toContain("SFTPWrapper");
+    expect(installation).toContain("containsPublicKey");
+    expect(installation).not.toContain(".exec(");
+    expect(installation).not.toContain("ssh-copy-id");
+  });
+
+  it("wires the installer modal to observable state without persisting its password", () => {
+    const setup = readFileSync(new URL("../src/views/SshKeySetupModals.ts", import.meta.url), "utf8");
+    const workflow = readFileSync(new URL("../src/security/SshPublicKeyInstallWorkflow.ts", import.meta.url), "utf8");
+    expect(setup).toContain("Installing…");
+    expect(setup).toContain('state.state === "failed" ? "Retry"');
+    expect(setup).toContain("workflow.setPassword(value)");
+    expect(setup).toContain("this.workflow.clear();");
+    expect(setup).toContain("this.profile, password, this.publicKey");
+    expect(setup).toContain('"Install Public Key"');
+    expect(workflow).toContain('this.current = { state: "installing"');
+    expect(workflow).not.toContain("trim()");
+  });
+
+  it("keeps generation progress and the completed selected key modal-local until Close", () => {
+    const setup = readFileSync(new URL("../src/views/SshKeySetupModals.ts", import.meta.url), "utf8");
+    const workflow = readFileSync(new URL("../src/security/SshKeyGenerationWorkflow.ts", import.meta.url), "utf8");
+    expect(setup).toContain('text: "Generate SSH Key"');
+    expect(setup).toContain("this.workflow.isBusy");
+    expect(setup).toContain('state.state === "failed" ? "Retry"');
+    expect(setup).toContain("this.workflow.takeCompleted()");
+    expect(modal).toContain("completed.resolved");
+    expect(workflow).toContain("Preparing key generation…");
+    expect(workflow).toContain("Generating Ed25519 key…");
+    expect(workflow).toContain("Validating private key…");
+    expect(workflow).toContain("Resolving matching public key…");
+    expect(workflow).toContain("Verifying key pair…");
+    expect(workflow).not.toContain("console.");
+  });
+
   it("does not add global Obsidian Setting overrides", () => {
     expect(styles).not.toMatch(/^\.setting-item(?:\s|\{|,)/m);
     expect(styles).not.toMatch(/^\.setting-item-control(?:\s|\{|,)/m);

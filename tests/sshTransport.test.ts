@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import type { Client, ConnectConfig } from "ssh2";
 import { SshDockerTransport } from "../src/connections/SshDockerTransport";
 import { HostKeyVerifier } from "../src/security/HostKeyVerifier";
+import { SshKeyGenerationService } from "../src/security/SshKeyGenerationService";
 import type { SshDockerProfile } from "../src/models/DockerConnectionProfile";
 class FakeClient extends EventEmitter { ended = false; config?: ConnectConfig; connect(config: ConnectConfig): this { this.config = config; config.hostVerifier?.(Buffer.from("known-key")); queueMicrotask(() => { this.emit("connect"); this.emit("handshake"); this.emit("ready"); }); return this; } end(): this { this.ended = true; return this; } }
 class HostKeyFailureClient extends EventEmitter { connect(config: ConnectConfig): this { config.hostVerifier?.(Buffer.from("received-key")); queueMicrotask(() => this.emit("error", new Error("Host verification failed"))); return this; } end(): this { return this; } }
@@ -73,6 +74,32 @@ describe("password SSH lifecycle", () => {
       expect(client.config?.password).toBeUndefined();
       expect(client.config?.agent).toBeUndefined();
       expect(client.config?.tryKeyboard).toBeUndefined();
+      await transport.disconnect();
+    } finally { await rm(directory, { recursive: true, force: true }); }
+  });
+  it("connects with a generated unencrypted Ed25519 key after runtime credentials are cleared", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "docker-connector-ed25519-"));
+    try {
+      const generated = await new SshKeyGenerationService(directory).generate();
+      const client = new FakeClient();
+      const transport = new SshDockerTransport({ ...profile, authentication: { type: "private-key", privateKeyPath: generated.privateKeyPath } }, () => ({}), undefined, () => client as unknown as Client);
+      await transport.connect();
+      expect(client.config?.privateKey).toBeInstanceOf(Buffer);
+      expect(client.config?.passphrase).toBeUndefined();
+      await transport.disconnect();
+    } finally { await rm(directory, { recursive: true, force: true }); }
+  });
+  it("requires a runtime passphrase only for an encrypted generated Ed25519 key", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "docker-connector-encrypted-ed25519-"));
+    try {
+      const passphrase = "session-only-passphrase";
+      const generated = await new SshKeyGenerationService(directory).generate(passphrase);
+      const encryptedProfile = { ...profile, authentication: { type: "private-key" as const, privateKeyPath: generated.privateKeyPath } };
+      await expect(new SshDockerTransport(encryptedProfile, () => ({}), undefined, () => new FakeClient() as unknown as Client).connect()).rejects.toMatchObject({ code: "SSH_PRIVATE_KEY_PASSPHRASE_REQUIRED" });
+      const client = new FakeClient();
+      const transport = new SshDockerTransport(encryptedProfile, () => ({ privateKeyPassphrase: passphrase }), undefined, () => client as unknown as Client);
+      await transport.connect();
+      expect(client.config?.passphrase).toBe(passphrase);
       await transport.disconnect();
     } finally { await rm(directory, { recursive: true, force: true }); }
   });
