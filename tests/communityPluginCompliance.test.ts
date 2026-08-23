@@ -2,6 +2,8 @@ import { access, readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 const source = async (file: string) => readFile(file, "utf8");
+const screenshotNumber = (index: number) => String(index + 1).padStart(2, "0");
+const isSequential = (numbers: string[]) => numbers.every((number, index) => number === screenshotNumber(index));
 
 describe("Obsidian Community Plugin release guard", () => {
   it("keeps manifest, package, and version-map metadata aligned for the mobile-capable release", async () => {
@@ -76,17 +78,23 @@ describe("Obsidian Community Plugin release guard", () => {
     const placeholders = [...guide.matchAll(/^> \*\*Screenshot placeholder (\d{2})\*\*/gm)].map((match) => match[1]);
     const filenames = [...guide.matchAll(/^> \*\*Suggested filename:\*\* `[^`/]+(?:\/[^`/]+)*\/(\d{2})-[^`]+`$/gm)].map((match) => match[1]);
     const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
-    const expected = Array.from({ length: 42 }, (_, index) => String(index + 1).padStart(2, "0"));
-    expect([...headings].sort()).toEqual(expected);
-    expect([...placeholders, "01", "02"].sort()).toEqual(expected);
-    expect([...filenames, "01", "02"].sort()).toEqual(expected);
+    const embedded = [...guide.matchAll(/!\[[^\]]*\]\(docs\/images\/user-guide\/(\d{2}-[^)]+)\)/g)].map((match) => match[1]);
+    const expected = Array.from({ length: 42 }, (_, index) => screenshotNumber(index));
+    expect(headings).toEqual(expected);
+    expect(placeholders).toEqual(expected.slice(2));
+    expect(filenames).toEqual(expected.slice(2));
     expect(checklist).toEqual(expected);
-    expect(guide).toMatch(/!\[[^\]]*\]\(docs\/images\/user-guide\/01-dashboard-overview\.png\)/);
-    expect(guide).toMatch(/!\[[^\]]*\]\(docs\/images\/user-guide\/02-empty-connections\.png\)/);
+    expect(embedded).toEqual(["01-empty-connections.png", "02-dashboard-overview.png"]);
+    await Promise.all(embedded.map((filename) => access(`docs/images/user-guide/${filename}`)));
     const appendixStart = guide.indexOf("# Appendix A — Screenshot production checklist");
     expect(appendixStart).toBeGreaterThan(0);
     expect(guide.slice(appendixStart)).not.toMatch(/^### Screenshot |^> \*\*Screenshot placeholder/m);
     expect([...guide.matchAll(/^> \*\*Screenshot placeholder \d{2}\*\*/gm)].every((match) => match.index! < appendixStart)).toBe(true);
+  });
+
+  it("rejects complete screenshot sets that are out of document order", () => {
+    expect(isSequential(["02", "01", "03"])).toBe(false);
+    expect(isSequential(["01", "02", "03"])).toBe(true);
   });
 
   it("keeps release artifacts free of embedded credential material", async () => {
