@@ -6,7 +6,7 @@ import { SshDockerTransport } from "./SshDockerTransport";
 import { DockerContextDialStdioTransport } from "./DockerContextDialStdioTransport";
 import { DockerMutualTlsTransport } from "./DockerMutualTlsTransport";
 
-/** Separate desktop bundle: never imported by mobile startup code. */
+/** Loaded from the bundled main artifact only after the desktop capability gate. */
 export function createDesktopTransport(profile: Exclude<DockerConnectionProfile, { connectionType: "gateway" }>, credentials: RuntimeCredentialStore): DockerTransport {
   switch (profile.connectionType) {
     case "local": return new LocalDockerTransport(profile);

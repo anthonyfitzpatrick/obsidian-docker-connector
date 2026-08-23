@@ -10,7 +10,7 @@ Use this checklist for a release candidate. Do not mark a manual item complete f
 
 - [ ] Confirm `manifest.json`, `package.json`, `package-lock.json`, and `versions.json` have the intended matching version/minimum app version.
 - [ ] Confirm the manifest ID, display name, description, and `isDesktopOnly: false` are current.
-- [ ] Build and attach exactly `main.js`, `desktop-transports.js`, `desktop-ui.js`, `manifest.json`, and `styles.css` to the matching release tag.
+- [ ] Build and attach exactly `main.js`, `manifest.json`, and `styles.css` to the matching release tag.
 - [ ] Confirm no source, `node_modules`, fixtures, credentials, or development configuration are needed by installers.
 
 ## Automated checks

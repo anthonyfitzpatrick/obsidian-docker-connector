@@ -4,7 +4,7 @@ import { defaultLocalEndpoint, discoverLocalDockerEndpoints } from "../connectio
 import { DockerContextDiscoveryService } from "../connections/DockerContextDiscovery";
 import { createDockerTlsProfile, validateDockerTlsFiles } from "../security/TlsProfileValidation";
 
-/** Desktop-only modal helpers. This module is emitted as desktop-ui.js. */
+/** Desktop-only modal helpers loaded after the desktop capability gate. */
 export const desktopUiServices = {
   defaultLocalEndpoint,
   discoverLocalDockerEndpoints,

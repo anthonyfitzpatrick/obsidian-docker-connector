@@ -25,7 +25,6 @@ import { getContainerUpdateEligibility, type ContainerUpdatePreview } from "./se
 import { ContainerImageUpdateService, type ContainerImageUpdateStatus } from "./services/ContainerImageUpdateService";
 import { StartupRefreshCoordinator } from "./lifecycle/StartupRefreshCoordinator";
 import { ProfileRefreshTracker } from "./services/ProfileRefreshTracker";
-import { desktopPluginArtifactPath } from "./platform/DesktopPluginArtifact";
 
 /** Describes a persisted preference change that an open view may need to reflect. */
 export type DockerConnectorSettingsChange = { key: keyof DockerConnectorSettings | "managementAuthorization"; previousValue: unknown; value: unknown };
@@ -51,7 +50,7 @@ export default class DockerConnectorPlugin extends Plugin {
   settings: DockerConnectorSettings = DEFAULT_SETTINGS;
   readonly snapshots = new Map<string, DockerHostSnapshot>();
   readonly hostManager = new DockerHostManager(this);
-  private readonly connectionFactory = new DockerConnectionFactory(undefined, desktopPluginArtifactPath(this.app.vault.adapter, this.manifest.dir, "desktop-transports.js"));
+  private readonly connectionFactory = new DockerConnectionFactory();
   private readonly inspectionService = new DockerInspectionService(this.connectionFactory);
   private readonly containerDetailService = new ContainerDetailService(this.connectionFactory);
   private readonly imageDetailService = new ImageDetailService(this.connectionFactory);

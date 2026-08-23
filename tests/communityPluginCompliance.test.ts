@@ -19,7 +19,7 @@ describe("Obsidian Community Plugin release guard", () => {
   });
 
   it("ships the required Community Plugin release artifacts", async () => {
-    await expect(Promise.all([source("main.js"), source("desktop-transports.js"), source("desktop-ui.js"), source("manifest.json"), source("styles.css")])).resolves.toHaveLength(5);
+    await expect(Promise.all([source("main.js"), source("manifest.json"), source("styles.css")])).resolves.toHaveLength(3);
   });
 
   it("keeps prohibited Docker, TLS, and child-process patterns out of production source", async () => {
@@ -78,10 +78,10 @@ describe("Obsidian Community Plugin release guard", () => {
     const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
     const expected = Array.from({ length: 42 }, (_, index) => String(index + 1).padStart(2, "0"));
     expect([...headings].sort()).toEqual(expected);
-    expect([...placeholders].sort()).toEqual(expected);
-    expect([...filenames].sort()).toEqual(expected);
+    expect([...placeholders, "01"].sort()).toEqual(expected);
+    expect([...filenames, "01"].sort()).toEqual(expected);
     expect(checklist).toEqual(expected);
-    expect(guide).not.toMatch(/!\[[^\]]*\]\([^)]*user-guide\//);
+    expect(guide).toMatch(/!\[[^\]]*\]\(docs\/images\/user-guide\/01-dashboard-overview\.png\)/);
     const appendixStart = guide.indexOf("# Appendix A — Screenshot production checklist");
     expect(appendixStart).toBeGreaterThan(0);
     expect(guide.slice(appendixStart)).not.toMatch(/^### Screenshot |^> \*\*Screenshot placeholder/m);
