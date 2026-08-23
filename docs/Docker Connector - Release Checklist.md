@@ -26,7 +26,7 @@ Use this checklist for a release candidate. Do not mark a manual item complete f
 ## Documentation and submission
 
 - [ ] README links resolve and match shipped behavior.
-- [ ] The canonical [[User Guide]] is current and its 01–42 screenshot specifications match the Appendix A checklist.
+- [ ] The canonical [[User Guide]] is current and its 01–41 screenshot specifications match the Appendix A checklist.
 - [ ] Screenshot captures are real, redacted, reviewed, and use no fabricated/blank placeholder assets.
 - [ ] [[Docker Connector - Obsidian Community Plugin Compliance]] and [[Docker Connector - Testing]] are current.
 - [ ] Confirm Community directory plugin-ID/name uniqueness and submission requirements. Do not claim approval before it occurs.

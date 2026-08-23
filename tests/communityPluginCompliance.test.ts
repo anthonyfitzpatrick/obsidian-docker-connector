@@ -79,10 +79,10 @@ describe("Obsidian Community Plugin release guard", () => {
     const filenames = [...guide.matchAll(/^> \*\*Suggested filename:\*\* `[^`/]+(?:\/[^`/]+)*\/(\d{2})-[^`]+`$/gm)].map((match) => match[1]);
     const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
     const embedded = [...guide.matchAll(/!\[[^\]]*\]\(docs\/images\/user-guide\/(\d{2}-[^)]+)\)/g)].map((match) => match[1]);
-    const expected = Array.from({ length: 42 }, (_, index) => screenshotNumber(index));
+    const expected = Array.from({ length: 41 }, (_, index) => screenshotNumber(index));
     expect(headings).toEqual(expected);
-    expect(placeholders).toEqual(expected.slice(6));
-    expect(filenames).toEqual(expected.slice(6));
+    expect(placeholders).toEqual(expected.slice(5));
+    expect(filenames).toEqual(expected.slice(5));
     expect(checklist).toEqual(expected);
     expect(embedded).toEqual(["01-empty-connections.png", "02-dashboard-overview.png", "03-add-docker-host.png", "04-connection-type-selector.png", "05-local-docker-socket.png", "06-docker-cli-detected.png"]);
     await Promise.all(embedded.map((filename) => access(`docs/images/user-guide/${filename}`)));
