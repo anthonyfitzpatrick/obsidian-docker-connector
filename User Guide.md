@@ -88,20 +88,7 @@ The header identifies the Current Environment and its connection status. Use the
 The primary navigation contains **Overview**, **Applications**, **Containers**, **Images**, **Volumes**, **Networks**, and **Connections**. The resource tabs show data for the Current Environment; their search, filter, sort, and detail controls never mutate Docker resources.
 
 ### Screenshot 01 — Main Docker Connector dashboard
-> **Screenshot placeholder 01**
->
-> **Capture:** Overview with an Online Current Environment, status, navigation, summary, refresh control, and the compact read-only management switch.
->
-> **How to capture this screenshot:**
-> 1. Open Obsidian and open Docker Connector.
-> 2. Select an existing **Online** connection in **Current Environment**.
-> 3. Open **Overview** and wait for the latest snapshot to finish loading.
-> 4. Make sure the header shows the current environment, **Online** status, all primary navigation tabs, summary information, refresh control, and **Container management — Read-only** for the selected host.
-> 5. Collapse or close unrelated Obsidian sidebars if they distract from the plugin, but keep enough of the Obsidian frame visible to make it clear this is the plugin.
-> 6. Capture only after the Overview is fully populated and no transient loading message is visible.
-
->
-> **Suggested filename:** `docs/images/user-guide/01-dashboard-overview.png`
+![Docker Connector dashboard](docs/images/user-guide/01-dashboard-overview.png)
 
 ## 7. Adding a Docker host
 
