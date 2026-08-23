@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "release:check": "npm run build && node tools/verify-release.mjs",
     "test": "vitest run tests",
     "lint": "tsc --noEmit"
   },

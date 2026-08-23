@@ -18,6 +18,7 @@ Use this checklist for a release candidate. Do not mark a manual item complete f
 - [ ] `npm test`
 - [ ] `npm run lint` (the project TypeScript typecheck)
 - [ ] `npm run build`
+- [ ] `npm run release:check` (rebuilds and validates the staged three-file release package)
 - [ ] `git diff --check`
 - [ ] Review `npm audit`; record any unresolved advisory and its decision. Do not use a forced breaking upgrade without review.
 - [ ] Search for debug logs, credentials, private paths, `shell: true`, disabled TLS verification, Context mutation, and insecure Docker TCP.

@@ -1,4 +1,4 @@
-import { copyFile, mkdtemp, readdir, readFile, rm } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -8,7 +8,6 @@ import { DockerConnectionFactory } from "../src/connections/DockerConnectionFact
 import { desktopUi } from "../src/platform/DesktopUiAdapter";
 import type { DockerConnectionProfile, DockerTlsProfile, SshDockerProfile } from "../src/models/DockerConnectionProfile";
 
-const stagingDirectory = "dist/community-plugin/docker-connector";
 const base = { enabled: true, createdAt: "", updatedAt: "" };
 const local: DockerConnectionProfile = { ...base, id: "local", name: "Local", connectionType: "local", localEndpoint: { type: "unix-socket", socketPath: "/var/run/docker.sock" } };
 const context: DockerConnectionProfile = { ...base, id: "context", name: "Context", connectionType: "docker-context", contextName: "test", dockerCliPath: "docker", contextEndpoint: "unix:///var/run/docker.sock", contextTlsVerify: false };
@@ -28,7 +27,7 @@ afterEach(() => {
   (globalThis as { Platform?: unknown }).Platform = originalPlatform;
 });
 
-describe("single-bundle Community Plugin release", () => {
+describe("single-bundle Community Plugin architecture", () => {
   it("uses the compiled production desktop factory for every desktop transport without injected loaders", async () => {
     (globalThis as { Platform?: unknown }).Platform = { isDesktop: true, isMobile: false };
     const bundle = await bundledModule('export { DockerConnectionFactory } from "./src/connections/DockerConnectionFactory";');
@@ -64,24 +63,5 @@ describe("single-bundle Community Plugin release", () => {
     const factory = new DockerConnectionFactory(() => { throw new Error("desktop loader invoked"); });
     expect(factory.create(ssh).profile.connectionType).toBe("ssh");
     expect(() => desktopUi({})).toThrow("DESKTOP_UI_UNAVAILABLE");
-  });
-
-  it("stages only the three Community Plugin runtime files without legacy runtime references", async () => {
-    const files = await readdir(stagingDirectory);
-    expect(files.sort()).toEqual(["main.js", "manifest.json", "styles.css"]);
-    const main = await readFile(join(stagingDirectory, "main.js"), "utf8");
-    for (const legacy of ["desktop-transports.js", "desktop-ui.js", "./desktop-transports", "./desktop-ui", "DESKTOP_TRANSPORT_ARTIFACT_UNAVAILABLE"]) expect(main).not.toContain(legacy);
-  });
-
-  it("creates a clean three-file installation without extra JavaScript modules", async () => {
-    const installation = await mkdtemp(join(tmpdir(), "docker-connector-release-"));
-    try {
-      await Promise.all(["main.js", "manifest.json", "styles.css"].map((file) => copyFile(join(stagingDirectory, file), join(installation, file))));
-      expect((await readdir(installation)).sort()).toEqual(["main.js", "manifest.json", "styles.css"]);
-      const main = await readFile(join(installation, "main.js"), "utf8");
-      expect(main).not.toMatch(/(?:desktop-transports|desktop-ui|chunk-[\w-]+)\.js/);
-    } finally {
-      await rm(installation, { recursive: true, force: true });
-    }
   });
 });
