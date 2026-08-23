@@ -39,7 +39,7 @@ Docker Connector is designed to make its boundaries visible:
 
 - It is read-only until **Container management** is enabled for the selected Online connection from the header switch.
 - Its normal Docker Engine client is limited to approved GET requests. Start, Stop, Shut down, Restart, and Update use dedicated, typed operations rather than a general-purpose Docker API console.
-- Passwords and private-key passphrases are runtime-only. They are kept in memory for the current Obsidian session and are not saved in plugin settings.
+- Passwords and private-key passphrases are runtime-only by default. An SSH password profile can explicitly opt in to separate, unencrypted local plugin-data storage on a trusted device; see [[#Password authentication]].
 - Remote Docker via SSH keeps Docker API traffic inside the SSH session. It does not require a direct Docker API listener.
 - Mutual TLS requires server-certificate verification and a client certificate. Docker Connector does not offer an insecure “accept any certificate” mode.
 - Docker Context discovery and use never changes your active Docker Context.
@@ -163,17 +163,71 @@ The remote account must be able to access the configured Docker socket without i
 
 #### Password authentication
 
-With **Password** selected, enter the SSH password during connection or reconnection. Docker Connector keeps that password in memory only for the current Obsidian session. It is not stored in the saved profile, so a profile can show **Authentication Required** after Obsidian restarts. Choose **Reconnect** to provide it again.
+With **Password** selected, enter the SSH password during connection or reconnection. Docker Connector keeps that password in memory only for the current Obsidian session by default. It is not stored in the saved profile, so a profile can show **Authentication Required** after Obsidian restarts. Choose **Reconnect** to provide it again.
+
+For a password profile only, **Remember password on this device** is an optional, off-by-default choice. It stores the password separately in local plugin data so Docker Connector can reconnect after Obsidian restarts. Obsidian does not provide this plugin a supported keychain or guaranteed encryption, so use it only on a trusted device, prefer SSH keys where possible, and use **Forget stored password** to remove it immediately. It never applies to private-key passphrases, TLS passphrases, Gateway tokens, keys, or certificates. Host-key verification is still mandatory: a changed host key blocks reconnection even when a password is remembered.
 
 ### Screenshot 07 — Remote Docker via SSH password
 ![Remote Docker via SSH password](docs/images/user-guide/07-ssh-password.png)
+
+#### Host-key verification
+
+The **Host Key Fingerprint** identifies the remote SSH server. Docker Connector does not use `known_hosts`, auto-trust a first key, or silently replace a saved key.
+
+1. Select **Test Connection**. An unknown server key opens **Verify SSH Host**, which shows the configured host and port and the received SHA-256 fingerprint.
+2. Independently verify the fingerprint with the server administrator or a trusted out-of-band source. Select **Cancel** to leave the draft untrusted, or **Trust and Continue** to trust that received key only in the unsaved form.
+3. **Trust and Continue** performs exactly one automatic retest with the same session-only credential. A successful SSH test shows the completed SSH handshake, host-key verification, SSH authentication, Docker `GET /_ping`, and Docker `GET /version` diagnostics. Authentication stages not selected for the profile are marked **SKIPPED**.
+4. Select **Save Host** only after that successful retest. Saving persists the verified host-key fingerprint metadata, never a password or private-key passphrase.
+
+### Screenshot 08 — Verify SSH Host
+> **Screenshot placeholder 08**
+>
+> **Capture:** The first-connection **Verify SSH Host** dialog with a disposable server fingerprint.
+>
+> **How to capture this screenshot:**
+> 1. Use an isolated SSH test endpoint and a disposable test account, never a production server.
+> 2. Test an unsaved SSH profile until **Verify SSH Host** opens.
+> 3. Show the configured host and port, the received SHA-256 fingerprint, **Cancel**, and **Trust and Continue**.
+> 4. Use only a disposable fingerprint that may be published; redact private hostnames, user names, paths, passwords, passphrases, keys, tokens, and diagnostics that identify a production host.
+> 5. Do not accept the prompt solely to create the capture unless the test fingerprint has been independently verified.
+>
+> **Suggested filename:** `docs/images/user-guide/08-verify-ssh-host.png`
+
+### Screenshot 09 — SSH connection success diagnostics
+> **Screenshot placeholder 09**
+>
+> **Capture:** Successful SSH host-key verification and Docker connection diagnostics after the trusted retry.
+>
+> **How to capture this screenshot:**
+> 1. Use the same isolated SSH test profile after independently verifying its fingerprint.
+> 2. Select **Trust and Continue** once, then wait for the automatic retry to finish.
+> 3. Show successful host-key verification, SSH authentication, Docker `GET /_ping`, Docker `GET /version`, and final success where space allows.
+> 4. Show unselected authentication-source stages as **SKIPPED** when visible; do not expose passwords, passphrases, private-key paths, key material, tokens, or private endpoints.
+> 5. Capture only after the terminal result is stable.
+>
+> **Suggested filename:** `docs/images/user-guide/09-ssh-connection-success.png`
+
+### Screenshot 10 — Remember SSH password option
+> **Screenshot placeholder 10**
+>
+> **Capture:** The off-by-default **Remember password on this device** option and its local-storage warning for a password-authenticated SSH profile.
+>
+> **How to capture this screenshot:**
+> 1. Use a disposable SSH password profile and do not display the password field value.
+> 2. Show the option unchecked together with the warning that the password is stored separately in unencrypted local plugin data only when enabled.
+> 3. If showing the remembered state, show only its status and **Forget stored password** action, never the password.
+> 4. Do not display private-key passphrases, TLS passphrases, tokens, key material, certificate contents, personal paths, or production hosts.
+>
+> **Suggested filename:** `docs/images/user-guide/10-remember-ssh-password.png`
+
+With the option off, an Obsidian restart returns the profile to **Authentication Required** and **Reconnect** asks for the password again. With the option explicitly on, Docker Connector rehydrates the stored password only for that profile and only when the saved host-key fingerprint still matches. Use **Forget stored password** to remove it immediately. A changed host key always opens **SSH Host Identity Changed**, showing both trusted and received fingerprints with no replacement action; it blocks reconnection even when a password is remembered.
 
 #### Private-key authentication
 
 With **Private Key** selected, choose a **Private Key File** and, if required, enter its **Private-Key Passphrase**. The profile can save the file path, not a copy of the key material. An encrypted key’s passphrase remains in memory only for the current session; an unencrypted key simply has no passphrase to enter.
 
-### Screenshot 08 — Remote Docker via SSH private key
-> **Screenshot placeholder 08**
+### Screenshot 11 — Remote Docker via SSH private key
+> **Screenshot placeholder 11**
 >
 > **Capture:** Private Key file and passphrase controls using a redacted path.
 >
@@ -184,33 +238,13 @@ With **Private Key** selected, choose a **Private Key File** and, if required, e
 > 4. If a path is shown, use a test path or redact identifying path components before publication.
 > 5. Leave **Private-Key Passphrase** blank.
 > 6. Capture the Private Key File and passphrase controls without exposing key contents.
-
 >
-> **Suggested filename:** `docs/images/user-guide/08-ssh-private-key.png`
-
-#### Host-key verification
-
-The **Host Key Fingerprint** identifies the remote SSH server. Verifying it protects against connecting to an unexpected or malicious host that merely answers at the same network address. If Docker Connector reports a changed or unknown host key, independently verify the fingerprint with the server administrator before accepting any trust prompt. Do not treat a host-key warning as a password problem.
-
-### Screenshot 09 — SSH host-key trust state
-> **Screenshot placeholder 09**
->
-> **Capture:** Fingerprint/trust state using a non-production fingerprint.
->
-> **How to capture this screenshot:**
-> 1. Use the isolated SSH test endpoint rather than a production SSH server.
-> 2. Open or test its SSH profile until Docker Connector displays the host-key fingerprint/trust state.
-> 3. Ensure the fingerprint shown belongs only to the disposable test host and does not expose production identity information.
-> 4. If a trust prompt is needed, stop before accepting unless the test fingerprint has been independently verified.
-> 5. Capture the fingerprint and trust/verification message clearly.
-
->
-> **Suggested filename:** `docs/images/user-guide/09-ssh-host-key.png`
+> **Suggested filename:** `docs/images/user-guide/11-ssh-private-key.png`
 
 ### 8.4 Remote Docker API (Mutual TLS)
 
-### Screenshot 10 — Remote Docker API (Mutual TLS) form
-> **Screenshot placeholder 10**
+### Screenshot 12 — Remote Docker API (Mutual TLS) form
+> **Screenshot placeholder 12**
 >
 > **Capture:** Host, port, Server Name, CA, client certificate, and client key fields.
 >
@@ -223,7 +257,7 @@ The **Host Key Fingerprint** identifies the remote SSH server. Verifying it prot
 > 6. Capture the form so Host, Port, Server Name, CA, client certificate, and client key fields are visible.
 
 >
-> **Suggested filename:** `docs/images/user-guide/10-mutual-tls-form.png`
+> **Suggested filename:** `docs/images/user-guide/12-mutual-tls-form.png`
 
 **Remote Docker API (Mutual TLS)** is for a Docker Engine HTTPS endpoint that has deliberately been configured for mutual TLS. Unlike SSH, the Docker API endpoint is directly reachable on the network. Both sides authenticate:
 
@@ -246,8 +280,8 @@ Server verification cannot be disabled. If the Server Name is an IP address, the
 
 Selected certificate and key paths may be saved as profile metadata; certificate contents and client-key passphrases are not persisted in settings.
 
-### Screenshot 11 — Mutual TLS file validation
-> **Screenshot placeholder 11**
+### Screenshot 13 — Mutual TLS file validation
+> **Screenshot placeholder 13**
 >
 > **Capture:** Successful certificate/key validation with redacted file paths.
 >
@@ -260,7 +294,7 @@ Selected certificate and key paths may be saved as profile metadata; certificate
 > 6. Capture the successful validation state before or after Test Connection, whichever best isolates the file-validation UI.
 
 >
-> **Suggested filename:** `docs/images/user-guide/11-mutual-tls-validation.png`
+> **Suggested filename:** `docs/images/user-guide/13-mutual-tls-validation.png`
 
 ## 9. Testing a connection
 
@@ -268,8 +302,8 @@ Selected certificate and key paths may be saved as profile metadata; certificate
 
 A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. Stages that could not start after a failure are shown as **SKIPPED** or **NOT RUN**, rather than being presented as successful. For example, a mutual-TLS hostname mismatch stops before Docker API requests are used.
 
-### Screenshot 12 — Mutual TLS identity failure
-> **Screenshot placeholder 12**
+### Screenshot 14 — Mutual TLS identity failure
+> **Screenshot placeholder 14**
 >
 > **Capture:** Safe hostname or certificate-identity mismatch result.
 >
@@ -282,10 +316,10 @@ A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. 
 > 6. Immediately restore the correct Server Name after capturing; do not save the deliberately invalid value.
 
 >
-> **Suggested filename:** `docs/images/user-guide/12-mutual-tls-identity-failure.png`
+> **Suggested filename:** `docs/images/user-guide/14-mutual-tls-identity-failure.png`
 
-### Screenshot 13 — Successful Mutual TLS test
-> **Screenshot placeholder 13**
+### Screenshot 15 — Successful Mutual TLS test
+> **Screenshot placeholder 15**
 >
 > **Capture:** Successful mutual-TLS diagnostics.
 >
@@ -298,10 +332,10 @@ A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. 
 > 6. Capture only after the terminal success result is stable.
 
 >
-> **Suggested filename:** `docs/images/user-guide/13-mutual-tls-success.png`
+> **Suggested filename:** `docs/images/user-guide/15-mutual-tls-success.png`
 
-### Screenshot 14 — Successful Local Docker test
-> **Screenshot placeholder 14**
+### Screenshot 16 — Successful Local Docker test
+> **Screenshot placeholder 16**
 >
 > **Capture:** Successful local Test Connection diagnostics.
 >
@@ -314,14 +348,14 @@ A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. 
 > 6. Capture the diagnostics panel only after all relevant stages have completed.
 
 >
-> **Suggested filename:** `docs/images/user-guide/14-local-test-success.png`
+> **Suggested filename:** `docs/images/user-guide/16-local-test-success.png`
 
 ## 10. Managing saved connections
 
 Open **Connections** to manage every saved profile. The page begins with summary cards for **Configured hosts**, **Online**, and **Needs sign-in**; Needs sign-in counts only profiles in **Authentication Required**. For example, three configured profiles may show one Online and two Needs sign-in without changing either healthy profile’s state. It then provides **Add Docker Host** and a card for every profile. Each card uses one uniform structure: purple Docker host identity, textual connection method, transport-relevant safe endpoint details, inventory, runtime details, actions, and management row. Only the safe profile data and status vary by connection method.
 
-### Screenshot 15 — Connections management view
-> **Screenshot placeholder 15**
+### Screenshot 17 — Connections management view
+> **Screenshot placeholder 17**
 >
 > **Capture:** Docker connections summary cards, profile cards, statuses, and management actions.
 >
@@ -333,12 +367,12 @@ Open **Connections** to manage every saved profile. The page begins with summary
 > 5. If any hostnames or addresses should not be public, use disposable test profiles before capturing.
 
 >
-> **Suggested filename:** `docs/images/user-guide/15-connections-management.png`
+> **Suggested filename:** `docs/images/user-guide/17-connections-management.png`
 
 Cards expose the applicable management actions:
 
-### Screenshot 16 — Connection actions
-> **Screenshot placeholder 16**
+### Screenshot 18 — Connection actions
+> **Screenshot placeholder 18**
 >
 > **Capture:** Add, Edit, Reconnect, and Delete connection actions.
 >
@@ -350,7 +384,7 @@ Cards expose the applicable management actions:
 > 5. Capture a region wide enough to show the two-row footer clearly: actions, including Delete, in the first row and the centered compact per-card management switch in the second, without exposing sensitive host details.
 
 >
-> **Suggested filename:** `docs/images/user-guide/16-connection-actions.png`
+> **Suggested filename:** `docs/images/user-guide/18-connection-actions.png`
 
 - **Edit** opens the same profile workflow without changing the profile’s stable identity.
 - **Reconnect** appears when session-only credentials need to be entered again.
@@ -359,8 +393,8 @@ Cards expose the applicable management actions:
 
 Status is information, not an action. The current states are **Unknown**, **Connecting**, **Online**, **Offline**, **Degraded**, and **Authentication Required**. Unknown means the profile has not yet been evaluated or is between registration and its first refresh; it should not be a permanent result after a completed connection attempt. Authentication Required normally means a required runtime-only secret needs to be supplied again.
 
-### Screenshot 17 — Authentication Required connection
-> **Screenshot placeholder 17**
+### Screenshot 19 — Authentication Required connection
+> **Screenshot placeholder 19**
 >
 > **Capture:** A profile requiring a session-only credential and Reconnect.
 >
@@ -373,14 +407,14 @@ Status is information, not an action. The current states are **Unknown**, **Conn
 > 6. Capture the profile name, canonical connection method, Authentication Required badge, and Reconnect action.
 
 >
-> **Suggested filename:** `docs/images/user-guide/17-authentication-required.png`
+> **Suggested filename:** `docs/images/user-guide/19-authentication-required.png`
 
 ### Delete connection
 
 Deleting a connection removes only Docker Connector’s saved profile, runtime credentials, cached session data, and associated transport state. It does **not** stop or remove containers; delete images, volumes, or networks; remove Docker Contexts; delete SSH keys or TLS files; change Docker sockets; or change a remote server configuration. The confirmation dialog repeats this boundary before removal.
 
-### Screenshot 18 — Delete connection confirmation
-> **Screenshot placeholder 18**
+### Screenshot 20 — Delete connection confirmation
+> **Screenshot placeholder 20**
 >
 > **Capture:** Confirmation scope and destructive action.
 >
@@ -393,7 +427,7 @@ Deleting a connection removes only Docker Connector’s saved profile, runtime c
 > 6. After the screenshot, cancel unless you intentionally want to remove that disposable profile.
 
 >
-> **Suggested filename:** `docs/images/user-guide/18-delete-connection.png`
+> **Suggested filename:** `docs/images/user-guide/20-delete-connection.png`
 
 ## 11. Switching environments
 
@@ -401,8 +435,8 @@ Use **Current Environment** to choose which saved host supplies dashboard data. 
 
 If the selected profile is deleted, Docker Connector chooses a safe remaining profile where possible, preferring an Online profile. If no profiles remain, the dashboard returns to its no-host state.
 
-### Screenshot 19 — Current Environment selector
-> **Screenshot placeholder 19**
+### Screenshot 21 — Current Environment selector
+> **Screenshot placeholder 21**
 >
 > **Capture:** Multiple profiles and the active environment.
 >
@@ -415,7 +449,7 @@ If the selected profile is deleted, Docker Connector chooses a safe remaining pr
 > 6. Capture the selector while it is open.
 
 >
-> **Suggested filename:** `docs/images/user-guide/19-current-environment.png`
+> **Suggested filename:** `docs/images/user-guide/21-current-environment.png`
 
 ## 12. Overview
 
@@ -423,8 +457,8 @@ Overview is the host-level operational summary. It presents connection health, D
 
 Overview is not a metrics-history system. It shows the latest safe dashboard snapshot for the selected environment.
 
-### Screenshot 20 — Populated Overview
-> **Screenshot placeholder 20**
+### Screenshot 22 — Populated Overview
+> **Screenshot placeholder 22**
 >
 > **Capture:** An online host’s Overview and attention items where present.
 >
@@ -436,14 +470,14 @@ Overview is not a metrics-history system. It shows the latest safe dashboard sna
 > 5. Capture the full Overview content area without unrelated Obsidian panels.
 
 >
-> **Suggested filename:** `docs/images/user-guide/20-populated-overview.png`
+> **Suggested filename:** `docs/images/user-guide/22-populated-overview.png`
 
 ## 13. Applications
 
 Applications groups Docker Compose-managed containers into projects. Docker Connector uses Docker’s Compose metadata—especially `com.docker.compose.project` and `com.docker.compose.service`—rather than guessing project membership from names, paths, networks, or image references.
 
-### Screenshot 21 — Applications list
-> **Screenshot placeholder 21**
+### Screenshot 23 — Applications list
+> **Screenshot placeholder 23**
 >
 > **Capture:** Compose project cards, search, filters, and sorting.
 >
@@ -455,12 +489,12 @@ Applications groups Docker Compose-managed containers into projects. Docker Conn
 > 5. Capture the list with at least two applications visible if possible.
 
 >
-> **Suggested filename:** `docs/images/user-guide/21-applications-list.png`
+> **Suggested filename:** `docs/images/user-guide/23-applications-list.png`
 
 Application cards show a project’s services, container counts, running and stopped counts, available-update count where known, and associated networks, volumes, and images. The list supports searching, status and update filtering, sorting, and an inspector. The inspector exposes project details, services, containers, and images; selecting a listed container opens that container in **Containers**.
 
-### Screenshot 22 — Application detail inspector
-> **Screenshot placeholder 22**
+### Screenshot 24 — Application detail inspector
+> **Screenshot placeholder 24**
 >
 > **Capture:** Services, containers, images, networks, and volumes as available.
 >
@@ -472,7 +506,7 @@ Application cards show a project’s services, container counts, running and sto
 > 5. Capture the detail panel with enough list context to identify the selected application.
 
 >
-> **Suggested filename:** `docs/images/user-guide/22-application-inspector.png`
+> **Suggested filename:** `docs/images/user-guide/24-application-inspector.png`
 
 For example, a project named `juliarosedelane` can contain services `ghost` and `ghost-db`, containers named `juliarosedelane-ghost` and `juliarosedelane-ghost-db`, and images such as `ghost:5-alpine` and `mysql:8.4`. These are different concepts, and Docker Connector keeps them separate.
 
@@ -482,8 +516,8 @@ Applications is read-only at the project level. Docker Connector does not run `d
 
 The **Containers** tab is the main container inventory. It has summary cards for **Containers**, **Running**, **Stopped**, and **Updates Available**. Selecting the Updates Available card filters the list; clear the active filter to return to the complete inventory.
 
-### Screenshot 23 — Updates Available filter
-> **Screenshot placeholder 23**
+### Screenshot 25 — Updates Available filter
+> **Screenshot placeholder 25**
 >
 > **Capture:** Updates Available card or active filter state.
 >
@@ -496,10 +530,10 @@ The **Containers** tab is the main container inventory. It has summary cards for
 > 6. Clear the filter after capturing.
 
 >
-> **Suggested filename:** `docs/images/user-guide/23-updates-filter.png`
+> **Suggested filename:** `docs/images/user-guide/25-updates-filter.png`
 
-### Screenshot 24 — Containers view
-> **Screenshot placeholder 24**
+### Screenshot 26 — Containers view
+> **Screenshot placeholder 26**
 >
 > **Capture:** Summary cards and populated container rows.
 >
@@ -512,12 +546,12 @@ The **Containers** tab is the main container inventory. It has summary cards for
 > 6. Capture the main Containers list at a normal readable density.
 
 >
-> **Suggested filename:** `docs/images/user-guide/24-containers-view.png`
+> **Suggested filename:** `docs/images/user-guide/26-containers-view.png`
 
 Use the toolbar to search by container information and filter by State, Health, and Network. Sort and density controls make it practical to work with larger inventories. Each row identifies the container, image, short ID, state, health, and relevant update state. Copy controls copy a full ID without changing the Docker host.
 
-### Screenshot 25 — Container filters and search
-> **Screenshot placeholder 25**
+### Screenshot 27 — Container filters and search
+> **Screenshot placeholder 27**
 >
 > **Capture:** Search, State, Health, Network, Updates, sort, and density controls.
 >
@@ -529,7 +563,7 @@ Use the toolbar to search by container information and filter by State, Health, 
 > 5. Capture the toolbar and enough container rows beneath it to show the controls affect an actual inventory.
 
 >
-> **Suggested filename:** `docs/images/user-guide/25-container-filters.png`
+> **Suggested filename:** `docs/images/user-guide/27-container-filters.png`
 
 ### Container health
 
@@ -541,8 +575,8 @@ Select a container to open its read-only inspector. The inspector provides **Act
 
 The inspector lets you refresh details and copy the full container ID. It does not provide an interactive shell, file browser, log terminal, or arbitrary Docker API console.
 
-### Screenshot 26 — Container detail inspector
-> **Screenshot placeholder 26**
+### Screenshot 28 — Container detail inspector
+> **Screenshot placeholder 28**
 >
 > **Capture:** Read-only sections and the Image update area.
 >
@@ -554,7 +588,7 @@ The inspector lets you refresh details and copy the full container ID. It does n
 > 5. Capture the inspector and selected container row; do not expand anything that would expose secrets.
 
 >
-> **Suggested filename:** `docs/images/user-guide/26-container-inspector.png`
+> **Suggested filename:** `docs/images/user-guide/28-container-inspector.png`
 
 ## 16. Images
 
@@ -562,8 +596,8 @@ The **Images** tab is a read-only image inventory. Summary cards cover Images, I
 
 Select an image for an inspector with overview data, repository tags and digests, safe labels, and visible container references. Docker Connector does not delete images or expose arbitrary pull controls from this view.
 
-### Screenshot 27 — Images view
-> **Screenshot placeholder 27**
+### Screenshot 29 — Images view
+> **Screenshot placeholder 29**
 >
 > **Capture:** Image inventory and detail inspector.
 >
@@ -576,7 +610,7 @@ Select an image for an inspector with overview data, repository tags and digests
 > 6. Capture the Images view with both list and inspector if the layout allows.
 
 >
-> **Suggested filename:** `docs/images/user-guide/27-images-view.png`
+> **Suggested filename:** `docs/images/user-guide/29-images-view.png`
 
 ## 17. Volumes
 
@@ -584,8 +618,8 @@ The **Volumes** tab lists Docker named volumes and their driver, scope, mountpoi
 
 The volume inspector shows overview information, options, safe labels, and containers using the volume where Docker makes that relationship visible. Docker Connector does not delete volumes.
 
-### Screenshot 28 — Volumes view
-> **Screenshot placeholder 28**
+### Screenshot 30 — Volumes view
+> **Screenshot placeholder 30**
 >
 > **Capture:** Named-volume inventory and inspector.
 >
@@ -598,7 +632,7 @@ The volume inspector shows overview information, options, safe labels, and conta
 > 6. Capture the populated Volumes view and inspector.
 
 >
-> **Suggested filename:** `docs/images/user-guide/28-volumes-view.png`
+> **Suggested filename:** `docs/images/user-guide/30-volumes-view.png`
 
 ## 18. Networks
 
@@ -606,8 +640,8 @@ The **Networks** tab lists Docker network definitions. It distinguishes built-in
 
 Selecting a network shows driver, scope, internal and attachable settings, IPv6 status, gateways, and attached containers. When a subnet is available it is shown in the list. Docker Connector does not create, change, or delete networks.
 
-### Screenshot 29 — Networks view
-> **Screenshot placeholder 29**
+### Screenshot 31 — Networks view
+> **Screenshot placeholder 31**
 >
 > **Capture:** Network inventory and attached-container details.
 >
@@ -620,7 +654,7 @@ Selecting a network shows driver, scope, internal and attachable settings, IPv6 
 > 6. Capture the populated Networks view and inspector.
 
 >
-> **Suggested filename:** `docs/images/user-guide/29-networks-view.png`
+> **Suggested filename:** `docs/images/user-guide/31-networks-view.png`
 
 ## 19. Image update checking
 
@@ -630,8 +664,8 @@ Automatic checks run on a 24-hour stale interval for eligible standalone contain
 
 Choose **Check now** in the container inspector to perform a one-off check. The Docker daemon may pull or resolve image data to check the image ID, but Check now does not change the running container’s state.
 
-### Screenshot 30 — Image is current
-> **Screenshot placeholder 30**
+### Screenshot 32 — Image is current
+> **Screenshot placeholder 32**
 >
 > **Capture:** Image update area showing Image is current and Check now.
 >
@@ -644,13 +678,13 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 > 6. Capture the Image update area after the result stabilizes.
 
 >
-> **Suggested filename:** `docs/images/user-guide/30-image-current.png`
+> **Suggested filename:** `docs/images/user-guide/32-image-current.png`
 
 > [!note] Availability is not eligibility
 > **Update available** means a newer image is available. **Update eligibility** means Docker Connector can safely use its standalone update transaction. Compose-managed containers can have an available image but remain ineligible for the standalone Update action.
 
-### Screenshot 31 — Update available
-> **Screenshot placeholder 31**
+### Screenshot 33 — Update available
+> **Screenshot placeholder 33**
 >
 > **Capture:** Confirmed Update available state for an eligible standalone container.
 >
@@ -662,7 +696,7 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 > 5. Capture before beginning the update transaction.
 
 >
-> **Suggested filename:** `docs/images/user-guide/31-update-available.png`
+> **Suggested filename:** `docs/images/user-guide/33-update-available.png`
 
 ## 20. Container management
 
@@ -672,8 +706,8 @@ Authorization is valid only while the profile remains continuously verified as *
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
-### Screenshot 32 — Container management disabled
-> **Screenshot placeholder 32**
+### Screenshot 34 — Container management disabled
+> **Screenshot placeholder 34**
 >
 > **Capture:** Read-only Actions panel and enable guidance.
 >
@@ -686,10 +720,10 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. Do not enable management until after this screenshot is complete.
 
 >
-> **Suggested filename:** `docs/images/user-guide/32-management-disabled.png`
+> **Suggested filename:** `docs/images/user-guide/34-management-disabled.png`
 
-### Screenshot 33 — Per-profile Container management enabled
-> **Screenshot placeholder 33**
+### Screenshot 35 — Per-profile Container management enabled
+> **Screenshot placeholder 35**
 >
 > **Capture:** An individual Online host with management enabled in the compact header and on its matching Connections card.
 >
@@ -702,7 +736,7 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. If desired, disable management again after all management/update screenshots are finished.
 
 >
-> **Suggested filename:** `docs/images/user-guide/33-management-enabled.png`
+> **Suggested filename:** `docs/images/user-guide/35-management-enabled.png`
 
 ### Start, Stop, Shut down, and Restart
 
@@ -711,8 +745,8 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 - **Stop** uses the normal stop action with a 10-second wait.
 - **Restart** uses Docker’s restart action with a 10-second wait.
 
-### Screenshot 34 — Stopped container Start control
-> **Screenshot placeholder 34**
+### Screenshot 36 — Stopped container Start control
+> **Screenshot placeholder 36**
 >
 > **Capture:** Start action for a stopped standalone container.
 >
@@ -725,12 +759,12 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. After capturing, return the test container to its desired normal state.
 
 >
-> **Suggested filename:** `docs/images/user-guide/34-stopped-start.png`
+> **Suggested filename:** `docs/images/user-guide/36-stopped-start.png`
 
 Docker Connector asks for confirmation before lifecycle actions and coordinates a refresh after an accepted action. These controls never appear as a bulk-action interface.
 
-### Screenshot 35 — Running container lifecycle controls
-> **Screenshot placeholder 35**
+### Screenshot 37 — Running container lifecycle controls
+> **Screenshot placeholder 37**
 >
 > **Capture:** Shut down, Stop, Restart, and Update eligibility where applicable.
 >
@@ -743,7 +777,7 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 > 6. Capture the Actions section and container identity clearly enough to show it is a test target.
 
 >
-> **Suggested filename:** `docs/images/user-guide/35-running-actions.png`
+> **Suggested filename:** `docs/images/user-guide/37-running-actions.png`
 
 ### Update
 
@@ -753,8 +787,8 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 
 An eligible Update begins with a confirmation preview. It identifies the container and image, summarizes supported configuration preservation, shows warnings, and offers Cancel or a direct proceed action. There is no acknowledgement checkbox; the writable-layer warning remains prominent.
 
-### Screenshot 36 — Update preview
-> **Screenshot placeholder 36**
+### Screenshot 38 — Update preview
+> **Screenshot placeholder 38**
 >
 > **Capture:** Preview, configuration summary, and writable-layer warning.
 >
@@ -767,12 +801,12 @@ An eligible Update begins with a confirmation preview. It identifies the contain
 > 6. Capture the complete preview dialog before selecting Proceed.
 
 >
-> **Suggested filename:** `docs/images/user-guide/36-update-preview.png`
+> **Suggested filename:** `docs/images/user-guide/38-update-preview.png`
 
 The transaction is designed for standalone containers. It inspects the original container, validates eligibility, pulls the candidate image, compares image IDs, stops the original if needed, preserves it as a backup, creates and configures a replacement, restores supported networking, starts and verifies the replacement, then cleans up the backup where safe. The exact progress view reports the stage actually in progress.
 
-### Screenshot 37 — Update progress
-> **Screenshot placeholder 37**
+### Screenshot 39 — Update progress
+> **Screenshot placeholder 39**
 >
 > **Capture:** Real in-progress transaction stages.
 >
@@ -785,12 +819,12 @@ The transaction is designed for standalone containers. It inspects the original 
 > 6. If the operation completes too quickly to capture reliably, repeat only on the disposable test target when safe.
 
 >
-> **Suggested filename:** `docs/images/user-guide/37-update-progress.png`
+> **Suggested filename:** `docs/images/user-guide/39-update-progress.png`
 
 Docker Connector attempts to preserve the supported Docker configuration needed to recreate an eligible standalone container, including its relevant mounts, ports, restart configuration, and network attachments. No update workflow can make writable-layer-only data persistent.
 
-### Screenshot 38 — Successful update result
-> **Screenshot placeholder 38**
+### Screenshot 40 — Successful update result
+> **Screenshot placeholder 40**
 >
 > **Capture:** Completed replacement and image identifiers.
 >
@@ -803,7 +837,7 @@ Docker Connector attempts to preserve the supported Docker configuration needed 
 > 6. Capture the final success/result panel.
 
 >
-> **Suggested filename:** `docs/images/user-guide/38-update-success.png`
+> **Suggested filename:** `docs/images/user-guide/40-update-success.png`
 
 ## 22. Rollback and recovery
 
@@ -811,8 +845,8 @@ If a replacement cannot be created, started, or verified after mutation starts, 
 
 Rollback is a recovery attempt, not an absolute guarantee against every host, storage, or Docker failure. If the result says a backup was retained, rollback is incomplete, or manual recovery is required, pause and inspect the reported container names and Docker state before taking further action. Do not repeatedly retry an unclear update result.
 
-### Screenshot 39 — Rollback or recovery result
-> **Screenshot placeholder 39**
+### Screenshot 41 — Rollback or recovery result
+> **Screenshot placeholder 41**
 >
 > **Capture:** Safe rollback, backup-retained, or manual-recovery guidance.
 >
@@ -825,7 +859,7 @@ Rollback is a recovery attempt, not an absolute guarantee against every host, st
 > 6. If no safe real recovery result is available, leave this placeholder uncaptured rather than manufacturing a misleading screenshot.
 
 >
-> **Suggested filename:** `docs/images/user-guide/39-update-recovery.png`
+> **Suggested filename:** `docs/images/user-guide/41-update-recovery.png`
 
 > [!warning] Writable-layer data
 > Data kept only in a container’s writable layer is not equivalent to a named volume or bind mount. Recreating a container can lose writable-layer-only changes. Persist important data with Docker volumes or bind mounts before updating.
@@ -844,8 +878,8 @@ Docker Connector Settings provide:
 
 Container management is intentionally not a Setting. It is controlled only by the synchronized per-profile header/card switches and never persists across a restart or reload.
 
-### Screenshot 40 — Settings page
-> **Screenshot placeholder 40**
+### Screenshot 42 — Settings page
+> **Screenshot placeholder 42**
 >
 > **Capture:** Automatic refresh, interval, and theme integration.
 >
@@ -857,7 +891,7 @@ Container management is intentionally not a Setting. It is controlled only by th
 > 5. Capture the Docker Connector settings page at a width where labels, descriptions, and controls are readable.
 
 >
-> **Suggested filename:** `docs/images/user-guide/40-settings.png`
+> **Suggested filename:** `docs/images/user-guide/42-settings.png`
 
 ## 25. Security model and saved information
 
@@ -868,7 +902,7 @@ Docker Connector saves connection metadata needed to reconnect, but keeps secret
 | Friendly name, description, category, host, and port | Yes |
 | Docker Context name and safe endpoint snapshot | Yes |
 | SSH username and private-key file path | Yes |
-| SSH password | No — session-only |
+| SSH password | No by default; an explicit per-profile opt-in stores it separately in unencrypted local plugin data |
 | SSH private-key passphrase | No — session-only |
 | TLS CA, client-certificate, and client-private-key paths | Yes |
 | TLS certificate/key contents | No |
@@ -944,22 +978,6 @@ Deletion is blocked while a container operation is active for that profile. Wait
 
 ### Connection stays Unknown
 
-### Screenshot 41 — Offline or error connection
-> **Screenshot placeholder 41**
->
-> **Capture:** Safe error state with Reconnect, without secrets.
->
-> **How to capture this screenshot:**
-> 1. Use a disposable/offline test profile rather than deliberately breaking production connectivity.
-> 2. Create a safe failure such as an unreachable test endpoint or use an existing offline test connection.
-> 3. Open **Connections** and wait for the profile to settle into **Offline**, **Degraded**, or another safe error state.
-> 4. Ensure the safe error summary and **Reconnect** action are visible.
-> 5. Do not display passwords, private-key material, or sensitive diagnostics.
-> 6. Capture the card and error/reconnect state; remove the disposable failure profile afterward if it is no longer needed.
-
->
-> **Suggested filename:** `docs/images/user-guide/41-offline-connection.png`
-
 Unknown means not yet evaluated. Use Reconnect or refresh the profile. A completed attempt should become Online, Offline, Degraded, or Authentication Required with a safe error. If it remains Unknown after a completed refresh, collect the diagnostics and report it as a problem.
 
 ### Update check or update unavailable
@@ -968,7 +986,7 @@ An image can be current, unavailable from a registry, untagged, inaccessible, Co
 
 ## 27. Frequently asked questions
 
-**Does Docker Connector store my SSH password?** No. SSH passwords and key passphrases are runtime-only and must be re-entered when the session needs them again.
+**Does Docker Connector store my SSH password?** Not by default. SSH passwords and key passphrases are runtime-only unless a password profile explicitly enables **Remember password on this device**. That opt-in stores only the password separately in unencrypted local plugin data; private-key passphrases are never stored.
 
 **Does it store Mutual TLS passphrases or certificate contents?** No. It can save selected certificate/key paths, but not certificate contents or the client-key passphrase.
 
@@ -1002,7 +1020,7 @@ An image can be current, unavailable from a registry, untagged, inaccessible, Co
 - Plain insecure Docker TCP is not supported.
 - Applications is a Compose-aware read-only view; it does not deploy, edit, start, stop, or update Compose projects.
 - Standalone transactional Update is intentionally blocked for Compose-managed and otherwise unsupported containers.
-- Passwords and passphrases are session-only, so reconnecting after restarting Obsidian can require them again.
+- Passwords and passphrases are session-only by default, so reconnecting after restarting Obsidian can require them again. Only an explicitly remembered SSH password can be rehydrated; passphrases are never remembered.
 - Some Docker Context endpoint types are blocked when they cannot be routed through an existing secure transport.
 - Docker permissions, Docker Engine availability, registry access, and remote host policy ultimately control what the plugin can inspect or change.
 
@@ -1049,37 +1067,38 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 05 | `05-local-docker-socket.png` | Local | Endpoint |
 | 06 | `06-docker-cli-detected.png` | Context | CLI and context discovery |
 | 07 | `07-ssh-password.png` | SSH | Password |
-| 08 | `08-ssh-private-key.png` | SSH | Key |
-| 09 | `09-ssh-host-key.png` | SSH | Trust |
-| 10 | `10-mutual-tls-form.png` | Mutual TLS | Form |
-| 11 | `11-mutual-tls-validation.png` | Mutual TLS | Files |
-| 12 | `12-mutual-tls-identity-failure.png` | Testing | Identity error |
-| 13 | `13-mutual-tls-success.png` | Testing | Test success |
-| 14 | `14-local-test-success.png` | Testing | Local test success |
-| 15 | `15-connections-management.png` | Connections | Profiles and actions |
-| 16 | `16-connection-actions.png` | Connections | Actions |
-| 17 | `17-authentication-required.png` | Connections | Reconnect |
-| 18 | `18-delete-connection.png` | Connections | Confirmation |
-| 19 | `19-current-environment.png` | Interface | Selector |
-| 20 | `20-populated-overview.png` | Overview | Host summary |
-| 21 | `21-applications-list.png` | Applications | List |
-| 22 | `22-application-inspector.png` | Applications | Detail |
-| 23 | `23-updates-filter.png` | Containers | Filter |
-| 24 | `24-containers-view.png` | Containers | List |
-| 25 | `25-container-filters.png` | Containers | Controls |
-| 26 | `26-container-inspector.png` | Container detail | Detail |
-| 27 | `27-images-view.png` | Images | Inventory |
-| 28 | `28-volumes-view.png` | Volumes | Inventory |
-| 29 | `29-networks-view.png` | Networks | Inventory |
-| 30 | `30-image-current.png` | Image updates | Current |
-| 31 | `31-update-available.png` | Image updates | Available |
-| 32 | `32-management-disabled.png` | Container management | Read-only |
-| 33 | `33-management-enabled.png` | Container management | Per-profile enabled |
-| 34 | `34-stopped-start.png` | Container management | Start |
-| 35 | `35-running-actions.png` | Container management | Running actions |
-| 36 | `36-update-preview.png` | Update | Preview |
-| 37 | `37-update-progress.png` | Update | Progress |
-| 38 | `38-update-success.png` | Update | Result |
-| 39 | `39-update-recovery.png` | Recovery | Result |
-| 40 | `40-settings.png` | Settings | Full page |
-| 41 | `41-offline-connection.png` | Troubleshooting | Error |
+| 08 | `08-verify-ssh-host.png` | SSH | First host-key verification |
+| 09 | `09-ssh-connection-success.png` | SSH | Trusted retry diagnostics |
+| 10 | `10-remember-ssh-password.png` | SSH | Optional local password storage |
+| 11 | `11-ssh-private-key.png` | SSH | Key |
+| 12 | `12-mutual-tls-form.png` | Mutual TLS | Form |
+| 13 | `13-mutual-tls-validation.png` | Mutual TLS | Files |
+| 14 | `14-mutual-tls-identity-failure.png` | Testing | Identity error |
+| 15 | `15-mutual-tls-success.png` | Testing | Test success |
+| 16 | `16-local-test-success.png` | Testing | Local test success |
+| 17 | `17-connections-management.png` | Connections | Profiles and actions |
+| 18 | `18-connection-actions.png` | Connections | Actions |
+| 19 | `19-authentication-required.png` | Connections | Reconnect |
+| 20 | `20-delete-connection.png` | Connections | Confirmation |
+| 21 | `21-current-environment.png` | Interface | Selector |
+| 22 | `22-populated-overview.png` | Overview | Host summary |
+| 23 | `23-applications-list.png` | Applications | List |
+| 24 | `24-application-inspector.png` | Applications | Detail |
+| 25 | `25-updates-filter.png` | Containers | Filter |
+| 26 | `26-containers-view.png` | Containers | List |
+| 27 | `27-container-filters.png` | Containers | Controls |
+| 28 | `28-container-inspector.png` | Container detail | Detail |
+| 29 | `29-images-view.png` | Images | Inventory |
+| 30 | `30-volumes-view.png` | Volumes | Inventory |
+| 31 | `31-networks-view.png` | Networks | Inventory |
+| 32 | `32-image-current.png` | Image updates | Current |
+| 33 | `33-update-available.png` | Image updates | Available |
+| 34 | `34-management-disabled.png` | Container management | Read-only |
+| 35 | `35-management-enabled.png` | Container management | Per-profile enabled |
+| 36 | `36-stopped-start.png` | Container management | Start |
+| 37 | `37-running-actions.png` | Container management | Running actions |
+| 38 | `38-update-preview.png` | Update | Preview |
+| 39 | `39-update-progress.png` | Update | Progress |
+| 40 | `40-update-success.png` | Update | Result |
+| 41 | `41-update-recovery.png` | Recovery | Result |
+| 42 | `42-settings.png` | Settings | Full page |

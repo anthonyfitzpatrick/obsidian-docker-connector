@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { DockerHostManager } from "../src/services/DockerHostManager";
-import type { LocalDockerProfile } from "../src/models/DockerConnectionProfile";
+import type { LocalDockerProfile, SshDockerProfile } from "../src/models/DockerConnectionProfile";
 
 const profile = (id: string): LocalDockerProfile => ({ id, name: id, connectionType: "local", localEndpoint: { type: "unix-socket", socketPath: "/var/run/docker.sock" }, enabled: true, createdAt: "", updatedAt: "" });
 
 function subject(profiles = [profile("one"), profile("two")]) {
-  const plugin = { settings: { profiles }, saveSettings: vi.fn(async () => undefined), hasActiveContainerAction: vi.fn(() => false), disconnectProfile: vi.fn(async () => undefined), invalidateProfileRefresh: vi.fn(), clearRuntimeCredentials: vi.fn(), clearDeletedProfileState: vi.fn(), refreshDashboard: vi.fn() };
+  const plugin = { settings: { profiles }, saveSettings: vi.fn(async () => undefined), hasActiveContainerAction: vi.fn(() => false), disconnectProfile: vi.fn(async () => undefined), invalidateProfileRefresh: vi.fn(), clearRuntimeCredentials: vi.fn(), clearDeletedProfileState: vi.fn(), refreshDashboard: vi.fn(), contextLifecycle: { clear: vi.fn() }, takeRememberedSshPassword: vi.fn(), restoreRememberedSshPassword: vi.fn() };
   return { plugin, manager: new DockerHostManager(plugin as never) };
 }
 
@@ -18,8 +18,20 @@ describe("DockerHostManager profile deletion", () => {
     expect(plugin.invalidateProfileRefresh).not.toHaveBeenCalled();
     expect(plugin.disconnectProfile).toHaveBeenCalledWith("one");
     expect(plugin.clearRuntimeCredentials).toHaveBeenCalledWith("one");
+    expect(plugin.takeRememberedSshPassword).toHaveBeenCalledWith("one");
     expect(plugin.clearDeletedProfileState).toHaveBeenCalledWith("one");
     expect(plugin.refreshDashboard).toHaveBeenCalledOnce();
+  });
+  it("removes a remembered password before a saved SSH identity changes and restores it if persistence fails", async () => {
+    const ssh: SshDockerProfile = { id: "ssh", name: "SSH", enabled: true, createdAt: "", updatedAt: "", connectionType: "ssh", sshHost: "one.example.test", sshPort: 22, sshUsername: "user", authentication: { type: "password" }, remoteSocketPath: "/var/run/docker.sock", hostKeyFingerprint: "SHA256:test" };
+    const { plugin, manager } = subject([ssh] as never);
+    plugin.takeRememberedSshPassword.mockReturnValue("remembered");
+    await manager.update({ ...ssh, sshHost: "two.example.test" });
+    expect(plugin.takeRememberedSshPassword).toHaveBeenCalledWith("ssh");
+
+    plugin.saveSettings.mockRejectedValueOnce(new Error("disk unavailable"));
+    await expect(manager.update({ ...ssh, sshUsername: "other" })).rejects.toThrow("disk unavailable");
+    expect(plugin.restoreRememberedSshPassword).toHaveBeenCalledWith("ssh", "remembered");
   });
   it("restores the visible profile and leaves runtime state alone when persistence fails", async () => {
     const { plugin, manager } = subject();

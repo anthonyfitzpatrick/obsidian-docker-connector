@@ -4,7 +4,7 @@ tags: [docker-connector, container-management]
 
 # Container Management
 
-[[Docker Connector]] is read-only by default. Use the compact **Container management** header switch for an individual Online trusted Docker connection. Authorization is profile-scoped and session-only, resets after restarting or reloading Obsidian, and is cleared on connection loss, edit, or deletion. Reconnecting never restores authorization; enable it explicitly again. Applications remain read-only and Compose-managed standalone Update remains blocked. Credentials remain session-only.
+[[Docker Connector]] is read-only by default. Use the compact **Container management** header switch for an individual Online trusted Docker connection. Authorization is profile-scoped and session-only, resets after restarting or reloading Obsidian, and is cleared on connection loss, edit, or deletion. Reconnecting never restores authorization; enable it explicitly again. Applications remain read-only and Compose-managed standalone Update remains blocked. Credentials remain session-only by default; see [[Docker Connector - Runtime Credentials]] for the explicit remembered SSH password exception.
 
 Management authorization is never persisted. Enabling first asks for confirmation. The switch is unavailable for All Docker hosts and for any non-Online connection.
 

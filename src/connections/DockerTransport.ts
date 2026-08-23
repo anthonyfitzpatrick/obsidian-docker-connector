@@ -13,7 +13,7 @@ import type { DockerConnectionProfile } from "../models/DockerConnectionProfile"
 export interface DockerApiRequest { method: "GET" | "POST" | "DELETE"; path: string; body?: string; responseType?: "json" | "text" | "empty"; }
 export type ConnectionTestStepStatus = "pending" | "running" | "success" | "warning" | "error" | "skipped";
 export interface ConnectionTestStep { id: string; label: string; status: ConnectionTestStepStatus; message?: string; technicalDetails?: string; }
-export interface DockerConnectionTestResult { success: boolean; steps: ConnectionTestStep[]; safeErrorCode?: string; safeErrorMessage?: string; dockerVersion?: string; apiVersion?: string; hostFingerprint?: string; }
+export interface DockerConnectionTestResult { success: boolean; steps: ConnectionTestStep[]; safeErrorCode?: string; safeErrorMessage?: string; dockerVersion?: string; apiVersion?: string; /** The server fingerprint received during a host-key failure. */ hostFingerprint?: string; }
 /** A connected channel to precisely one configured Docker host profile. */
 export interface DockerTransport {
   readonly profile: DockerConnectionProfile;
@@ -29,6 +29,12 @@ export class HostKeyTrustRequiredError extends Error {
 }
 export class DockerConnectionError extends Error {
   constructor(readonly code: string, message: string, readonly details?: string, readonly httpStatus?: number) { super(message); this.name = "DockerConnectionError"; }
+}
+export class HostKeyMismatchError extends DockerConnectionError {
+  constructor(readonly receivedFingerprint: string, expectedFingerprint: string) {
+    super("SSH_HOST_KEY_MISMATCH", "SSH host key changed. Verify the server before reconnecting.", `Expected ${expectedFingerprint}; received ${receivedFingerprint}.`);
+    this.name = "HostKeyMismatchError";
+  }
 }
 
 export function dockerHttpError(status: number, body: string, ping = false): DockerConnectionError {

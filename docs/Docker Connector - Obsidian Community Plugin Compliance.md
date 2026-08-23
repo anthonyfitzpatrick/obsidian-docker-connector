@@ -29,7 +29,7 @@ Docker connection methods are documented in [[Docker Connector - Connection Arch
 
 ## Filesystem, network, DOM, CSS, and accessibility — PASS
 
-Settings persist non-secret profile metadata only. [[Docker Connector - Runtime Credentials]] documents why SSH passwords, SSH key passphrases, and TLS client-key passphrases are runtime-only. Certificate and private-key contents, registry credentials, container environment values, and raw inspect payloads are not persisted or copied into safe diagnostics. Explicitly selected paths are read for key/certificate/socket functionality; no recursive filesystem scan occurs.
+Settings persist non-secret profile metadata only. [[Docker Connector - Runtime Credentials]] documents the default runtime-only boundary for SSH passwords, SSH key passphrases, and TLS client-key passphrases, plus the explicit per-profile unencrypted plugin-data exception for remembered SSH passwords where no supported Obsidian keychain API exists. Certificate and private-key contents, registry credentials, container environment values, and raw inspect payloads are not persisted or copied into safe diagnostics. Explicitly selected paths are read for key/certificate/socket functionality; no recursive filesystem scan occurs.
 
 There is no telemetry, analytics, cloud service, remote script, remote CSS, or runtime executable-code download. Network activity is limited to configured Docker/SSH/TLS/Context connections, public registry lookups for advisory image-release checks, and Docker-daemon pulls used solely for image-ID checking/updating. Docker metadata is rendered with Obsidian DOM text APIs rather than HTML insertion. Clipboard and diagnostics exclude secrets. CSS is scoped under the plugin namespace, uses Obsidian variables, and includes visible focus and responsive/reduced-motion treatment.
 
@@ -53,8 +53,8 @@ Current Obsidian guidance prefers distributing `main.js` as a release attachment
 - Test connection Add/Edit/Reconnect/Retry/Delete, including deleting the Current Environment and final profile.
 - Test all views in light/dark themes and narrow panes; verify keyboard focus, modals, and status communication.
 - Test lifecycle actions and update/rollback/backup-retention only on disposable containers.
-- Reload Obsidian and the plugin; verify session-only credentials are not retained and no stale status returns after deletion.
+- Reload Obsidian and the plugin; verify default session-only credentials are not retained, the explicit remembered SSH-password option behaves as documented, host-key mismatches still block reconnect, and no stale status returns after deletion.
 
 ## User-facing documentation
 
-[[User Guide]] is the end-user starting point and [[README]] provides the Marketplace-facing overview. Both identify desktop transport limits and Gateway-based mobile access, all five supported connection methods, Compose-label Applications, profile-scoped session-only management, image-update limitations, privilege warning, no-telemetry policy, runtime-only credentials, installation, and troubleshooting. Technical notes remain linked from the guide rather than being required reading for a first-time user.
+[[User Guide]] is the end-user starting point and [[README]] provides the Marketplace-facing overview. Both identify desktop transport limits and Gateway-based mobile access, all five supported connection methods, Compose-label Applications, profile-scoped session-only management, image-update limitations, privilege warning, no-telemetry policy, runtime credentials by default, and the explicit unencrypted remembered SSH-password exception, installation, and troubleshooting. Technical notes remain linked from the guide rather than being required reading for a first-time user.

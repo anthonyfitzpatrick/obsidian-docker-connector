@@ -9,14 +9,14 @@
 
 ## Architecture
 
-- `src/main.ts` is the Obsidian plugin lifecycle entrypoint. It owns persisted non-secret settings and snapshots; keep transport construction, Docker API policy, and mutations in their dedicated services.
+- `src/main.ts` is the Obsidian plugin lifecycle entrypoint. It owns persisted settings and snapshots; keep transport construction, Docker API policy, and mutations in their dedicated services.
 - Esbuild emits one CommonJS bundle, `main.js`. Desktop transports and UI services are bundled but initialized only after the desktop platform capability gate; mobile supports the Gateway path only.
 - `gateway/` is a dependency-free Node companion service for mobile access. It is intentionally a token-authenticated, GET-only allowlist over the local Docker socket; do not turn it into a generic Docker proxy.
 
 ## Safety Boundaries
 
 - Preserve read-only-by-default behavior. Container actions must stay typed, explicitly enabled per online profile, session-only, validated in the service layer, and covered by focused tests. Connection loss revokes management authorization.
-- Do not add insecure Docker TCP, TLS-verification or SSH host-key bypasses, Docker Context mutation, shell execution, telemetry, or persisted passwords, passphrases, tokens, private keys, or certificate contents.
+- Do not add insecure Docker TCP, TLS-verification or SSH host-key bypasses, Docker Context mutation, shell execution, telemetry, persisted passphrases, tokens, private keys, or certificate contents. The sole password exception is the explicitly opted-in, profile-ID-scoped SSH password record in unencrypted plugin data; keep it separate from profiles, documented, and covered by focused tests.
 - Use only non-secret fixtures and diagnostics. Run any Docker mutation validation only against disposable local containers, never a production host.
 - Keep the Gateway a token-authenticated, GET-only allowlist, never an arbitrary Docker or mutation proxy. Keep Compose-managed containers protected from standalone Update.
 

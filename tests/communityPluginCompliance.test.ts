@@ -49,11 +49,22 @@ describe("Obsidian Community Plugin release guard", () => {
     expect(actions).toContain('async update(');
   });
 
-  it("does not use unsafe HTML insertion or persist runtime credential names", async () => {
-    const files = ["src/main.ts", "src/settings/settings.ts", "src/views/DockerDashboardView.ts", "src/security/RuntimeCredentialStore.ts"];
-    const production = (await Promise.all(files.map(source))).join("\n");
+  it("does not use unsafe HTML insertion or serialize credentials into profiles", async () => {
+    const [main, settings, dashboard, runtimeStore, profiles] = await Promise.all([
+      source("src/main.ts"),
+      source("src/settings/settings.ts"),
+      source("src/views/DockerDashboardView.ts"),
+      source("src/security/RuntimeCredentialStore.ts"),
+      source("src/models/DockerConnectionProfile.ts"),
+    ]);
+    const production = [main, settings, dashboard, runtimeStore].join("\n");
+    const diagnostics = dashboard.slice(dashboard.indexOf("private renderDiagnostics"), dashboard.indexOf("\n}\n\n/** Prompts"));
     for (const prohibited of ["innerHTML", "outerHTML", "insertAdjacentHTML", "localStorage", "sessionStorage"]) expect(production).not.toContain(prohibited);
-    expect(production).not.toMatch(/saveData\([^)]*(password|passphrase|privateKey|certificate)/i);
+    expect(main).toContain("rememberedSshPasswords: this.rememberedSshPasswords.serialize()");
+    expect(settings).not.toContain("rememberedSshPasswords");
+    expect(profiles).not.toMatch(/password\??\s*:/i);
+    expect(diagnostics).not.toMatch(/password/i);
+    expect(runtimeStore).not.toMatch(/\.saveData\s*\(|rememberedSshPasswords/);
   });
 
   it("keeps lifecycle cleanup and scoped interactive UI contracts in production source", async () => {
@@ -79,7 +90,7 @@ describe("Obsidian Community Plugin release guard", () => {
     const filenames = [...guide.matchAll(/^> \*\*Suggested filename:\*\* `[^`/]+(?:\/[^`/]+)*\/(\d{2})-[^`]+`$/gm)].map((match) => match[1]);
     const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
     const embedded = [...guide.matchAll(/!\[[^\]]*\]\(docs\/images\/user-guide\/(\d{2}-[^)]+)\)/g)].map((match) => match[1]);
-    const expected = Array.from({ length: 41 }, (_, index) => screenshotNumber(index));
+    const expected = Array.from({ length: 42 }, (_, index) => screenshotNumber(index));
     expect(headings).toEqual(expected);
     expect(placeholders).toEqual(["06", ...expected.slice(7)]);
     expect(filenames).toEqual(["06", ...expected.slice(7)]);

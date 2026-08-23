@@ -9,6 +9,7 @@ import { SshDockerTransport } from "../src/connections/SshDockerTransport";
 import { HostKeyVerifier } from "../src/security/HostKeyVerifier";
 import type { SshDockerProfile } from "../src/models/DockerConnectionProfile";
 class FakeClient extends EventEmitter { ended = false; config?: ConnectConfig; connect(config: ConnectConfig): this { this.config = config; config.hostVerifier?.(Buffer.from("known-key")); queueMicrotask(() => { this.emit("connect"); this.emit("handshake"); this.emit("ready"); }); return this; } end(): this { this.ended = true; return this; } }
+class HostKeyFailureClient extends EventEmitter { connect(config: ConnectConfig): this { config.hostVerifier?.(Buffer.from("received-key")); queueMicrotask(() => this.emit("error", new Error("Host verification failed"))); return this; } end(): this { return this; } }
 class KeyboardInteractiveClient extends EventEmitter {
   responses?: string[];
   connect(config: ConnectConfig): this {
@@ -45,7 +46,20 @@ describe("password SSH lifecycle", () => {
   it("uses the supplied password for a single keyboard-interactive prompt", async () => { const client = new KeyboardInteractiveClient(); const transport = new SshDockerTransport(profile, () => ({ password: "session-password" }), undefined, () => client as unknown as Client); await transport.connect(); expect(client.responses).toEqual(["session-password"]); });
   it("shares one in-progress SSH connection across concurrent Docker requests", async () => { let clientCount = 0; const transport = new SshDockerTransport(profile, () => ({ password: "session-password" }), undefined, () => { clientCount += 1; return new FakeClient() as unknown as Client; }); await Promise.all([transport.connect(), transport.connect()]); expect(clientCount).toBe(1); });
   it("reports authentication required when the runtime password is absent", async () => { const transport = new SshDockerTransport(profile, () => ({}), undefined, () => new FakeClient() as unknown as Client); await expect(transport.connect()).rejects.toMatchObject({ code: "SSH_PASSWORD_REQUIRED" }); });
+  it("returns the received fingerprint for an unknown host key without trusting it", async () => {
+    const transport = new SshDockerTransport({ ...profile, hostKeyFingerprint: undefined }, () => ({ password: "session-password" }), undefined, () => new HostKeyFailureClient() as unknown as Client);
+    const result = await transport.testConnection();
+    expect(result).toMatchObject({ success: false, safeErrorCode: "SSH_HOST_KEY_UNTRUSTED", hostFingerprint: new HostKeyVerifier().fingerprint(Buffer.from("received-key")) });
+  });
+  it("returns both the mismatch code and received fingerprint without replacing the trusted key", async () => {
+    const original = profile.hostKeyFingerprint;
+    const transport = new SshDockerTransport({ ...profile, hostKeyFingerprint: original }, () => ({ password: "session-password" }), undefined, () => new HostKeyFailureClient() as unknown as Client);
+    const result = await transport.testConnection();
+    expect(result).toMatchObject({ success: false, safeErrorCode: "SSH_HOST_KEY_MISMATCH", hostFingerprint: new HostKeyVerifier().fingerprint(Buffer.from("received-key")) });
+    expect(transport.profile.hostKeyFingerprint).toBe(original);
+  });
   it("uses the same SSH session to ping Docker before reading its version", async () => { const client = new DockerClient(); const transport = new SshDockerTransport(profile, () => ({ password: "session-password" }), undefined, () => client as unknown as Client); const result = await transport.testConnection(); expect(result).toMatchObject({ success: true, dockerVersion: "28.0", apiVersion: "1.50" }); expect(result.steps.find((step) => step.id === "ping-response")?.status).toBe("success"); expect(client.command).toBe("docker system dial-stdio"); expect(client.ended).toBe(true); });
+  it("marks the unused private-key diagnostic branch skipped after password authentication succeeds", async () => { const transport = new SshDockerTransport(profile, () => ({ password: "session-password" }), undefined, () => new DockerClient() as unknown as Client); const result = await transport.testConnection(); expect(result.steps.filter((step) => ["private-key-path", "private-key-read", "private-key-parse"].includes(step.id)).every((step) => step.status === "skipped")).toBe(true); });
   it("passes only private-key authentication to ssh2", async () => {
     const directory = await mkdtemp(join(tmpdir(), "docker-connector-transport-"));
     try {

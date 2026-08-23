@@ -18,6 +18,14 @@ describe("SSH Authentication field layout", () => {
     expect(modal).toContain('setName("Private-Key Passphrase")');
   });
 
+  it("offers password persistence only as an explicit, scoped SSH password opt-in", () => {
+    expect(modal).toContain('setName("Remember password on this device")');
+    expect(modal).toContain("Stores this SSH password locally so Docker Connector can reconnect automatically after Obsidian restarts.");
+    expect(modal).toContain('setButtonText("Forget stored password")');
+    expect(modal).toContain("changedAwayFromPassword");
+    expect(modal).toContain("forgetRememberedSshPassword");
+  });
+
   it("does not add global Obsidian Setting overrides", () => {
     expect(styles).not.toMatch(/^\.setting-item(?:\s|\{|,)/m);
     expect(styles).not.toMatch(/^\.setting-item-control(?:\s|\{|,)/m);

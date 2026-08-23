@@ -25,6 +25,7 @@ import { getContainerUpdateEligibility, type ContainerUpdatePreview } from "./se
 import { ContainerImageUpdateService, type ContainerImageUpdateStatus } from "./services/ContainerImageUpdateService";
 import { StartupRefreshCoordinator } from "./lifecycle/StartupRefreshCoordinator";
 import { ProfileRefreshTracker } from "./services/ProfileRefreshTracker";
+import { RememberedSshPasswordStore } from "./security/RememberedSshPasswordStore";
 
 /** Describes a persisted preference change that an open view may need to reflect. */
 export type DockerConnectorSettingsChange = { key: keyof DockerConnectorSettings | "managementAuthorization"; previousValue: unknown; value: unknown };
@@ -32,15 +33,15 @@ export type DockerConnectorSettingsChange = { key: keyof DockerConnectorSettings
 /**
  * Docker Connector plugin entry point.
  *
- * This class owns only Obsidian lifecycle work, persisted non-secret settings,
- * and the current in-memory host snapshots. Transport construction, Docker API
+ * This class owns Obsidian lifecycle work, persisted settings, and the current
+ * in-memory host snapshots. Transport construction, Docker API
  * policy, and container mutations live in dedicated services so a UI change
  * cannot accidentally expand the plugin's authority.
  *
  * Security notes:
- * - `settings` contains connection metadata only; passwords and passphrases are
- *   held by DockerConnectionFactory's runtime credential store and are cleared
- *   during unload.
+ * - Profile settings contain connection metadata only. Runtime credentials are
+ *   cleared during unload; explicitly opted-in SSH passwords are separately
+ *   stored in plugin data and rehydrated into runtime memory on startup.
  * - The dashboard's visibility is never authorization. The mutation service
  *   rechecks the opt-in setting before every typed action.
  * - Refresh work is best-effort. Failures become bounded host snapshots rather
@@ -68,6 +69,7 @@ export default class DockerConnectorPlugin extends Plugin {
   private unloading = false;
   private readonly settingsListeners = new Set<(change: DockerConnectorSettingsChange) => void>();
   private settingsSaveChain: Promise<void> = Promise.resolve();
+  private readonly rememberedSshPasswords = new RememberedSshPasswordStore();
 
   async onload(): Promise<void> {
     try {
@@ -151,11 +153,16 @@ export default class DockerConnectorPlugin extends Plugin {
       integrateWithTheme: typeof modernSettings.integrateWithTheme === "boolean" ? modernSettings.integrateWithTheme : DEFAULT_SETTINGS.integrateWithTheme,
       containerDensity: modernSettings.containerDensity === "compact" || modernSettings.containerDensity === "comfortable" ? modernSettings.containerDensity : DEFAULT_SETTINGS.containerDensity,
     };
+    this.rememberedSshPasswords.load((persisted as { rememberedSshPasswords?: unknown } | null)?.rememberedSshPasswords, profiles);
+    for (const profile of profiles) {
+      const password = this.rememberedSshPasswords.get(profile.id);
+      if (password) this.setRuntimePassword(profile.id, password);
+    }
     if (requiresMigration || repairedProfiles || hasRetiredReportFolder) await this.saveSettings();
   }
   async saveSettings(): Promise<void> {
     const save = this.settingsSaveChain.then(async () => {
-      await this.saveData(this.settings);
+      await this.saveData({ ...this.settings, rememberedSshPasswords: this.rememberedSshPasswords.serialize() });
     });
     this.settingsSaveChain = save.catch(() => undefined);
     await save;
@@ -279,6 +286,26 @@ export default class DockerConnectorPlugin extends Plugin {
   setRuntimeTlsClientKeyPassphrase(profileId: string, passphrase: string): void { this.connectionFactory.setRuntimeTlsClientKeyPassphrase(profileId, passphrase); }
   setRuntimeGatewayToken(profileId: string, token: string): void { this.connectionFactory.setRuntimeGatewayToken(profileId, token); }
   clearRuntimeCredentials(profileId: string): void { this.connectionFactory.clearRuntimeCredentials(profileId); }
+  hasRememberedSshPassword(profileId: string): boolean { return this.rememberedSshPasswords.has(profileId); }
+  async rememberSshPassword(profileId: string, password: string): Promise<void> {
+    this.rememberedSshPasswords.set(profileId, password);
+    this.setRuntimePassword(profileId, password);
+    await this.saveSettings();
+  }
+  async forgetRememberedSshPassword(profileId: string): Promise<void> {
+    this.takeRememberedSshPassword(profileId);
+    await this.saveSettings();
+  }
+  /** Removes persisted and runtime password material so the caller can persist the accompanying profile change. */
+  takeRememberedSshPassword(profileId: string): string | undefined {
+    const password = this.rememberedSshPasswords.take(profileId);
+    this.clearRuntimePassword(profileId);
+    return password;
+  }
+  restoreRememberedSshPassword(profileId: string, password: string | undefined): void {
+    this.rememberedSshPasswords.restore(profileId, password);
+    if (password) this.setRuntimePassword(profileId, password);
+  }
   private setRuntimeCredential(profile: DockerConnectionProfile, credential: string): void { if (profile.connectionType === "gateway") this.setRuntimeGatewayToken(profile.id, credential); else if (profile.connectionType === "ssh" && profile.authentication.type === "password") this.setRuntimePassword(profile.id, credential); else if (profile.connectionType === "ssh") this.setRuntimePrivateKeyPassphrase(profile.id, credential); else if (profile.connectionType === "docker-tls") this.setRuntimeTlsClientKeyPassphrase(profile.id, credential); }
   private scheduleContainerImageUpdateChecks(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot): void { if (this.unloading || !this.managementAuthorization.isEnabled(profile.id) || snapshot.status !== "online") return; snapshot.containers.forEach((container) => { const eligibility = getContainerUpdateEligibility(container.image, container.labels); if (eligibility.eligible && this.containerImageUpdates.isStale(profile.id, container.id)) void this.containerImageUpdates.check(profile, container.id).catch(() => undefined); }); }
   private refreshOpenDashboard(): void { this.app.workspace.getLeavesOfType(DOCKER_CONNECTOR_VIEW).forEach((leaf) => void (leaf.view as DockerDashboardView).render()); }

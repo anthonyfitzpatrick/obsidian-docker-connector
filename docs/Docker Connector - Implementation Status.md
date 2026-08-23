@@ -12,7 +12,7 @@ Implemented: Password and Private Key authentication, session-only credentials, 
 
 Implemented: deletion of saved Docker Connector connection profiles with explicit confirmation. Deletion clears plugin-owned runtime state and never deletes external Docker resources, Docker Contexts, credential files, or server configuration.
 
-Implemented: Remote Docker API (Mutual TLS) profile modeling, HTTPS mutual-TLS Test Connection, dashboard refresh, and lazy details. Local Docker Socket, Docker Context, Remote Docker via SSH, Remote Docker API (Mutual TLS), and Gateway share the read-only API policy and cleanup lifecycle. Not implemented: SSH Agent, SSH config import, and OS credential storage. See [[Docker Connector - Connectivity Overview]].
+Implemented: Remote Docker API (Mutual TLS) profile modeling, HTTPS mutual-TLS Test Connection, dashboard refresh, and lazy details. Local Docker Socket, Docker Context, Remote Docker via SSH, Remote Docker API (Mutual TLS), and Gateway share the read-only API policy and cleanup lifecycle. Not implemented: SSH Agent, SSH config import, and OS credential storage; the only remembered credential is the explicit unencrypted plugin-data SSH password option. See [[Docker Connector - Connectivity Overview]].
 
 Implemented: Container management is opt-in, disabled by default, profile-scoped, and session-only. The synchronized header/card switches are available only for an individual Online profile, revoke authorization immediately on connection loss, and never restore it automatically after reconnect. Manual Obsidian verification of the installed bundle remains outstanding.
 

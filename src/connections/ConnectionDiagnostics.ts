@@ -12,6 +12,7 @@ const DEFINITIONS: Array<[string, string]> = [["input", "Validate profile"], ["p
 export class ConnectionDiagnostics {
   readonly steps: ConnectionTestStep[] = DEFINITIONS.map(([id, label]) => ({ id, label, status: "pending" }));
   set(id: string, status: ConnectionTestStepStatus, message?: string, technicalDetails?: string): void { const step = this.steps.find((item) => item.id === id); if (step) Object.assign(step, { status, message, technicalDetails }); }
+  skip(ids: string[], message?: string): void { for (const id of ids) { const step = this.steps.find((item) => item.id === id); if (step?.status === "pending") Object.assign(step, { status: "skipped" as const, message }); } }
   success(version: { Version: string; ApiVersion: string }): DockerConnectionTestResult { this.set("complete", "success"); return { success: true, steps: this.steps, dockerVersion: version.Version, apiVersion: version.ApiVersion }; }
   failure(code: string, message: string, details?: string, fingerprint?: string): DockerConnectionTestResult { const active = [...this.steps].reverse().find((step) => step.status === "running" || step.status === "success"); if (active?.status === "running") this.set(active.id, "error", message, details); for (const step of this.steps) if (step.status === "pending") step.status = "skipped"; return { success: false, steps: this.steps, safeErrorCode: code, safeErrorMessage: message, hostFingerprint: fingerprint }; }
 }

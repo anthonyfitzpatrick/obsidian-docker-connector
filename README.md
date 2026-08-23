@@ -21,7 +21,7 @@ Run the separate component in [`gateway/`](gateway/) only on a trusted LAN or VP
 - Check eligible standalone containers for image updates on a 24-hour schedule or with **Check now**.
 - Explicitly enable confirmed Start, Shut down, Stop, Restart, and safe standalone-container Update actions.
 - Use a backup-first update transaction with rollback/recovery guidance for eligible standalone containers.
-- Keep SSH passwords and key passphrases, and TLS client-key passphrases, in memory only for the current Obsidian session.
+- Keep SSH passwords and key passphrases, and TLS client-key passphrases, in memory only for the current Obsidian session by default. Password SSH profiles may explicitly opt in to separate unencrypted local plugin-data storage on a trusted device.
 
 ## Screenshots
 
@@ -60,7 +60,7 @@ When a newer image is confirmed and a standalone container is eligible, **Update
 ## Security and privacy
 
 - Docker access remains privileged; use least-privileged access where possible.
-- SSH passwords, SSH private-key passphrases, TLS client-key passphrases, and Gateway tokens are session-only and are never saved in plugin settings. Passive cards hide SSH usernames, authentication labels, credential paths, and secrets.
+- SSH passwords, SSH private-key passphrases, TLS client-key passphrases, and Gateway tokens are session-only by default. Only an explicit per-profile SSH password opt-in stores a password separately in unencrypted local plugin data; it is never a profile field. Passive cards hide SSH usernames, authentication labels, credential paths, and secrets.
 - Selected key and certificate paths can be saved; their file contents are not copied into settings.
 - Mutual TLS requires server-certificate and Server Name verification. There is no insecure verification bypass.
 - Docker Contexts are discovered and used without `docker context use`, create, update, remove, import, or export commands.

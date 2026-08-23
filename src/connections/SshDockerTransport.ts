@@ -3,7 +3,7 @@ import * as net from "node:net";
 import { lookup } from "node:dns/promises";
 import type { SshDockerProfile } from "../models/DockerConnectionProfile";
 import type { DockerApiRequest, DockerConnectionTestResult, DockerTransport } from "./DockerTransport";
-import { dockerHttpError, DockerConnectionError, HostKeyTrustRequiredError } from "./DockerTransport";
+import { dockerHttpError, DockerConnectionError, HostKeyMismatchError, HostKeyTrustRequiredError } from "./DockerTransport";
 import { ConnectionDiagnostics } from "./ConnectionDiagnostics";
 import { HostKeyVerifier } from "../security/HostKeyVerifier";
 import { DockerDialStdioTransport } from "./DockerDialStdioTransport";
@@ -138,7 +138,7 @@ export class SshDockerTransport implements DockerTransport {
             return false;
           }
           if (!this.verifier.verify(key, this.profile.hostKeyFingerprint)) {
-            hostKeyError = new DockerConnectionError("SSH_HOST_KEY_MISMATCH", "SSH host key changed. Verify the server before reconnecting.", `Expected ${this.profile.hostKeyFingerprint}; received ${received}.`);
+            hostKeyError = new HostKeyMismatchError(received, this.profile.hostKeyFingerprint);
             diagnostics?.set("trust", "error", "Stored host key does not match the server.");
             return false;
           }
@@ -164,6 +164,7 @@ export class SshDockerTransport implements DockerTransport {
 
   private async authenticationSource(credentials: RuntimeSshCredentials, diagnostics?: ConnectionDiagnostics): Promise<{ type: "password"; password: string } | { type: "private-key"; privateKey: Buffer; passphrase?: string }> {
     if (this.profile.authentication.type === "password") {
+      diagnostics?.skip(["private-key-path", "private-key-read", "private-key-parse"], "Password authentication selected.");
       if (!credentials.password) {
         const error = new DockerConnectionError("SSH_PASSWORD_REQUIRED", "Enter the SSH password to connect. Passwords are kept only for the current Obsidian session.");
         diagnostics?.set("password", "error", error.message);
@@ -172,6 +173,7 @@ export class SshDockerTransport implements DockerTransport {
       diagnostics?.set("password", "success", "Runtime password is available.");
       return { type: "password", password: credentials.password };
     }
+    diagnostics?.skip(["password"], "Private-key authentication selected.");
     diagnostics?.set("private-key-path", "running");
     const key = await loadPrivateKeyFile(this.profile.authentication.privateKeyPath, credentials.privateKeyPassphrase);
     diagnostics?.set("private-key-path", "success", "Private-key path resolved.");
@@ -255,7 +257,7 @@ export class SshDockerTransport implements DockerTransport {
     } catch (error) {
       const code = error instanceof HostKeyTrustRequiredError ? "SSH_HOST_KEY_UNTRUSTED" : error instanceof DockerConnectionError ? error.code : "UNKNOWN_CONNECTION_ERROR";
       const message = error instanceof HostKeyTrustRequiredError ? "Verify and explicitly trust this SSH host fingerprint before continuing." : safeMessage(error);
-      return diagnostics.failure(code, message, error instanceof DockerConnectionError ? error.details : undefined, error instanceof HostKeyTrustRequiredError ? error.fingerprint : undefined);
+      return diagnostics.failure(code, message, error instanceof DockerConnectionError ? error.details : undefined, error instanceof HostKeyTrustRequiredError ? error.fingerprint : error instanceof HostKeyMismatchError ? error.receivedFingerprint : undefined);
     } finally {
       clearTimeout(overallTimer);
       this.activeTests.delete(controller);

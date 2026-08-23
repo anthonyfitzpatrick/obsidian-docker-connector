@@ -51,6 +51,11 @@ describe("DockerInspectionService", () => {
     const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(profile);
     expect(snapshot).toMatchObject({ status: "authentication-required", error: "The SSH server rejected the username or password." });
   });
+  it("keeps an untrusted SSH host key actionable rather than degrading the connection", async () => {
+    const transport = failingTransport(new DockerConnectionError("SSH_HOST_KEY_UNTRUSTED", "Verify the received fingerprint."));
+    const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(profile);
+    expect(snapshot).toMatchObject({ status: "authentication-required", error: "SSH host key verification required. Open Edit to verify and explicitly trust the received fingerprint." });
+  });
 
   it("marks Docker-side failures as degraded instead of offline", async () => {
     const transport = failingTransport(new DockerConnectionError("DOCKER_SOCKET_PERMISSION_DENIED", "The SSH user cannot access Docker."));

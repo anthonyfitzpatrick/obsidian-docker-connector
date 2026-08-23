@@ -68,6 +68,9 @@ export function classifyHostFailure(error: unknown): Pick<DockerHostSnapshot, "s
   if (failure.code === "SSH_PASSWORD_REQUIRED") {
     return { status: "authentication-required", error: "Password required to reconnect." };
   }
+  if (failure.code === "SSH_HOST_KEY_UNTRUSTED") {
+    return { status: "authentication-required", error: "SSH host key verification required. Open Edit to verify and explicitly trust the received fingerprint." };
+  }
   if (failure.code === "DOCKER_TLS_CLIENT_KEY_PASSPHRASE_REQUIRED") return { status: "authentication-required", error: "Client Key Passphrase required to reconnect." };
   if (AUTHENTICATION_ERROR_CODES.has(failure.code)) {
     return { status: "authentication-required", error: failure.message };
@@ -79,10 +82,8 @@ export function classifyHostFailure(error: unknown): Pick<DockerHostSnapshot, "s
 }
 
 /**
- * Desktop transports are emitted into a separate plugin artifact. Their
- * DockerConnectionError has a different JavaScript constructor from main.js,
- * so `instanceof` cannot safely cross that artifact boundary. Codes/messages
- * are the stable internal error contract shared by both bundles.
+ * Error codes/messages are the stable internal contract. The structural
+ * fallback also handles errors that cross an integration boundary.
  */
 function connectionFailure(error: unknown): { code: string; message: string } | undefined {
   if (error instanceof DockerConnectionError) return error;
