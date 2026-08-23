@@ -109,20 +109,7 @@ On macOS, Docker Desktop commonly uses a user socket such as `~/.docker/run/dock
 The **Docker Endpoint** field can show the detected local Unix socket or Windows named pipe. If Docker Desktop is stopped, the endpoint is missing, the symlink is broken, or your account cannot open it, Test Connection explains that local endpoint problem.
 
 ### Screenshot 05 — Local Docker Socket configuration
-> **Screenshot placeholder 05**
->
-> **Capture:** Detected local socket or named pipe and endpoint status.
->
-> **How to capture this screenshot:**
-> 1. Start Docker Desktop or the local Docker Engine so a supported local endpoint exists.
-> 2. Open **Add Docker Host** and select **Local Docker Socket**.
-> 3. Allow endpoint discovery/validation to complete.
-> 4. Ensure the detected Unix socket or named pipe and its supported/available status are visible.
-> 5. On macOS, a path such as `~/.docker/run/docker.sock` is suitable; avoid showing unrelated personal file paths.
-> 6. Do not run a container-management action; this screenshot is configuration only.
-
->
-> **Suggested filename:** `docs/images/user-guide/05-local-docker-socket.png`
+![Local Docker Socket configuration](docs/images/user-guide/05-local-docker-socket.png)
 
 ### 8.2 Docker Context
 
