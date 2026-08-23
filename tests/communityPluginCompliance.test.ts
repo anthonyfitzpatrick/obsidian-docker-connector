@@ -92,10 +92,10 @@ describe("Obsidian Community Plugin release guard", () => {
     const embedded = [...guide.matchAll(/!\[[^\]]*\]\(docs\/images\/user-guide\/(\d{2}-[^)]+)\)/g)].map((match) => match[1]);
     const expected = Array.from({ length: 42 }, (_, index) => screenshotNumber(index));
     expect(headings).toEqual(expected);
-    expect(placeholders).toEqual(["06", ...expected.slice(7)]);
-    expect(filenames).toEqual(["06", ...expected.slice(7)]);
+    expect(placeholders).toEqual(["06", ...expected.slice(9)]);
+    expect(filenames).toEqual(["06", ...expected.slice(9)]);
     expect(checklist).toEqual(expected);
-    expect(embedded).toEqual(["01-empty-connections.png", "02-dashboard-overview.png", "03-add-docker-host.png", "04-connection-type-selector.png", "05-local-docker-socket.png", "06-docker-cli-detected.png", "07-ssh-password.png"]);
+    expect(embedded).toEqual(["01-empty-connections.png", "02-dashboard-overview.png", "03-add-docker-host.png", "04-connection-type-selector.png", "05-local-docker-socket.png", "06-docker-cli-detected.png", "07-ssh-password.png", "08-verify-ssh-host.png", "09-ssh-connection-success.png"]);
     await Promise.all(embedded.map((filename) => access(`docs/images/user-guide/${filename}`)));
     const appendixStart = guide.indexOf("# Appendix A — Screenshot production checklist");
     expect(appendixStart).toBeGreaterThan(0);

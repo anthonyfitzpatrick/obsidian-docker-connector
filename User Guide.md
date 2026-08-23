@@ -180,32 +180,10 @@ The **Host Key Fingerprint** identifies the remote SSH server. Docker Connector 
 4. Select **Save Host** only after that successful retest. Saving persists the verified host-key fingerprint metadata, never a password or private-key passphrase.
 
 ### Screenshot 08 — Verify SSH Host
-> **Screenshot placeholder 08**
->
-> **Capture:** The first-connection **Verify SSH Host** dialog with a disposable server fingerprint.
->
-> **How to capture this screenshot:**
-> 1. Use an isolated SSH test endpoint and a disposable test account, never a production server.
-> 2. Test an unsaved SSH profile until **Verify SSH Host** opens.
-> 3. Show the configured host and port, the received SHA-256 fingerprint, **Cancel**, and **Trust and Continue**.
-> 4. Use only a disposable fingerprint that may be published; redact private hostnames, user names, paths, passwords, passphrases, keys, tokens, and diagnostics that identify a production host.
-> 5. Do not accept the prompt solely to create the capture unless the test fingerprint has been independently verified.
->
-> **Suggested filename:** `docs/images/user-guide/08-verify-ssh-host.png`
+![Verify SSH Host dialog](docs/images/user-guide/08-verify-ssh-host.png)
 
 ### Screenshot 09 — SSH connection success diagnostics
-> **Screenshot placeholder 09**
->
-> **Capture:** Successful SSH host-key verification and Docker connection diagnostics after the trusted retry.
->
-> **How to capture this screenshot:**
-> 1. Use the same isolated SSH test profile after independently verifying its fingerprint.
-> 2. Select **Trust and Continue** once, then wait for the automatic retry to finish.
-> 3. Show successful host-key verification, SSH authentication, Docker `GET /_ping`, Docker `GET /version`, and final success where space allows.
-> 4. Show unselected authentication-source stages as **SKIPPED** when visible; do not expose passwords, passphrases, private-key paths, key material, tokens, or private endpoints.
-> 5. Capture only after the terminal result is stable.
->
-> **Suggested filename:** `docs/images/user-guide/09-ssh-connection-success.png`
+![SSH connection success diagnostics](docs/images/user-guide/09-ssh-connection-success.png)
 
 ### Screenshot 10 — Remember SSH password option
 > **Screenshot placeholder 10**
