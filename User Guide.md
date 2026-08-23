@@ -166,20 +166,7 @@ The remote account must be able to access the configured Docker socket without i
 With **Password** selected, enter the SSH password during connection or reconnection. Docker Connector keeps that password in memory only for the current Obsidian session. It is not stored in the saved profile, so a profile can show **Authentication Required** after Obsidian restarts. Choose **Reconnect** to provide it again.
 
 ### Screenshot 07 — Remote Docker via SSH password
-> **Screenshot placeholder 07**
->
-> **Capture:** SSH password form without a real password.
->
-> **How to capture this screenshot:**
-> 1. Open **Add Docker Host** and select **Remote Docker via SSH**.
-> 2. Set **SSH Authentication** to **Password**.
-> 3. Populate only harmless sample host/username values if needed for layout; leave the password blank.
-> 4. Ensure SSH Host, Port, Username, Authentication, Remote Docker Socket, and password-related controls are visible.
-> 5. Never type a real password for this screenshot.
-> 6. Capture before running Test Connection.
-
->
-> **Suggested filename:** `docs/images/user-guide/07-ssh-password.png`
+![Remote Docker via SSH password](docs/images/user-guide/07-ssh-password.png)
 
 #### Private-key authentication
 
