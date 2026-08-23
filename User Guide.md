@@ -120,19 +120,7 @@ This distinction matters: Docker Connector uses the context you select without c
 The plugin performs bounded discovery of the Docker CLI from the current process PATH and standard platform locations. This helps normal macOS GUI launches, where Obsidian can inherit a different PATH than Terminal, without invoking a login shell or reading shell startup files.
 
 ### Screenshot 06 — Docker CLI detected
-> **Screenshot placeholder 06**
->
-> **Capture:** Docker Context form showing detected Docker CLI and version.
->
-> **How to capture this screenshot:**
-> 1. Open **Add Docker Host** and select **Docker Context**.
-> 2. Use **Discover Contexts** if needed and wait for Docker CLI discovery to finish.
-> 3. Ensure the detected Docker CLI/version message is visible.
-> 4. Use a normal test/local context setup; do not change the active Docker Context just for the screenshot.
-> 5. Capture enough of the form to show that Docker Connector found the CLI and can enumerate contexts.
-
->
-> **Suggested filename:** `docs/images/user-guide/06-docker-cli-detected.png`
+![Docker CLI detected](docs/images/user-guide/06-docker-cli-detected.png)
 
 Docker Connector resolves a selected Context to the right physical transport each time it is used:
 
