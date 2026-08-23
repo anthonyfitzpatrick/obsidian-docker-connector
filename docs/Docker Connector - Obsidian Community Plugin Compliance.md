@@ -39,7 +39,7 @@ Part 1’s `npm audit` reported a moderate advisory for transitive `esbuild` and
 
 ## Documentation and automated validation — PASS
 
-The canonical [[User Guide]] and README document five connection methods, including Gateway for mobile; privilege model; settings; Applications; inventories; update checks; explicit profile-scoped management; rollback limits; privacy model; troubleshooting; FAQ; and 41 numbered screenshot capture specifications. Automated validation must be repeated for the release candidate.
+The canonical [[User Guide]] and README document five connection methods, including Gateway for mobile; privilege model; settings; Applications; inventories; update checks; explicit profile-scoped management; rollback limits; privacy model; troubleshooting; FAQ; and 47 numbered screenshot capture specifications. Automated validation must be repeated for the release candidate.
 
 ## Manual Marketplace submission checks — MANUAL REVIEW
 
