@@ -186,17 +186,7 @@ The **Host Key Fingerprint** identifies the remote SSH server. Docker Connector 
 ![SSH connection success diagnostics](docs/images/user-guide/09-ssh-connection-success.png)
 
 ### Screenshot 10 — Remember SSH password option
-> **Screenshot placeholder 10**
->
-> **Capture:** The off-by-default **Remember password on this device** option and its local-storage warning for a password-authenticated SSH profile.
->
-> **How to capture this screenshot:**
-> 1. Use a disposable SSH password profile and do not display the password field value.
-> 2. Show the option unchecked together with the warning that the password is stored separately in unencrypted local plugin data only when enabled.
-> 3. If showing the remembered state, show only its status and **Forget stored password** action, never the password.
-> 4. Do not display private-key passphrases, TLS passphrases, tokens, key material, certificate contents, personal paths, or production hosts.
->
-> **Suggested filename:** `docs/images/user-guide/10-remember-ssh-password.png`
+![Remember SSH password option](docs/images/user-guide/10-remember-ssh-password.png)
 
 With the option off, an Obsidian restart returns the profile to **Authentication Required** and **Reconnect** asks for the password again. With the option explicitly on, Docker Connector rehydrates the stored password only for that profile and only when the saved host-key fingerprint still matches. Use **Forget stored password** to remove it immediately. A changed host key always opens **SSH Host Identity Changed**, showing both trusted and received fingerprints with no replacement action; it blocks reconnection even when a password is remembered.
 
