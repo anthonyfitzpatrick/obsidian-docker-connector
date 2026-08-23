@@ -91,20 +91,7 @@ The primary navigation contains **Overview**, **Applications**, **Containers**, 
 On desktop, drag the dialog by its title bar or resize it from its lower-right edge. On touch and narrow layouts, it remains viewport-safe without draggable controls.
 
 ### Screenshot 03 — Add Docker Host dialog
-> **Screenshot placeholder 03**
->
-> **Capture:** Friendly Name, optional metadata, Connection Type, Test Connection, and Save Host.
->
-> **How to capture this screenshot:**
-> 1. From **Connections**, select **Add Docker Host**.
-> 2. Leave the dialog in its initial/general configuration state.
-> 3. Enter a clearly fictional or disposable **Friendly Name**; optionally fill Description and Category with harmless sample text.
-> 4. Keep the **Connection Type** control visible together with **Test Connection**, **Save Host**, and **Cancel**.
-> 5. Do not enter a real password, passphrase, private key, token, or sensitive hostname.
-> 6. Capture the whole dialog at a width where all controls are readable.
-
->
-> **Suggested filename:** `docs/images/user-guide/03-add-docker-host.png`
+![Add Docker Host dialog](docs/images/user-guide/03-add-docker-host.png)
 
 Testing before saving is strongly recommended. A successful test proves the selected profile can validate its endpoint and obtain safe Docker information; saving then registers the profile for the normal dashboard refresh lifecycle.
 
