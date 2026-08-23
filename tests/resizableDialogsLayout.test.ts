@@ -11,7 +11,9 @@ describe("resizable large dialog layout", () => {
     expect(dashboard).toMatch(/class DockerHostModal extends Modal/);
     expect(dashboard).toMatch(/editingProfile \? "Edit Docker Host" : "Add Docker Host"/);
     expect(dashboard).toMatch(/modalEl\.addClass\("dc-resizable-modal"\)/);
+    expect(dashboard).toMatch(/dc-modal-drag-handle/);
     expect(update).toMatch(/modalEl\.addClasses\(\["dc-resizable-modal", "dc-update-dialog"\]\)/);
+    expect(update).toMatch(/dc-modal-drag-handle/);
     expect(update).toMatch(/dc-update-dialog__body/);
   });
 
@@ -22,6 +24,8 @@ describe("resizable large dialog layout", () => {
 
     expect(reconnect).not.toContain("dc-resizable-modal");
     expect(deletion).not.toContain("dc-resizable-modal");
+    expect(reconnect).not.toContain("dc-modal-drag-handle");
+    expect(deletion).not.toContain("dc-modal-drag-handle");
   });
 
   it("uses a desktop native resize shell with scrollable bodies and touch-safe overrides", async () => {
@@ -33,5 +37,7 @@ describe("resizable large dialog layout", () => {
     expect(css).toMatch(/\.dc-host-modal__form \{[^}]*flex: 1 1 auto[^}]*min-height: 0[^}]*overflow: auto/s);
     expect(css).toMatch(/\.dc-update-dialog__body \{[^}]*flex: 1 1 auto[^}]*min-height: 0[^}]*overflow: auto/s);
     expect(css).toMatch(/@media \(hover: none\), \(pointer: coarse\), \(max-width: 620px\) \{ \.modal\.dc-resizable-modal \{[^}]*resize: none/s);
+    expect(css).toMatch(/\.dc-modal-drag-handle \{ flex: none; \}/);
+    expect(css).toMatch(/\.dc-modal-drag-handle \{ cursor: grab; user-select: none; touch-action: none; \}/);
   });
 });

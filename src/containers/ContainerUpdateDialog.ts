@@ -4,6 +4,7 @@ import type { DockerConnectionProfile } from "../models/DockerConnectionProfile"
 import type { DockerContainerSummary } from "./ContainerModels";
 import type { ContainerUpdatePreview } from "../services/ContainerUpdatePlan";
 import type { ContainerUpdateProgressEvent, ContainerUpdateResult } from "../services/DockerContainerActionService";
+import { ModalDragController } from "../ui/ModalDragController";
 
 type ContainerUpdateDialogPhase = "loading-preflight" | "awaiting-confirmation" | "updating" | "rolling-back" | "completed" | "failed" | "cancelled";
 const STAGES = ["inspecting", "validating", "pulling-image", "comparing-images", "stopping-original", "creating-backup", "creating-replacement", "connecting-networks", "starting-replacement", "verifying", "removing-backup", "completed"] as const;
@@ -18,14 +19,15 @@ export class ContainerUpdateDialog extends Modal {
   private events = new Map<string, ContainerUpdateProgressEvent>();
   private removeProgress?: () => void;
   private finished = false;
+  private drag?: ModalDragController;
   private readonly attemptId = crypto.randomUUID();
 
   constructor(private readonly plugin: DockerConnectorPlugin, private readonly profile: DockerConnectionProfile, private readonly container: DockerContainerSummary, private readonly onUpdated: (newId?: string) => void) { super(plugin.app); }
-  onOpen(): void { this.modalEl.addClasses(["dc-resizable-modal", "dc-update-dialog"]); void this.loadPreflight(); }
-  onClose(): void { this.removeProgress?.(); this.contentEl.empty(); }
+  onOpen(): void { this.modalEl.addClasses(["dc-resizable-modal", "dc-update-dialog"]); this.drag = new ModalDragController(this.modalEl); void this.loadPreflight(); }
+  onClose(): void { this.removeProgress?.(); this.drag?.dispose(); this.drag = undefined; this.contentEl.empty(); }
 
   private async loadPreflight(): Promise<void> { this.phase = "loading-preflight"; this.error = undefined; this.render(); try { this.preview = await this.plugin.preflightContainerUpdate(this.profile, this.container.id); this.phase = "awaiting-confirmation"; } catch (error) { this.phase = "failed"; this.error = safeError(error); } this.render(); }
-  private render(): void { const root = this.contentEl; root.empty(); root.createEl("h2", { text: this.phase === "failed" ? "Update unavailable" : "Update container" }); const body = root.createDiv({ cls: "dc-update-dialog__body" }); if (this.phase === "loading-preflight") { body.createDiv({ text: "Preparing update information…", cls: "dc-update-dialog-live", attr: { "aria-live": "polite" } }); return; } if (this.phase === "failed") { body.createDiv({ text: this.error?.message ?? "The update could not be prepared.", cls: "dc-update-dialog-result is-failed", attr: { role: "alert" } }); if (this.error?.code) body.createDiv({ text: this.error.code, cls: "docker-connector__muted" }); this.footer(body, [["Retry check", () => void this.loadPreflight()], ["Close", () => this.close()]]); return; }
+  private render(): void { const root = this.contentEl; root.empty(); const header = root.createDiv({ cls: "dc-modal-drag-handle" }); header.createEl("h2", { text: this.phase === "failed" ? "Update unavailable" : "Update container" }); this.drag?.attach(header); const body = root.createDiv({ cls: "dc-update-dialog__body" }); if (this.phase === "loading-preflight") { body.createDiv({ text: "Preparing update information…", cls: "dc-update-dialog-live", attr: { "aria-live": "polite" } }); return; } if (this.phase === "failed") { body.createDiv({ text: this.error?.message ?? "The update could not be prepared.", cls: "dc-update-dialog-result is-failed", attr: { role: "alert" } }); if (this.error?.code) body.createDiv({ text: this.error.code, cls: "docker-connector__muted" }); this.footer(body, [["Retry check", () => void this.loadPreflight()], ["Close", () => this.close()]]); return; }
     if (this.phase === "awaiting-confirmation") { this.previewView(body); return; }
     if (this.phase === "updating" || this.phase === "rolling-back") { this.progressView(body); return; }
     this.resultView(body);

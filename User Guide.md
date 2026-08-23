@@ -88,6 +88,8 @@ The primary navigation contains **Overview**, **Applications**, **Containers**, 
 6. Choose **Test Connection** and review the transport-specific diagnostics.
 7. Choose **Save Host**.
 
+On desktop, drag the dialog by its title bar or resize it from its lower-right edge. On touch and narrow layouts, it remains viewport-safe without draggable controls.
+
 ### Screenshot 03 — Add Docker Host dialog
 > **Screenshot placeholder 03**
 >
