@@ -54,7 +54,13 @@
 @container (max-width: 400px) { .docker-connector__application-container-main { align-items: flex-start; flex-direction: column; }.docker-connector__application-container-badges { justify-content: flex-start; }.docker-connector__application-image-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }.docker-connector__application-detail .dc-container-detail-row { grid-template-columns: 1fr; gap: 2px; }.docker-connector__application-detail .dc-container-detail-row span:last-child { white-space: normal; overflow-wrap: anywhere; } }
 @container (max-width: 330px) { .docker-connector__applications-toolbar { grid-template-columns: 1fr; }.docker-connector__application-card-header { align-items: flex-start; }.docker-connector__application-card-header strong { white-space: normal; overflow-wrap: anywhere; } }
 
-.dc-update-dialog .modal-content { max-width: 760px; max-height: min(76vh, 760px); overflow: auto; }
+.modal.dc-resizable-modal { box-sizing: border-box; width: min(760px, calc(100vw - 48px)); max-width: calc(100vw - 48px); height: min(720px, calc(100vh - 48px)); max-height: calc(100vh - 48px); overflow: hidden; }
+.modal.dc-resizable-modal .modal-content { display: flex; flex-direction: column; box-sizing: border-box; width: 100%; height: 100%; min-height: 0; overflow: hidden; }
+@media (hover: hover) and (pointer: fine) and (min-width: 621px) { .modal.dc-resizable-modal { min-width: 480px; min-height: 360px; resize: both; } }
+@media (hover: none), (pointer: coarse), (max-width: 620px) { .modal.dc-resizable-modal { width: min(calc(100% - 24px), 760px); min-width: 0; height: auto; max-height: calc(100vh - 24px); resize: none; } }
+.dc-update-dialog .modal-content { padding: 0; }
+.dc-update-dialog .modal-content > h2 { flex: none; margin: 0; padding: 20px 22px 12px; }
+.dc-update-dialog__body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 0 22px 14px; }
 .dc-update-dialog-summary { display: grid; grid-template-columns: minmax(120px, .7fr) minmax(0, 1.3fr); gap: 5px 12px; margin: 10px 0; font-size: .86em; }
 .dc-update-dialog-summary > div { display: contents; }
 .dc-update-dialog-summary span:first-child { color: var(--dc-text-muted); }
@@ -63,12 +69,12 @@
 .dc-update-dialog-warning { border-color: color-mix(in srgb, var(--dc-warning) 45%, var(--dc-border)); }
 .dc-update-dialog-result.is-failed { border-color: color-mix(in srgb, var(--dc-danger) 45%, var(--dc-border)); }
 .dc-container-image-update { display: grid; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--dc-border); }.dc-container-image-update h4 { margin: 0; font-size: .88em; }.dc-container-image-update-status { display: flex; gap: 8px; align-items: flex-start; }.dc-container-image-update-status > span:first-child { width: 16px; height: 16px; }.dc-container-image-update-status > div { display: grid; gap: 2px; }.dc-container-image-update-rows { display: grid; gap: 3px; font-size: .78em; }.dc-container-image-update-rows > div { display: grid; grid-template-columns: minmax(90px, .7fr) minmax(0, 1.3fr); gap: 8px; }.dc-container-image-update-rows span:first-child { color: var(--dc-text-muted); }.dc-container-image-update-rows span:last-child { overflow-wrap: anywhere; }
-.dc-update-dialog-footer { position: sticky; bottom: 0; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding: 12px 0 2px; background: var(--background-primary); }
+.dc-update-dialog-footer { flex: none; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding: 12px 22px 16px; border-top: 1px solid var(--dc-border); background: var(--background-primary); }
 .dc-update-dialog-live { margin: 12px 0; color: var(--dc-accent); font-weight: 650; }
 .dc-update-dialog-steps { display: grid; gap: 6px; margin: 12px 0; }
 .dc-update-dialog-steps > div { display: flex; gap: 8px; align-items: center; font-size: .86em; }
 .dc-update-dialog-steps .is-running { color: var(--dc-accent); }.dc-update-dialog-steps .is-complete { color: var(--dc-success); }.dc-update-dialog-steps .is-warning { color: var(--dc-warning); }
-@media (max-width: 480px) { .dc-update-dialog-summary { grid-template-columns: 1fr; gap: 2px; } }
+@media (max-width: 480px) { .dc-update-dialog .modal-content > h2 { padding: 16px 15px 10px; }.dc-update-dialog__body { padding: 0 15px 10px; }.dc-update-dialog-footer { padding: 10px 15px 13px; }.dc-update-dialog-summary { grid-template-columns: 1fr; gap: 2px; } }
 
 .docker-connector button { cursor: pointer; }
 .docker-connector button:focus-visible, .docker-connector input:focus-visible, .docker-connector select:focus-visible, .docker-connector summary:focus-visible { outline: 2px solid var(--dc-accent); outline-offset: 2px; }
@@ -110,8 +116,8 @@
   .dc-host-card-endpoint, .dc-connection-inventory span, .dc-connection-engine span { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
   .dc-container-layout, .dc-image-layout, .dc-volume-layout { grid-template-columns: 1fr; }
   .dc-image-detail-panel, .dc-volume-detail-panel { position: static; max-height: none; }
-  .dc-host-modal { max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px); overflow-y: auto; }
-  .dc-host-modal__footer { position: sticky; bottom: 0; padding-bottom: max(8px, env(safe-area-inset-bottom)); background: var(--background-primary); }
+  .dc-host-modal { min-height: 0; overflow: hidden; }
+  .dc-host-modal__footer { position: static; padding-bottom: max(8px, env(safe-area-inset-bottom)); background: var(--background-primary); }
 }
 .docker-connector__nav-item:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
 .docker-connector__nav-item.is-active { background: var(--dc-surface-raised); color: var(--dc-accent); box-shadow: 0 1px 4px rgb(0 0 0 / .1); font-weight: 600; opacity: 1; pointer-events: auto; }
@@ -942,9 +948,9 @@ button.dc-metric-card:focus-visible,
 }
 
 /* Desktop-style host dialog: compact sections with a persistent action row. */
-.modal .dc-host-modal { display: flex; flex-direction: column; max-height: min(760px, calc(100vh - 72px)); padding: 0; }
+.modal .dc-host-modal { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; padding: 0; }
 .dc-host-modal > h2 { margin: 0; padding: 20px 22px 12px; color: var(--text-normal); font-size: 1.2em; }
-.dc-host-modal__form { overflow-y: auto; padding: 0 22px 14px; }
+.dc-host-modal__form { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 0 22px 14px; }
 .dc-host-modal__section { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--dc-border); }
 .dc-host-modal__section:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .dc-host-modal__section h3 { margin: 0 0 4px; color: var(--text-muted); font-size: .7em; font-weight: 750; letter-spacing: .075em; text-transform: uppercase; }
@@ -969,7 +975,7 @@ button.dc-metric-card:focus-visible,
 .dc-host-modal__validation { margin: 12px 0 2px; padding: 8px 10px; border: 1px solid color-mix(in srgb, var(--dc-danger) 45%, var(--dc-border)); border-radius: 7px; background: color-mix(in srgb, var(--dc-danger) 9%, transparent); font-size: .82em; }
 .dc-host-modal__security-actions { display: flex; gap: 7px; justify-content: flex-end; padding-top: 3px; }.dc-host-modal__security-actions button { min-height: 30px; }
 .dc-host-modal__diagnostics { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--dc-border); }.dc-host-modal__diagnostics h4 { margin: 0 0 5px; font-size: .82em; }
-.dc-host-modal__footer { position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 8px; padding: 12px 22px 16px; border-top: 1px solid var(--dc-border); background: var(--background-primary); box-shadow: 0 -7px 14px color-mix(in srgb, var(--background-primary) 78%, transparent); }.dc-host-modal__footer button { min-height: 34px; padding: 6px 12px; }.dc-host-modal__footer button:first-child { margin-right: auto; }
+.dc-host-modal__footer { flex: none; display: flex; justify-content: flex-end; gap: 8px; padding: 12px 22px 16px; border-top: 1px solid var(--dc-border); background: var(--background-primary); box-shadow: 0 -7px 14px color-mix(in srgb, var(--background-primary) 78%, transparent); }.dc-host-modal__footer button { min-height: 34px; padding: 6px 12px; }.dc-host-modal__footer button:first-child { margin-right: auto; }
 @keyframes dc-host-auth-in { from { opacity: .4; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .dc-host-modal__auth-details { animation: none; } }
 @media (max-width: 620px) { .dc-host-modal .dc-host-modal__full-width-field { grid-template-columns: minmax(0, 1fr); gap: 5px; } }
