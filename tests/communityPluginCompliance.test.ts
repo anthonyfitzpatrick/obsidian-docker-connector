@@ -78,10 +78,11 @@ describe("Obsidian Community Plugin release guard", () => {
     const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
     const expected = Array.from({ length: 42 }, (_, index) => String(index + 1).padStart(2, "0"));
     expect([...headings].sort()).toEqual(expected);
-    expect([...placeholders, "01"].sort()).toEqual(expected);
-    expect([...filenames, "01"].sort()).toEqual(expected);
+    expect([...placeholders, "01", "02"].sort()).toEqual(expected);
+    expect([...filenames, "01", "02"].sort()).toEqual(expected);
     expect(checklist).toEqual(expected);
     expect(guide).toMatch(/!\[[^\]]*\]\(docs\/images\/user-guide\/01-dashboard-overview\.png\)/);
+    expect(guide).toMatch(/!\[[^\]]*\]\(docs\/images\/user-guide\/02-empty-connections\.png\)/);
     const appendixStart = guide.indexOf("# Appendix A — Screenshot production checklist");
     expect(appendixStart).toBeGreaterThan(0);
     expect(guide.slice(appendixStart)).not.toMatch(/^### Screenshot |^> \*\*Screenshot placeholder/m);

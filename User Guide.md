@@ -67,19 +67,7 @@ For a manual release installation, the plugin directory needs only `main.js`, `m
 On first launch there are no saved Docker connections. Open **Connections** and choose **Add Docker Host**. After testing and saving a host, choose it as the Current Environment to populate the dashboard.
 
 ### Screenshot 02 — Empty Docker connections state
-> **Screenshot placeholder 02**
->
-> **Capture:** Connections with no profiles and the Add Docker Host action.
->
-> **How to capture this screenshot:**
-> 1. Use a temporary vault/profile state with **no saved Docker connections**, or temporarily remove only disposable Docker Connector profiles after confirming they can be recreated.
-> 2. Open Docker Connector and select **Connections**.
-> 3. Confirm the page shows the no-connections empty state and the **Add Docker Host** action.
-> 4. Do not expose any production connection details in this screenshot.
-> 5. Capture the complete empty-state panel and the Add Docker Host control.
-
->
-> **Suggested filename:** `docs/images/user-guide/02-empty-connections.png`
+![Empty Docker connections state](docs/images/user-guide/02-empty-connections.png)
 
 ## 6. Understanding the interface
 
