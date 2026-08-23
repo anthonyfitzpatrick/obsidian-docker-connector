@@ -98,19 +98,7 @@ Testing before saving is strongly recommended. A successful test proves the sele
 ## 8. Connection methods
 
 ### Screenshot 04 — Connection Type selector
-> **Screenshot placeholder 04**
->
-> **Capture:** All desktop connection methods in the selector.
->
-> **How to capture this screenshot:**
-> 1. Open **Add Docker Host**.
-> 2. Open the **Connection Type** selector without selecting a new option yet.
-> 3. On desktop, position the dialog so all five options are simultaneously visible: **Local Docker Socket**, **Docker Context**, **Remote Docker via SSH**, **Remote Docker API (Mutual TLS)**, and **Docker Connector Gateway**. On iPhone/iPad, capture the single Gateway option instead.
-> 4. Ensure no secret-bearing fields are visible with populated values.
-> 5. Capture while the selector menu is open.
-
->
-> **Suggested filename:** `docs/images/user-guide/04-connection-type-selector.png`
+![Connection Type selector](docs/images/user-guide/04-connection-type-selector.png)
 
 ### 8.1 Local Docker Socket
 
