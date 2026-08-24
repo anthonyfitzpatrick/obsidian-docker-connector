@@ -447,20 +447,7 @@ Status is information, not an action. The current states are **Unknown**, **Conn
 Deleting a connection removes only Docker Connector’s saved profile, runtime credentials, cached session data, and associated transport state. It does **not** stop or remove containers; delete images, volumes, or networks; remove Docker Contexts; delete SSH keys or TLS files; change Docker sockets; or change a remote server configuration. The confirmation dialog repeats this boundary before removal.
 
 ### Screenshot 25 — Delete connection confirmation
-> **Screenshot placeholder 25**
->
-> **Capture:** Confirmation scope and destructive action.
->
-> **How to capture this screenshot:**
-> 1. Create or use a disposable Docker Connector profile that can safely be deleted.
-> 2. On **Connections**, select its **Delete** action.
-> 3. Leave the confirmation dialog open without confirming deletion yet.
-> 4. Ensure the text explaining that only the Docker Connector profile is removed—and Docker resources/external credential files are not deleted—is readable.
-> 5. Capture the dialog with both Cancel and destructive confirmation controls visible.
-> 6. After the screenshot, cancel unless you intentionally want to remove that disposable profile.
-
->
-> **Suggested filename:** `docs/images/user-guide/25-delete-connection.png`
+![Delete connection confirmation](docs/images/user-guide/25-delete-connection.png)
 
 ## 11. Switching environments
 
