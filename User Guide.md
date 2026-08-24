@@ -199,17 +199,12 @@ For the recommended unattended setup, select **Generate SSH Key**, leave both pa
 ### Screenshot 11 — Remote Docker via SSH private-key selection
 ![Remote Docker via SSH private-key selection](docs/images/user-guide/11-ssh-private-key-selection.png)
 
-### Screenshot 12 — Generate SSH Key dialog
-> **Screenshot placeholder 12**
->
-> **Capture:** The dedicated Generate SSH Key dialog before generation, with optional passphrase fields and no entered secret.
->
-> **How to capture this screenshot:**
-> 1. Use a disposable local test account and open **Generate SSH Key** from a Private Key SSH form.
-> 2. Leave both passphrase fields blank for the unattended-key example.
-> 3. Do not show a real home-directory path, an entered passphrase, key contents, or another user's files.
->
-> **Suggested filename:** `docs/images/user-guide/12-generate-ssh-key.png`
+### Screenshot 12 — Generate SSH Key completed
+![Generate SSH Key completed](docs/images/user-guide/12-generate-ssh-key.png)
+
+**Generate SSH Key** has completed successfully: the dialog confirms an Ed25519 SSH key is ready, shows a safe public SHA-256 fingerprint, and provides **Close**. For the unattended-key example, leave both passphrase fields blank before generation. Selecting **Close** returns to the SSH host form with the validated key selected, where **Install Public Key** is available.
+
+Never expose private-key contents, public-key contents, entered passphrases, identifying filesystem paths, or other secrets.
 
 ### Screenshot 13 — SSH key generation complete
 > **Screenshot placeholder 13**
