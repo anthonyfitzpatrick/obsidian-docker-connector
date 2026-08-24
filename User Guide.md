@@ -192,17 +192,17 @@ With the option off, an Obsidian restart returns the profile to **Authentication
 
 #### Private-key authentication
 
-With **Private Key** selected, use **Browse…** to choose an existing key. Docker Connector saves only its path, never key contents. It validates the selected private key and derives its public identity; when a sibling `<private-key>.pub` exists, its type and base64 identity must match. A mismatched `.pub` blocks installation, while a missing `.pub` is derived in memory without modifying the private key.
+With **Private Key** selected, use **Browse…** to choose an existing key or select **Generate SSH Key**. For the recommended unattended setup, leave both passphrase fields blank before generation. A nonblank generation passphrase encrypts the key: it remains session-only and must be entered again after restart, so it is not unattended.
 
-For the recommended unattended setup, select **Generate SSH Key**, leave both passphrase fields blank, wait for successful completion, then select **Close**. The host form receives the validated key path and public fingerprint only after Close. Select **Install Public Key**, enter the remote account's current session-only SSH password, complete first-host verification if needed, test the selected private key, save the host, then restart Obsidian to confirm it reconnects online. A nonblank generation passphrase encrypts the key: it remains session-only and must be entered again after restart, so it is not unattended.
+### Screenshot 11 — Generate SSH Key completed
+![Generate SSH Key completed](docs/images/user-guide/11-generate-ssh-key.png)
 
-### Screenshot 11 — Remote Docker via SSH private-key selection
-![Remote Docker via SSH private-key selection](docs/images/user-guide/11-ssh-private-key-selection.png)
+**Generate SSH Key** has completed successfully: the dialog confirms an Ed25519 SSH key is ready, shows a safe public SHA-256 fingerprint, and provides **Close**. Select **Close** to return to the SSH host form.
 
-### Screenshot 12 — Generate SSH Key completed
-![Generate SSH Key completed](docs/images/user-guide/12-generate-ssh-key.png)
+### Screenshot 12 — Remote Docker via SSH private-key selection
+![Remote Docker via SSH private-key selection](docs/images/user-guide/12-ssh-private-key-selection.png)
 
-**Generate SSH Key** has completed successfully: the dialog confirms an Ed25519 SSH key is ready, shows a safe public SHA-256 fingerprint, and provides **Close**. For the unattended-key example, leave both passphrase fields blank before generation. Selecting **Close** returns to the SSH host form with the validated key selected, where **Install Public Key** is available.
+The host form now shows the validated selected key and public fingerprint. Docker Connector saves only the key path, never key contents, and derives its public identity. When a sibling `<private-key>.pub` exists, its type and base64 identity must match; a mismatched `.pub` blocks installation, while a missing `.pub` is derived in memory without modifying the private key. Select **Install Public Key**, enter the remote account's current session-only SSH password, complete first-host verification if needed, test the selected private key, save the host, then restart Obsidian to confirm it reconnects online.
 
 Never expose private-key contents, public-key contents, entered passphrases, identifying filesystem paths, or other secrets.
 
@@ -1060,8 +1060,8 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 08 | `08-verify-ssh-host.png` | SSH | First host-key verification |
 | 09 | `09-ssh-connection-success.png` | SSH | Trusted retry diagnostics |
 | 10 | `10-remember-ssh-password.png` | SSH | Optional local password storage |
-| 11 | `11-ssh-private-key-selection.png` | SSH | Selected key and fingerprint |
-| 12 | `12-generate-ssh-key.png` | SSH | Generation dialog |
+| 11 | `11-generate-ssh-key.png` | SSH | Generation dialog |
+| 12 | `12-ssh-private-key-selection.png` | SSH | Selected key and fingerprint |
 | 13 | `13-ssh-key-generation-complete.png` | SSH | Verified key-pair success |
 | 14 | `14-install-public-key.png` | SSH | Public-key installation |
 | 15 | `15-private-key-test-success.png` | SSH | Private-key test success |
