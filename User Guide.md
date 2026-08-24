@@ -219,16 +219,9 @@ The **Install Public Key** dialog shows the selected key's public SHA-256 finger
 **Current SSH Password** is the remote account's existing password, needed only for this session-only installation and never saved. The screenshot intentionally leaves it empty. The private key, its passphrase, and its contents are never transferred to the remote host. After entering the remote account password, select **Install public key**.
 
 ### Screenshot 15 — Private-key Test Connection success
-> **Screenshot placeholder 15**
->
-> **Capture:** A successful private-key Test Connection after public-key installation.
->
-> **How to capture this screenshot:**
-> 1. Use only a disposable test host and key.
-> 2. Show host-key verification, private-key authentication, Docker `GET /_ping`, and Docker `GET /version` success stages.
-> 3. Ensure no password, passphrase, private key, or identifying endpoint is visible.
->
-> **Suggested filename:** `docs/images/user-guide/15-private-key-test-success.png`
+![Private-key Test Connection success](docs/images/user-guide/15-private-key-test-success.png)
+
+After public-key installation, select **Test Connection** to verify host-key verification, private-key authentication, and Docker `GET /_ping` and `GET /version` all succeed.
 
 ### Screenshot 16 — SSH Host Identity Changed
 > **Screenshot placeholder 16**
