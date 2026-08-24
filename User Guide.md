@@ -212,17 +212,11 @@ Never expose private-key contents, public-key contents, entered passphrases, ide
 The completed dialog confirms the Ed25519 key is ready, shows its public SHA-256 fingerprint, and provides **Close** to return to the SSH host form.
 
 ### Screenshot 14 — Install Public Key
-> **Screenshot placeholder 14**
->
-> **Capture:** The Install Public Key dialog with a matching public fingerprint and empty remote SSH password field.
->
-> **How to capture this screenshot:**
-> 1. Use a disposable SSH account and a validated test key.
-> 2. Open **Install Public Key** after generation or selection.
-> 3. Leave the remote password field empty and do not display any secret.
-> 4. Capture the public fingerprint and explanation that only the public key is installed.
->
-> **Suggested filename:** `docs/images/user-guide/14-install-public-key.png`
+![Install Public Key](docs/images/user-guide/14-install-public-key.png)
+
+The **Install Public Key** dialog shows the selected key's public SHA-256 fingerprint. Docker Connector appends only that public key to the remote account's `~/.ssh/authorized_keys` when it is not already present; existing entries are preserved.
+
+**Current SSH Password** is the remote account's existing password, needed only for this session-only installation and never saved. The screenshot intentionally leaves it empty. The private key, its passphrase, and its contents are never transferred to the remote host. After entering the remote account password, select **Install public key**.
 
 ### Screenshot 15 — Private-key Test Connection success
 > **Screenshot placeholder 15**
