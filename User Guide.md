@@ -207,16 +207,9 @@ The host form now shows the validated selected key and public fingerprint. Docke
 Never expose private-key contents, public-key contents, entered passphrases, identifying filesystem paths, or other secrets.
 
 ### Screenshot 13 — SSH key generation complete
-> **Screenshot placeholder 13**
->
-> **Capture:** The completed generation dialog showing success, the public SHA-256 fingerprint, and Close.
->
-> **How to capture this screenshot:**
-> 1. Generate a disposable Ed25519 key with blank passphrase fields.
-> 2. Wait for Preparing key generation, Generating Ed25519 key, Validating private key, Resolving matching public key, and Verifying key pair to complete.
-> 3. Capture only the success state and public fingerprint; do not show private material or identifying paths.
->
-> **Suggested filename:** `docs/images/user-guide/13-ssh-key-generation-complete.png`
+![SSH key generation complete](docs/images/user-guide/13-ssh-key-generation-complete.png)
+
+The completed dialog confirms the Ed25519 key is ready, shows its public SHA-256 fingerprint, and provides **Close** to return to the SSH host form.
 
 ### Screenshot 14 — Install Public Key
 > **Screenshot placeholder 14**
