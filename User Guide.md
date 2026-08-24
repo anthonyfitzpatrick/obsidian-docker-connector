@@ -197,19 +197,7 @@ With **Private Key** selected, use **Browse…** to choose an existing key. Dock
 For the recommended unattended setup, select **Generate SSH Key**, leave both passphrase fields blank, wait for successful completion, then select **Close**. The host form receives the validated key path and public fingerprint only after Close. Select **Install Public Key**, enter the remote account's current session-only SSH password, complete first-host verification if needed, test the selected private key, save the host, then restart Obsidian to confirm it reconnects online. A nonblank generation passphrase encrypts the key: it remains session-only and must be entered again after restart, so it is not unattended.
 
 ### Screenshot 11 — Remote Docker via SSH private-key selection
-> **Screenshot placeholder 11**
->
-> **Capture:** Private Key controls with a validated selected key, safe public SHA-256 fingerprint, and the available Install Public Key action.
->
-> **How to capture this screenshot:**
-> 1. Open **Add Docker Host** and select **Remote Docker via SSH**.
-> 2. Set **SSH Authentication** to **Private Key**.
-> 3. Choose a disposable/test key path; never show key contents, a passphrase, or an identifying local path.
-> 4. If a path is shown, use a test path or redact identifying path components before publication.
-> 5. Leave **Private-Key Passphrase** blank and do not run installation against a production host.
-> 6. Capture the Private Key File, passphrase, fingerprint, and Install Public Key controls without exposing key contents.
->
-> **Suggested filename:** `docs/images/user-guide/11-ssh-private-key-selection.png`
+![Remote Docker via SSH private-key selection](docs/images/user-guide/11-ssh-private-key-selection.png)
 
 ### Screenshot 12 — Generate SSH Key dialog
 > **Screenshot placeholder 12**
