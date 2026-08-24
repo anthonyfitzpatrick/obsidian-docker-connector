@@ -456,20 +456,7 @@ Use **Current Environment** to choose which saved host supplies dashboard data. 
 If the selected profile is deleted, Docker Connector chooses a safe remaining profile where possible, preferring an Online profile. If no profiles remain, the dashboard returns to its no-host state.
 
 ### Screenshot 26 — Current Environment selector
-> **Screenshot placeholder 26**
->
-> **Capture:** Multiple profiles and the active environment.
->
-> **How to capture this screenshot:**
-> 1. Configure at least two safe profiles.
-> 2. Open any resource view such as **Overview**.
-> 3. Open the **Current Environment** selector.
-> 4. Ensure multiple profile names and the currently selected environment are visible.
-> 5. Avoid using sensitive production profile names if the guide will be public; create harmless test names if necessary.
-> 6. Capture the selector while it is open.
-
->
-> **Suggested filename:** `docs/images/user-guide/26-current-environment.png`
+![Current Environment selector](docs/images/user-guide/26-current-environment.png)
 
 ## 12. Overview
 
