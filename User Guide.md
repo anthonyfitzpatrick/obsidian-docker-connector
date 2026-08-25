@@ -274,21 +274,12 @@ The summary cards count saved profiles, currently connected profiles, and profil
 
 Status is information, not an action. The current states are **Unknown**, **Connecting**, **Online**, **Offline**, **Degraded**, and **Authentication Required**. Unknown means the profile has not yet been evaluated or is between registration and its first refresh; it should not remain permanent after a completed connection attempt. Authentication Required normally means a required runtime-only secret must be supplied again.
 
-### Screenshot 19 — Authentication Required connection
-> **Screenshot placeholder 19**
->
-> **Capture:** A profile requiring a session-only credential and Reconnect.
->
-> **How to capture this screenshot:**
-> 1. Use an SSH profile whose password or encrypted-key passphrase is intentionally session-only.
-> 2. Restart/reload Obsidian so the runtime credential is no longer present.
-> 3. Open **Connections** and wait for the profile to settle into **Authentication Required**.
-> 4. Ensure the **Reconnect** action is visible on the same profile card.
-> 5. Do not enter the credential before taking the screenshot.
-> 6. Capture the profile name, canonical connection method, Authentication Required badge, and Reconnect action.
+### Screenshot 19 — Authentication Required / Reconnect
+![Authentication Required profile with Reconnect action](docs/images/user-guide/19-authentication-required-reconnect.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/19-authentication-required.png`
+**Authentication Required** means Docker Connector needs a runtime-only credential before the profile can reconnect. This screenshot shows an SSH password profile. The same state can occur for an SSH profile using an encrypted private key when its session-only key passphrase is no longer available after restart.
+
+**Reconnect** opens the appropriate credential workflow. Supply the required runtime credential through **Reconnect**, rather than displaying it on the passive connection card. Until authentication succeeds, Docker details may be unavailable, inventory counts may be empty, and **Container management** is unavailable because the connection is not Online.
 
 ### Delete connection
 
