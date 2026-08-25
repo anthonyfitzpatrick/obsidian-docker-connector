@@ -274,6 +274,8 @@ The summary cards count saved profiles, currently connected profiles, and profil
 
 Status is information, not an action. The current states are **Unknown**, **Connecting**, **Online**, **Offline**, **Degraded**, and **Authentication Required**. Unknown means the profile has not yet been evaluated or is between registration and its first refresh; it should not remain permanent after a completed connection attempt. Authentication Required normally means a required runtime-only secret must be supplied again.
 
+**Open dashboard** selects that Docker environment and opens its operational dashboard. Its **Overview** tab is the host-level operational summary for the selected environment. Where available, it presents connection health, Docker version and host information, resource counts, refresh information, and attention items that deserve review. Attention items can identify a host connection problem, an unhealthy container, a restarting or dead container, a non-zero container exit, or an available public release where that information is supported by the view. Overview is not a metrics-history system: it shows the latest safe dashboard snapshot for the selected environment.
+
 ### Screenshot 19 — Authentication Required / Reconnect
 ![Authentication Required profile with Reconnect action](docs/images/user-guide/19-authentication-required-reconnect.png)
 
@@ -297,33 +299,12 @@ If the selected profile is deleted, Docker Connector chooses a safe remaining pr
 ### Screenshot 21 — Current Environment selector
 ![Current Environment selector](docs/images/user-guide/21-current-environment.png)
 
-## 12. Overview
-
-Overview is the host-level operational summary. It presents connection health, Docker version and host information when available, resource counts, refresh information, and attention items that deserve review. Attention items can include a host connection problem, an unhealthy container, a restarting or dead container, a non-zero exit, or an available public release where supported by the view.
-
-Overview is not a metrics-history system. It shows the latest safe dashboard snapshot for the selected environment.
-
-### Screenshot 22 — Populated Overview
-> **Screenshot placeholder 22**
->
-> **Capture:** An online host’s Overview and attention items where present.
->
-> **How to capture this screenshot:**
-> 1. Select a safe **Online** environment with a populated Docker inventory.
-> 2. Open **Overview** and run a manual refresh if needed.
-> 3. Wait until Docker version/host information, resource summary cards, refresh metadata, and any attention items are stable.
-> 4. If possible use a test host with at least one meaningful but non-sensitive attention item; otherwise a clean populated Overview is acceptable.
-> 5. Capture the full Overview content area without unrelated Obsidian panels.
-
->
-> **Suggested filename:** `docs/images/user-guide/22-populated-overview.png`
-
-## 13. Applications
+## 12. Applications
 
 Applications groups Docker Compose-managed containers into projects. Docker Connector uses Docker’s Compose metadata—especially `com.docker.compose.project` and `com.docker.compose.service`—rather than guessing project membership from names, paths, networks, or image references.
 
-### Screenshot 23 — Applications list
-> **Screenshot placeholder 23**
+### Screenshot 22 — Applications list
+> **Screenshot placeholder 22**
 >
 > **Capture:** Compose project cards, search, filters, and sorting.
 >
@@ -335,12 +316,12 @@ Applications groups Docker Compose-managed containers into projects. Docker Conn
 > 5. Capture the list with at least two applications visible if possible.
 
 >
-> **Suggested filename:** `docs/images/user-guide/23-applications-list.png`
+> **Suggested filename:** `docs/images/user-guide/22-applications-list.png`
 
 Application cards show a project’s services, container counts, running and stopped counts, available-update count where known, and associated networks, volumes, and images. The list supports searching, status and update filtering, sorting, and an inspector. The inspector exposes project details, services, containers, and images; selecting a listed container opens that container in **Containers**.
 
-### Screenshot 24 — Application detail inspector
-> **Screenshot placeholder 24**
+### Screenshot 23 — Application detail inspector
+> **Screenshot placeholder 23**
 >
 > **Capture:** Services, containers, images, networks, and volumes as available.
 >
@@ -352,18 +333,18 @@ Application cards show a project’s services, container counts, running and sto
 > 5. Capture the detail panel with enough list context to identify the selected application.
 
 >
-> **Suggested filename:** `docs/images/user-guide/24-application-inspector.png`
+> **Suggested filename:** `docs/images/user-guide/23-application-inspector.png`
 
 For example, a project named `juliarosedelane` can contain services `ghost` and `ghost-db`, containers named `juliarosedelane-ghost` and `juliarosedelane-ghost-db`, and images such as `ghost:5-alpine` and `mysql:8.4`. These are different concepts, and Docker Connector keeps them separate.
 
 Applications is read-only at the project level. Docker Connector does not run `docker compose up` or `docker compose down`, edit Compose files, or update a whole Compose application. A Compose-managed container can report that a newer image is available but remains blocked from the standalone Update workflow.
 
-## 14. Containers
+## 13. Containers
 
 The **Containers** tab is the main container inventory. It has summary cards for **Containers**, **Running**, **Stopped**, and **Updates Available**. Selecting the Updates Available card filters the list; clear the active filter to return to the complete inventory.
 
-### Screenshot 25 — Updates Available filter
-> **Screenshot placeholder 25**
+### Screenshot 24 — Updates Available filter
+> **Screenshot placeholder 24**
 >
 > **Capture:** Updates Available card or active filter state.
 >
@@ -376,10 +357,10 @@ The **Containers** tab is the main container inventory. It has summary cards for
 > 6. Clear the filter after capturing.
 
 >
-> **Suggested filename:** `docs/images/user-guide/25-updates-filter.png`
+> **Suggested filename:** `docs/images/user-guide/24-updates-filter.png`
 
-### Screenshot 26 — Containers view
-> **Screenshot placeholder 26**
+### Screenshot 25 — Containers view
+> **Screenshot placeholder 25**
 >
 > **Capture:** Summary cards and populated container rows.
 >
@@ -392,12 +373,12 @@ The **Containers** tab is the main container inventory. It has summary cards for
 > 6. Capture the main Containers list at a normal readable density.
 
 >
-> **Suggested filename:** `docs/images/user-guide/26-containers-view.png`
+> **Suggested filename:** `docs/images/user-guide/25-containers-view.png`
 
 Use the toolbar to search by container information and filter by State, Health, and Network. Sort and density controls make it practical to work with larger inventories. Each row identifies the container, image, short ID, state, health, and relevant update state. Copy controls copy a full ID without changing the Docker host.
 
-### Screenshot 27 — Container filters and search
-> **Screenshot placeholder 27**
+### Screenshot 26 — Container filters and search
+> **Screenshot placeholder 26**
 >
 > **Capture:** Search, State, Health, Network, Updates, sort, and density controls.
 >
@@ -409,20 +390,20 @@ Use the toolbar to search by container information and filter by State, Health, 
 > 5. Capture the toolbar and enough container rows beneath it to show the controls affect an actual inventory.
 
 >
-> **Suggested filename:** `docs/images/user-guide/27-container-filters.png`
+> **Suggested filename:** `docs/images/user-guide/26-container-filters.png`
 
 ### Container health
 
 Docker state and Docker health are distinct. A container can be Running, Stopped/Exited, Restarting, or Dead. Health can be Healthy, Unhealthy, or **No health check**. No health check means the image or container configuration does not define Docker health checks; it does not mean Docker considers the container unhealthy.
 
-## 15. Container detail inspector
+## 14. Container detail inspector
 
 Select a container to open its read-only inspector. The inspector provides **Actions**, **Overview**, **State**, **Configuration**, **Networking**, **Storage**, **Metadata**, and safe diagnostics where those details are available. Depending on the container, this can include image, creation time, state, health, restart count, port bindings, networks, mounts, labels that are safe to show, and storage attachments.
 
 The inspector lets you refresh details and copy the full container ID. It does not provide an interactive shell, file browser, log terminal, or arbitrary Docker API console.
 
-### Screenshot 28 — Container detail inspector
-> **Screenshot placeholder 28**
+### Screenshot 27 — Container detail inspector
+> **Screenshot placeholder 27**
 >
 > **Capture:** Read-only sections and the Image update area.
 >
@@ -434,16 +415,16 @@ The inspector lets you refresh details and copy the full container ID. It does n
 > 5. Capture the inspector and selected container row; do not expand anything that would expose secrets.
 
 >
-> **Suggested filename:** `docs/images/user-guide/28-container-inspector.png`
+> **Suggested filename:** `docs/images/user-guide/27-container-inspector.png`
 
-## 16. Images
+## 15. Images
 
 The **Images** tab is a read-only image inventory. Summary cards cover Images, In use, Dangling, and No visible references. You can search, filter by usage/tag state, architecture, and operating system, then sort by repository, tag, creation date, size, or usage count.
 
 Select an image for an inspector with overview data, repository tags and digests, safe labels, and visible container references. Docker Connector does not delete images or expose arbitrary pull controls from this view.
 
-### Screenshot 29 — Images view
-> **Screenshot placeholder 29**
+### Screenshot 28 — Images view
+> **Screenshot placeholder 28**
 >
 > **Capture:** Image inventory and detail inspector.
 >
@@ -456,16 +437,16 @@ Select an image for an inspector with overview data, repository tags and digests
 > 6. Capture the Images view with both list and inspector if the layout allows.
 
 >
-> **Suggested filename:** `docs/images/user-guide/29-images-view.png`
+> **Suggested filename:** `docs/images/user-guide/28-images-view.png`
 
-## 17. Volumes
+## 16. Volumes
 
 The **Volumes** tab lists Docker named volumes and their driver, scope, mountpoint summary, use state, and visible container count. It has summary cards for Volumes, In use, No visible references, and Drivers, plus search, driver, scope, and sort controls.
 
 The volume inspector shows overview information, options, safe labels, and containers using the volume where Docker makes that relationship visible. Docker Connector does not delete volumes.
 
-### Screenshot 30 — Volumes view
-> **Screenshot placeholder 30**
+### Screenshot 29 — Volumes view
+> **Screenshot placeholder 29**
 >
 > **Capture:** Named-volume inventory and inspector.
 >
@@ -478,16 +459,16 @@ The volume inspector shows overview information, options, safe labels, and conta
 > 6. Capture the populated Volumes view and inspector.
 
 >
-> **Suggested filename:** `docs/images/user-guide/30-volumes-view.png`
+> **Suggested filename:** `docs/images/user-guide/29-volumes-view.png`
 
-## 18. Networks
+## 17. Networks
 
 The **Networks** tab lists Docker network definitions. It distinguishes built-in and user-defined networks, shows unused networks, and supports search plus filters for type, driver, scope, internal/external, attachable, and IPv6-enabled networks.
 
 Selecting a network shows driver, scope, internal and attachable settings, IPv6 status, gateways, and attached containers. When a subnet is available it is shown in the list. Docker Connector does not create, change, or delete networks.
 
-### Screenshot 31 — Networks view
-> **Screenshot placeholder 31**
+### Screenshot 30 — Networks view
+> **Screenshot placeholder 30**
 >
 > **Capture:** Network inventory and attached-container details.
 >
@@ -500,9 +481,9 @@ Selecting a network shows driver, scope, internal and attachable settings, IPv6 
 > 6. Capture the populated Networks view and inspector.
 
 >
-> **Suggested filename:** `docs/images/user-guide/31-networks-view.png`
+> **Suggested filename:** `docs/images/user-guide/30-networks-view.png`
 
-## 19. Image update checking
+## 18. Image update checking
 
 Image update checking is advisory. Docker Connector compares the image used by an eligible container with the image currently resolved for its configured tagged image reference. It can show **Update status not checked**, **Checking for updates…**, **Update available**, **Image is current**, or a safe unavailable/error reason.
 
@@ -510,8 +491,8 @@ Automatic checks run on a 24-hour stale interval for eligible standalone contain
 
 Choose **Check now** in the container inspector to perform a one-off check. The Docker daemon may pull or resolve image data to check the image ID, but Check now does not change the running container’s state.
 
-### Screenshot 32 — Image is current
-> **Screenshot placeholder 32**
+### Screenshot 31 — Image is current
+> **Screenshot placeholder 31**
 >
 > **Capture:** Image update area showing Image is current and Check now.
 >
@@ -524,13 +505,13 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 > 6. Capture the Image update area after the result stabilizes.
 
 >
-> **Suggested filename:** `docs/images/user-guide/32-image-current.png`
+> **Suggested filename:** `docs/images/user-guide/31-image-current.png`
 
 > [!note] Availability is not eligibility
 > **Update available** means a newer image is available. **Update eligibility** means Docker Connector can safely use its standalone update transaction. Compose-managed containers can have an available image but remain ineligible for the standalone Update action.
 
-### Screenshot 33 — Update available
-> **Screenshot placeholder 33**
+### Screenshot 32 — Update available
+> **Screenshot placeholder 32**
 >
 > **Capture:** Confirmed Update available state for an eligible standalone container.
 >
@@ -542,9 +523,9 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 > 5. Capture before beginning the update transaction.
 
 >
-> **Suggested filename:** `docs/images/user-guide/33-update-available.png`
+> **Suggested filename:** `docs/images/user-guide/32-update-available.png`
 
-## 20. Container management
+## 19. Container management
 
 **Container management** is disabled by default, per connection, and session-only. Select an individual **Online** Docker connection and use either its header switch or its Connections-card switch to enable it only for that profile when you trust it. The two switches stay synchronized; more than one profile can be authorized independently. Enabling asks for confirmation because lifecycle and update actions change the Docker host.
 
@@ -552,8 +533,8 @@ Authorization is valid only while the profile remains continuously verified as *
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
-### Screenshot 34 — Container management disabled
-> **Screenshot placeholder 34**
+### Screenshot 33 — Container management disabled
+> **Screenshot placeholder 33**
 >
 > **Capture:** Read-only Actions panel and enable guidance.
 >
@@ -566,10 +547,10 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. Do not enable management until after this screenshot is complete.
 
 >
-> **Suggested filename:** `docs/images/user-guide/34-management-disabled.png`
+> **Suggested filename:** `docs/images/user-guide/33-management-disabled.png`
 
-### Screenshot 35 — Per-profile Container management enabled
-> **Screenshot placeholder 35**
+### Screenshot 34 — Per-profile Container management enabled
+> **Screenshot placeholder 34**
 >
 > **Capture:** An individual Online host with management enabled in the compact header and on its matching Connections card.
 >
@@ -582,7 +563,7 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. If desired, disable management again after all management/update screenshots are finished.
 
 >
-> **Suggested filename:** `docs/images/user-guide/35-management-enabled.png`
+> **Suggested filename:** `docs/images/user-guide/34-management-enabled.png`
 
 ### Start, Stop, Shut down, and Restart
 
@@ -591,8 +572,8 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 - **Stop** uses the normal stop action with a 10-second wait.
 - **Restart** uses Docker’s restart action with a 10-second wait.
 
-### Screenshot 36 — Stopped container Start control
-> **Screenshot placeholder 36**
+### Screenshot 35 — Stopped container Start control
+> **Screenshot placeholder 35**
 >
 > **Capture:** Start action for a stopped standalone container.
 >
@@ -605,12 +586,12 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. After capturing, return the test container to its desired normal state.
 
 >
-> **Suggested filename:** `docs/images/user-guide/36-stopped-start.png`
+> **Suggested filename:** `docs/images/user-guide/35-stopped-start.png`
 
 Docker Connector asks for confirmation before lifecycle actions and coordinates a refresh after an accepted action. These controls never appear as a bulk-action interface.
 
-### Screenshot 37 — Running container lifecycle controls
-> **Screenshot placeholder 37**
+### Screenshot 36 — Running container lifecycle controls
+> **Screenshot placeholder 36**
 >
 > **Capture:** Shut down, Stop, Restart, and Update eligibility where applicable.
 >
@@ -623,18 +604,18 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 > 6. Capture the Actions section and container identity clearly enough to show it is a test target.
 
 >
-> **Suggested filename:** `docs/images/user-guide/37-running-actions.png`
+> **Suggested filename:** `docs/images/user-guide/36-running-actions.png`
 
 ### Update
 
 **Update** appears only when Container management is enabled, a newer image has been confirmed, and the container is eligible for the standalone update workflow. It is hidden when the current image is already current. Compose-managed containers and containers with unsupported configuration receive a safe reason instead of an unsafe generic update button.
 
-## 21. Safe container update workflow
+## 20. Safe container update workflow
 
 An eligible Update begins with a confirmation preview. It identifies the container and image, summarizes supported configuration preservation, shows warnings, and offers Cancel or a direct proceed action. There is no acknowledgement checkbox; the writable-layer warning remains prominent.
 
-### Screenshot 38 — Update preview
-> **Screenshot placeholder 38**
+### Screenshot 37 — Update preview
+> **Screenshot placeholder 37**
 >
 > **Capture:** Preview, configuration summary, and writable-layer warning.
 >
@@ -647,12 +628,12 @@ An eligible Update begins with a confirmation preview. It identifies the contain
 > 6. Capture the complete preview dialog before selecting Proceed.
 
 >
-> **Suggested filename:** `docs/images/user-guide/38-update-preview.png`
+> **Suggested filename:** `docs/images/user-guide/37-update-preview.png`
 
 The transaction is designed for standalone containers. It inspects the original container, validates eligibility, pulls the candidate image, compares image IDs, stops the original if needed, preserves it as a backup, creates and configures a replacement, restores supported networking, starts and verifies the replacement, then cleans up the backup where safe. The exact progress view reports the stage actually in progress.
 
-### Screenshot 39 — Update progress
-> **Screenshot placeholder 39**
+### Screenshot 38 — Update progress
+> **Screenshot placeholder 38**
 >
 > **Capture:** Real in-progress transaction stages.
 >
@@ -665,12 +646,12 @@ The transaction is designed for standalone containers. It inspects the original 
 > 6. If the operation completes too quickly to capture reliably, repeat only on the disposable test target when safe.
 
 >
-> **Suggested filename:** `docs/images/user-guide/39-update-progress.png`
+> **Suggested filename:** `docs/images/user-guide/38-update-progress.png`
 
 Docker Connector attempts to preserve the supported Docker configuration needed to recreate an eligible standalone container, including its relevant mounts, ports, restart configuration, and network attachments. No update workflow can make writable-layer-only data persistent.
 
-### Screenshot 40 — Successful update result
-> **Screenshot placeholder 40**
+### Screenshot 39 — Successful update result
+> **Screenshot placeholder 39**
 >
 > **Capture:** Completed replacement and image identifiers.
 >
@@ -683,16 +664,16 @@ Docker Connector attempts to preserve the supported Docker configuration needed 
 > 6. Capture the final success/result panel.
 
 >
-> **Suggested filename:** `docs/images/user-guide/40-update-success.png`
+> **Suggested filename:** `docs/images/user-guide/39-update-success.png`
 
-## 22. Rollback and recovery
+## 21. Rollback and recovery
 
 If a replacement cannot be created, started, or verified after mutation starts, Docker Connector attempts to restore the original container from its preserved backup. Results distinguish successful updates, updates where a backup is retained, already-current images, failure before mutation, failure with rollback, incomplete rollback, and cancellation.
 
 Rollback is a recovery attempt, not an absolute guarantee against every host, storage, or Docker failure. If the result says a backup was retained, rollback is incomplete, or manual recovery is required, pause and inspect the reported container names and Docker state before taking further action. Do not repeatedly retry an unclear update result.
 
-### Screenshot 41 — Rollback or recovery result
-> **Screenshot placeholder 41**
+### Screenshot 40 — Rollback or recovery result
+> **Screenshot placeholder 40**
 >
 > **Capture:** Safe rollback, backup-retained, or manual-recovery guidance.
 >
@@ -705,16 +686,16 @@ Rollback is a recovery attempt, not an absolute guarantee against every host, st
 > 6. If no safe real recovery result is available, leave this placeholder uncaptured rather than manufacturing a misleading screenshot.
 
 >
-> **Suggested filename:** `docs/images/user-guide/41-update-recovery.png`
+> **Suggested filename:** `docs/images/user-guide/40-update-recovery.png`
 
 > [!warning] Writable-layer data
 > Data kept only in a container’s writable layer is not equivalent to a named volume or bind mount. Recreating a container can lose writable-layer-only changes. Persist important data with Docker volumes or bind mounts before updating.
 
-## 23. Automatic refresh
+## 22. Automatic refresh
 
 Automatic refresh is enabled by default. The default interval is five minutes and can be changed to any whole number of minutes of at least one. Manual refresh performs one immediate snapshot refresh. Update checks use their separate 24-hour eligibility schedule and are not a substitute for snapshot refresh.
 
-## 24. Settings
+## 23. Settings
 
 Docker Connector Settings provide:
 
@@ -724,8 +705,8 @@ Docker Connector Settings provide:
 
 Container management is intentionally not a Setting. It is controlled only by the synchronized per-profile header/card switches and never persists across a restart or reload.
 
-### Screenshot 42 — Settings page
-> **Screenshot placeholder 42**
+### Screenshot 41 — Settings page
+> **Screenshot placeholder 41**
 >
 > **Capture:** Automatic refresh, interval, and theme integration.
 >
@@ -737,9 +718,9 @@ Container management is intentionally not a Setting. It is controlled only by th
 > 5. Capture the Docker Connector settings page at a width where labels, descriptions, and controls are readable.
 
 >
-> **Suggested filename:** `docs/images/user-guide/42-settings.png`
+> **Suggested filename:** `docs/images/user-guide/41-settings.png`
 
-## 25. Security model and saved information
+## 24. Security model and saved information
 
 Docker Connector saves connection metadata needed to reconnect, but keeps secrets out of saved settings where possible.
 
@@ -923,28 +904,27 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 15 | `15-private-key-test-success.png` | SSH | Private-key test success |
 | 16 | `16-mutual-tls-form.png` | Mutual TLS | Form |
 | 17 | `17-local-test-success.png` | Testing | Local test success |
-| 18 | `18-connections-management.png` | Connections | Profiles and actions |
-| 19 | `19-authentication-required.png` | Connections | Reconnect |
+| 18 | `18-connections-overview.png` | Connections | Profiles and actions |
+| 19 | `19-authentication-required-reconnect.png` | Connections | Reconnect |
 | 20 | `20-delete-connection.png` | Connections | Confirmation |
 | 21 | `21-current-environment.png` | Interface | Selector |
-| 22 | `22-populated-overview.png` | Overview | Host summary |
-| 23 | `23-applications-list.png` | Applications | List |
-| 24 | `24-application-inspector.png` | Applications | Detail |
-| 25 | `25-updates-filter.png` | Containers | Filter |
-| 26 | `26-containers-view.png` | Containers | List |
-| 27 | `27-container-filters.png` | Containers | Controls |
-| 28 | `28-container-inspector.png` | Container detail | Detail |
-| 29 | `29-images-view.png` | Images | Inventory |
-| 30 | `30-volumes-view.png` | Volumes | Inventory |
-| 31 | `31-networks-view.png` | Networks | Inventory |
-| 32 | `32-image-current.png` | Image updates | Current |
-| 33 | `33-update-available.png` | Image updates | Available |
-| 34 | `34-management-disabled.png` | Container management | Read-only |
-| 35 | `35-management-enabled.png` | Container management | Per-profile enabled |
-| 36 | `36-stopped-start.png` | Container management | Start |
-| 37 | `37-running-actions.png` | Container management | Running actions |
-| 38 | `38-update-preview.png` | Update | Preview |
-| 39 | `39-update-progress.png` | Update | Progress |
-| 40 | `40-update-success.png` | Update | Result |
-| 41 | `41-update-recovery.png` | Recovery | Result |
-| 42 | `42-settings.png` | Settings | Full page |
+| 22 | `22-applications-list.png` | Applications | List |
+| 23 | `23-application-inspector.png` | Applications | Detail |
+| 24 | `24-updates-filter.png` | Containers | Filter |
+| 25 | `25-containers-view.png` | Containers | List |
+| 26 | `26-container-filters.png` | Containers | Controls |
+| 27 | `27-container-inspector.png` | Container detail | Detail |
+| 28 | `28-images-view.png` | Images | Inventory |
+| 29 | `29-volumes-view.png` | Volumes | Inventory |
+| 30 | `30-networks-view.png` | Networks | Inventory |
+| 31 | `31-image-current.png` | Image updates | Current |
+| 32 | `32-update-available.png` | Image updates | Available |
+| 33 | `33-management-disabled.png` | Container management | Read-only |
+| 34 | `34-management-enabled.png` | Container management | Per-profile enabled |
+| 35 | `35-stopped-start.png` | Container management | Start |
+| 36 | `36-running-actions.png` | Container management | Running actions |
+| 37 | `37-update-preview.png` | Update | Preview |
+| 38 | `38-update-progress.png` | Update | Progress |
+| 39 | `39-update-success.png` | Update | Result |
+| 40 | `40-update-recovery.png` | Recovery | Result |
+| 41 | `41-settings.png` | Settings | Full page |
