@@ -304,19 +304,7 @@ If the selected profile is deleted, Docker Connector chooses a safe remaining pr
 Applications groups Docker Compose-managed containers into projects. Docker Connector uses Docker’s Compose metadata—especially `com.docker.compose.project` and `com.docker.compose.service`—rather than guessing project membership from names, paths, networks, or image references.
 
 ### Screenshot 22 — Applications list
-> **Screenshot placeholder 22**
->
-> **Capture:** Compose project cards, search, filters, and sorting.
->
-> **How to capture this screenshot:**
-> 1. Select the test environment that contains several Docker Compose projects.
-> 2. Open **Applications** and wait for the snapshot to load.
-> 3. Ensure project cards/rows, summary cards, search, status filter, update filter, and sort controls are visible.
-> 4. Prefer the test applications such as Ghost/Umami rather than production-only projects if publication privacy matters.
-> 5. Capture the list with at least two applications visible if possible.
-
->
-> **Suggested filename:** `docs/images/user-guide/22-applications-list.png`
+![Applications list](docs/images/user-guide/22-applications-list.png)
 
 Application cards show a project’s services, container counts, running and stopped counts, available-update count where known, and associated networks, volumes, and images. The list supports searching, status and update filtering, sorting, and an inspector. The inspector exposes project details, services, containers, and images; selecting a listed container opens that container in **Containers**.
 
