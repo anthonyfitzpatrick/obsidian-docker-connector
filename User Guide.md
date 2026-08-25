@@ -258,21 +258,8 @@ A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. 
 
 For mutual TLS, a successful test loads the TLS files, confirms the certificate/key pair, opens the TLS connection, verifies the server certificate and Server Name, then completes Docker `GET /_ping` and `GET /version`. If the Server Name is wrong, correct it before saving; the Docker API checks do not run after an identity failure.
 
-### Screenshot 17 — Successful Local Docker test
-> **Screenshot placeholder 17**
->
-> **Capture:** Successful local Test Connection diagnostics.
->
-> **How to capture this screenshot:**
-> 1. With the local Docker Engine running, open a Local Docker Socket Add/Edit dialog.
-> 2. Select **Test Connection**.
-> 3. Wait until the diagnostics reach a successful terminal result.
-> 4. Ensure successful endpoint validation, Docker `/_ping`, Docker `/version`, and the final successful result are visible as space permits.
-> 5. Do not include unrelated terminal windows or Docker credentials.
-> 6. Capture the diagnostics panel only after all relevant stages have completed.
-
->
-> **Suggested filename:** `docs/images/user-guide/17-local-test-success.png`
+### Screenshot 17 — Successful local Test Connection diagnostics
+![Successful local Docker Test Connection diagnostics](docs/images/user-guide/17-local-test-success.png)
 
 ## 10. Managing saved connections
 
