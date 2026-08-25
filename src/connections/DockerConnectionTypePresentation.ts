@@ -46,15 +46,6 @@ const PRESENTATION: Record<DockerConnectionType, DockerConnectionTypePresentatio
     authentication: "Client certificate",
     apiExposure: "Required",
     recommendedFor: "Advanced or centrally managed Docker environments"
-  },
-  gateway: {
-    displayName: "Docker Connector Gateway",
-    description: "Connect securely to a Docker Connector Gateway over HTTPS.",
-    helper: "Recommended for iPhone, iPad and other environments where direct Docker transports are unavailable.",
-    badge: "Mobile ready",
-    authentication: "Session-only bearer token",
-    apiExposure: "Approved read-only gateway API only",
-    recommendedFor: "Mobile, tablet and private-network access"
   }
 };
 

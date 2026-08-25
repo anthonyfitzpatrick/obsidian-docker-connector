@@ -4,11 +4,9 @@ title: Docker Connector User Guide
 
 # Docker Connector User Guide
 
-## Mobile and tablet access
+## Desktop access
 
-Docker Connector supports desktop Obsidian plus iPhone and iPad. Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS) use desktop-only runtime capabilities such as local sockets, the Docker CLI, SSH, or certificate files. They remain visible in a synced vault but are clearly unavailable on mobile.
-
-For iPhone and iPad, add a **Docker Connector Gateway** profile. The Gateway is a separate, authenticated HTTPS service that is deployed next to Docker and exposes only Docker Connector's approved read operations. Enter its high-entropy access token only for the current Obsidian session; it is not saved in the profile. Use a trusted LAN or VPN and HTTPS. Never expose Docker's unauthenticated TCP API or disable certificate validation. The `gateway/` folder contains a constrained container example and deployment notes; mounting `docker.sock` remains highly privileged.
+Docker Connector supports desktop Obsidian on macOS, Windows, and Linux. Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS) use desktop runtime capabilities such as local sockets, the Docker CLI, SSH, and certificate files.
 
 Docker Connector is an Obsidian desktop plugin for monitoring Docker environments and, when you explicitly enable it, carrying out a small set of container-management actions. It keeps local and remote Docker environments in one Obsidian workspace without trying to replace Docker Desktop, the Docker CLI, or a full deployment platform.
 
@@ -21,7 +19,7 @@ Docker Connector is read-only by default. You can inspect hosts, Docker Compose 
 
 Docker Connector supports multiple saved Docker environments. Each saved connection has its own status, inventory, cached dashboard data, and runtime credentials. Select one environment as the **Current Environment** to view its Overview, Applications, Containers, Images, Volumes, and Networks.
 
-The current release supports five connection methods. Desktop methods use the local desktop runtime; Gateway is the mobile-safe HTTPS option:
+The current release supports four desktop connection methods:
 
 | Method | Best for | Authentication | Direct Docker API exposure |
 | --- | --- | --- | --- |
@@ -29,7 +27,6 @@ The current release supports five connection methods. Desktop methods use the lo
 | Docker Context | An existing Docker CLI configuration | Defined by the selected Context | Depends on the Context |
 | Remote Docker via SSH | Most remote Docker hosts | Password or private key | No |
 | Remote Docker API (Mutual TLS) | A deliberately secured direct Docker Engine API | CA certificate, client certificate, and client private key | Yes |
-| Docker Connector Gateway | iPhone/iPad access to a trusted Docker host | Session-only Gateway token over HTTPS | No raw Docker API exposure |
 
 Plain unauthenticated Docker TCP is not supported.
 
@@ -47,7 +44,7 @@ Docker Connector is designed to make its boundaries visible:
 
 ## 3. Requirements
 
-Docker Connector supports desktop Obsidian on macOS, Windows, and Linux, plus responsive iPhone/iPad layouts. Local Docker Socket, Docker Context, SSH, and mutual TLS require desktop capabilities. On mobile, use an authenticated HTTPS **Docker Connector Gateway** profile; desktop-only profiles remain visible but unavailable there.
+Docker Connector supports desktop Obsidian on macOS, Windows, and Linux. Local Docker Socket, Docker Context, SSH, and mutual TLS require desktop capabilities.
 
 You also need appropriate access for the method you select:
 
@@ -165,7 +162,7 @@ The remote account must be able to access the configured Docker socket without i
 
 With **Password** selected, enter the SSH password during connection or reconnection. Docker Connector keeps that password in memory only for the current Obsidian session by default. It is not stored in the saved profile, so a profile can show **Authentication Required** after Obsidian restarts. Choose **Reconnect** to provide it again.
 
-For a password profile only, **Remember password on this device** is an optional, off-by-default choice. It stores the password separately in local plugin data so Docker Connector can reconnect after Obsidian restarts. Obsidian does not provide this plugin a supported keychain or guaranteed encryption, so use it only on a trusted device, prefer SSH keys where possible, and use **Forget stored password** to remove it immediately. It never applies to private-key passphrases, TLS passphrases, Gateway tokens, keys, or certificates. Host-key verification is still mandatory: a changed host key blocks reconnection even when a password is remembered.
+For a password profile only, **Remember password on this device** is an optional, off-by-default choice. It stores the password separately in local plugin data so Docker Connector can reconnect after Obsidian restarts. Obsidian does not provide this plugin a supported keychain or guaranteed encryption, so use it only on a trusted device, prefer SSH keys where possible, and use **Forget stored password** to remove it immediately. It never applies to private-key passphrases, TLS passphrases, keys, or certificates. Host-key verification is still mandatory: a changed host key blocks reconnection even when a password is remembered.
 
 ### Screenshot 07 — Remote Docker via SSH password
 ![Remote Docker via SSH password](docs/images/user-guide/07-ssh-password.png)
@@ -891,7 +888,7 @@ An image can be current, unavailable from a registry, untagged, inaccessible, Co
 
 **Does it store Mutual TLS passphrases or certificate contents?** No. It can save selected certificate/key paths, but not certificate contents or the client-key passphrase.
 
-**Can I use it on mobile?** Yes, with a Docker Connector Gateway profile over trusted HTTPS. Local sockets, Docker Context, SSH, and mutual TLS remain desktop-only.
+**Can I use it on mobile?** No. Docker Connector requires desktop Obsidian.
 
 **Does it change my active Docker Context?** No. It discovers and uses the selected context without running Context mutation commands.
 
@@ -917,7 +914,7 @@ An image can be current, unavailable from a registry, untagged, inaccessible, Co
 
 ## 28. Known limitations
 
-- Local sockets, Docker Context, SSH, and mutual TLS are desktop-only; mobile uses Docker Connector Gateway over trusted HTTPS.
+- Docker Connector requires desktop Obsidian.
 - Plain insecure Docker TCP is not supported.
 - Applications is a Compose-aware read-only view; it does not deploy, edit, start, stop, or update Compose projects.
 - Standalone transactional Update is intentionally blocked for Compose-managed and otherwise unsupported containers.
@@ -964,7 +961,7 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 01 | `01-empty-connections.png` | First launch | Empty state |
 | 02 | `02-dashboard-overview.png` | Interface | Main dashboard |
 | 03 | `03-add-docker-host.png` | Add | Host dialog |
-| 04 | `04-connection-type-selector.png` | Add | Desktop methods / mobile Gateway |
+| 04 | `04-connection-type-selector.png` | Add | Connection method selector |
 | 05 | `05-local-docker-socket.png` | Local | Endpoint |
 | 06 | `06-docker-cli-detected.png` | Context | CLI and context discovery |
 | 07 | `07-ssh-password.png` | SSH | Password |

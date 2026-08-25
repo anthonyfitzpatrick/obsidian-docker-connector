@@ -34,7 +34,7 @@ describe("connection host card icon", () => {
     expect(card).toContain('cls: "dc-host-card-inventory dc-connection-inventory"');
     expect(card).toContain('cls: "dc-host-card-runtime dc-connection-engine"');
     expect(card.indexOf(title)).toBeLessThan(card.indexOf('if (profile.connectionType === "docker-context")'));
-    expect(card).not.toMatch(/dc-(ssh|tls|context|local|gateway)-host-card/);
+    expect(card).not.toMatch(/dc-(ssh|tls|context|local)-host-card/);
   });
 
   it("centralizes title, metadata, endpoint, metric, badge, and management metrics in host-card tokens", () => {

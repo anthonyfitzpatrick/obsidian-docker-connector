@@ -284,7 +284,6 @@ export default class DockerConnectorPlugin extends Plugin {
   clearRuntimePassword(profileId: string): void { this.connectionFactory.clearRuntimePassword(profileId); }
   setRuntimePrivateKeyPassphrase(profileId: string, passphrase: string): void { this.connectionFactory.setRuntimePrivateKeyPassphrase(profileId, passphrase); }
   setRuntimeTlsClientKeyPassphrase(profileId: string, passphrase: string): void { this.connectionFactory.setRuntimeTlsClientKeyPassphrase(profileId, passphrase); }
-  setRuntimeGatewayToken(profileId: string, token: string): void { this.connectionFactory.setRuntimeGatewayToken(profileId, token); }
   clearRuntimeCredentials(profileId: string): void { this.connectionFactory.clearRuntimeCredentials(profileId); }
   hasRememberedSshPassword(profileId: string): boolean { return this.rememberedSshPasswords.has(profileId); }
   async rememberSshPassword(profileId: string, password: string): Promise<void> {
@@ -306,7 +305,7 @@ export default class DockerConnectorPlugin extends Plugin {
     this.rememberedSshPasswords.restore(profileId, password);
     if (password) this.setRuntimePassword(profileId, password);
   }
-  private setRuntimeCredential(profile: DockerConnectionProfile, credential: string): void { if (profile.connectionType === "gateway") this.setRuntimeGatewayToken(profile.id, credential); else if (profile.connectionType === "ssh" && profile.authentication.type === "password") this.setRuntimePassword(profile.id, credential); else if (profile.connectionType === "ssh") this.setRuntimePrivateKeyPassphrase(profile.id, credential); else if (profile.connectionType === "docker-tls") this.setRuntimeTlsClientKeyPassphrase(profile.id, credential); }
+  private setRuntimeCredential(profile: DockerConnectionProfile, credential: string): void { if (profile.connectionType === "ssh" && profile.authentication.type === "password") this.setRuntimePassword(profile.id, credential); else if (profile.connectionType === "ssh") this.setRuntimePrivateKeyPassphrase(profile.id, credential); else if (profile.connectionType === "docker-tls") this.setRuntimeTlsClientKeyPassphrase(profile.id, credential); }
   private scheduleContainerImageUpdateChecks(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot): void { if (this.unloading || !this.managementAuthorization.isEnabled(profile.id) || snapshot.status !== "online") return; snapshot.containers.forEach((container) => { const eligibility = getContainerUpdateEligibility(container.image, container.labels); if (eligibility.eligible && this.containerImageUpdates.isStale(profile.id, container.id)) void this.containerImageUpdates.check(profile, container.id).catch(() => undefined); }); }
   private refreshOpenDashboard(): void { this.app.workspace.getLeavesOfType(DOCKER_CONNECTOR_VIEW).forEach((leaf) => void (leaf.view as DockerDashboardView).render()); }
   private publishSnapshot(profileId: string, snapshot: DockerHostSnapshot): void { if (this.managementAuthorization.revokeOnConnectionLoss(profileId, snapshot.status)) this.emitSettingsChanged({ key: "managementAuthorization", previousValue: true, value: false }); this.snapshots.set(profileId, snapshot); }

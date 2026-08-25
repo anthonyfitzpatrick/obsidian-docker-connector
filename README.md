@@ -2,18 +2,14 @@
 
 Docker Connector brings multi-host Docker monitoring and deliberately opt-in container management into Obsidian. Connect to local or remote Docker Engines, inspect Docker Compose applications and Docker resources, check image availability, and use explicit lifecycle actions without leaving your vault.
 
-Docker Connector works on desktop and mobile Obsidian. Desktop supports Local Docker Socket, Docker Context, SSH and mutual TLS. iPhone and iPad use the Docker Connector Gateway: an authenticated HTTPS, allowlisted, read-only companion service that talks to the local Docker socket. It never exposes Docker's raw API or an arbitrary proxy. Docker Connector is read-only by default; the header and connection-card switches control the same session-only management authorization for one Online Docker connection. SSH usernames are shown only while adding or editing a host, not in normal dashboard cards.
-
-## Mobile Gateway
-
-Run the separate component in [`gateway/`](gateway/) only on a trusted LAN or VPN (for example Tailscale, NetBird, or WireGuard) behind HTTPS. Give it a high-entropy `GATEWAY_TOKEN`; enter that token in the host dialog for the current session only. Do not expose Docker on TCP port 2375, disable TLS verification, or publish the gateway to the public Internet. Mounting `docker.sock` is highly privileged even though the gateway only permits its fixed read endpoints.
+Docker Connector supports desktop Obsidian on macOS, Windows, and Linux with Local Docker Socket, Docker Context, SSH, and mutual TLS connections. Docker Connector is read-only by default; the header and connection-card switches control the same session-only management authorization for one Online Docker connection. SSH usernames are shown only while adding or editing a host, not in normal dashboard cards.
 
 > **Docker access is highly privileged.** A user or process that can control Docker can often gain extensive control of that Docker host. Connect only to Docker hosts, Docker Contexts, and credentials you trust.
 
 ## Features
 
 - Connect multiple Docker environments and switch the **Current Environment** at any time.
-- Use Local Docker Socket, Docker Context, Remote Docker via SSH, Remote Docker API (Mutual TLS), or the mobile-safe Docker Connector Gateway.
+- Use Local Docker Socket, Docker Context, Remote Docker via SSH, or Remote Docker API (Mutual TLS).
 - Read consistent host cards: the same purple host identity, safe endpoint details, inventory/runtime preview, action row, and synchronized per-profile management row for every transport.
 - Manage saved connections from **Connections**: add, edit, reconnect or retry when relevant, inspect status, and delete the plugin-only profile safely.
 - Browse host Overview data, Docker Compose **Applications**, **Containers**, **Images**, **Volumes**, and **Networks**.
@@ -35,7 +31,6 @@ Release screenshots will be added as the UI is finalized. The full [User Guide](
 | Docker Context | Existing Docker CLI configurations | Context-defined | Depends on Context |
 | Remote Docker via SSH | Most remote Docker hosts | Password or private key | No |
 | Remote Docker API (Mutual TLS) | Direct secured Docker Engine API access | CA + client certificate + private key | Yes |
-| Docker Connector Gateway | Authenticated iPhone/iPad access through a trusted companion service | Session-only Gateway token over HTTPS | No raw Docker API exposure |
 
 **Local Docker Socket** discovers and validates local Unix sockets or Windows named pipes. **Docker Context** uses an existing Docker CLI Context without changing your active Context; local Context endpoints route through the local transport, while supported SSH Contexts use Docker CLI’s secure Context transport. **Remote Docker via SSH** carries Docker traffic through SSH, so the Docker API does not need to be exposed directly. **Remote Docker API (Mutual TLS)** requires a trusted CA, client certificate, client private key, and mandatory server identity verification.
 
@@ -60,7 +55,7 @@ When a newer image is confirmed and a standalone container is eligible, **Update
 ## Security and privacy
 
 - Docker access remains privileged; use least-privileged access where possible.
-- SSH passwords, SSH private-key passphrases, TLS client-key passphrases, and Gateway tokens are session-only by default. Only an explicit per-profile SSH password opt-in stores a password separately in unencrypted local plugin data; it is never a profile field. Passive cards hide SSH usernames, authentication labels, credential paths, and secrets.
+- SSH passwords, SSH private-key passphrases, and TLS client-key passphrases are session-only by default. Only an explicit per-profile SSH password opt-in stores a password separately in unencrypted local plugin data; it is never a profile field. Passive cards hide SSH usernames, authentication labels, credential paths, and secrets.
 - Selected key and certificate paths can be saved; their file contents are not copied into settings.
 - Mutual TLS requires server-certificate and Server Name verification. There is no insecure verification bypass.
 - Docker Contexts are discovered and used without `docker context use`, create, update, remove, import, or export commands.
@@ -74,7 +69,7 @@ For details, read the [Security Review](docs/Docker%20Connector%20-%20Security%2
 
 | Requirement | Details |
 | --- | --- |
-| Obsidian | Obsidian 1.7.0 or later. Desktop supports local/Context/SSH/mTLS; iPhone/iPad use Gateway. |
+| Obsidian | Obsidian 1.7.0 or later on desktop. |
 | Local Docker Socket | A local Docker Engine/Docker Desktop and permission to access its Unix socket or Windows named pipe. |
 | Docker Context | Local Docker CLI and an existing Context. |
 | Remote Docker via SSH | SSH access and Docker access for the remote account; no interactive `sudo`. |
@@ -132,7 +127,7 @@ An available image is not automatically eligible for a standalone update. Docker
 
 ## Known limitations
 
-- Local Socket, Docker Context, SSH, and mutual TLS require desktop Obsidian; iPhone/iPad use Docker Connector Gateway.
+- Docker Connector requires desktop Obsidian.
 - Insecure unauthenticated Docker TCP is unsupported.
 - Compose applications are read-only at the project level.
 - Standalone Update is blocked for Compose-managed and other unsupported containers.

@@ -7,7 +7,7 @@ import { DockerContextDialStdioTransport } from "./DockerContextDialStdioTranspo
 import { DockerMutualTlsTransport } from "./DockerMutualTlsTransport";
 
 /** Loaded from the bundled main artifact only after the desktop capability gate. */
-export function createDesktopTransport(profile: Exclude<DockerConnectionProfile, { connectionType: "gateway" }>, credentials: RuntimeCredentialStore): DockerTransport {
+export function createDesktopTransport(profile: DockerConnectionProfile, credentials: RuntimeCredentialStore): DockerTransport {
   switch (profile.connectionType) {
     case "local": return new LocalDockerTransport(profile);
     case "ssh": return new SshDockerTransport(profile, () => ({ password: credentials.getPassword(profile.id), privateKeyPassphrase: credentials.getPrivateKeyPassphrase(profile.id) }));

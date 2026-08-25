@@ -6,7 +6,7 @@ const screenshotNumber = (index: number) => String(index + 1).padStart(2, "0");
 const isSequential = (numbers: string[]) => numbers.every((number, index) => number === screenshotNumber(index));
 
 describe("Obsidian Community Plugin release guard", () => {
-  it("keeps manifest, package, and version-map metadata aligned for the mobile-capable release", async () => {
+  it("keeps manifest, package, and version-map metadata aligned for the desktop-only release", async () => {
     const [manifestText, packageText, versionsText] = await Promise.all([source("manifest.json"), source("package.json"), source("versions.json")]);
     const manifest = JSON.parse(manifestText) as { id: string; version: string; minAppVersion: string; isDesktopOnly: boolean };
     const packageJson = JSON.parse(packageText) as { version: string; license: string };
@@ -16,7 +16,7 @@ describe("Obsidian Community Plugin release guard", () => {
     expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(packageJson.version).toBe(manifest.version);
     expect(versions[manifest.version]).toBe(manifest.minAppVersion);
-    expect(manifest.isDesktopOnly).toBe(false);
+    expect(manifest.isDesktopOnly).toBe(true);
     expect(packageJson.license).toBe("MIT");
   });
 
@@ -90,12 +90,13 @@ describe("Obsidian Community Plugin release guard", () => {
     const filenames = [...guide.matchAll(/^> \*\*Suggested filename:\*\* `[^`/]+(?:\/[^`/]+)*\/(\d{2})-[^`]+`$/gm)].map((match) => match[1]);
     const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
     const embedded = [...guide.matchAll(/!\[[^\]]*\]\(docs\/images\/user-guide\/(\d{2}-[^)]+)\)/g)].map((match) => match[1]);
-    const expected = Array.from({ length: 47 }, (_, index) => screenshotNumber(index));
+    const expected = Array.from({ length: 43 }, (_, index) => screenshotNumber(index));
+    const placeholdersAndFilenames = ["06", ...expected.slice(16, 20), ...expected.slice(22)];
     expect(headings).toEqual(expected);
-    expect(placeholders).toEqual(["06", ...expected.slice(10)]);
-    expect(filenames).toEqual(["06", ...expected.slice(10)]);
+    expect(placeholders).toEqual(placeholdersAndFilenames);
+    expect(filenames).toEqual(placeholdersAndFilenames);
     expect(checklist).toEqual(expected);
-    expect(embedded).toEqual(["01-empty-connections.png", "02-dashboard-overview.png", "03-add-docker-host.png", "04-connection-type-selector.png", "05-local-docker-socket.png", "06-docker-cli-detected.png", "07-ssh-password.png", "08-verify-ssh-host.png", "09-ssh-connection-success.png", "10-remember-ssh-password.png"]);
+    expect(embedded).toEqual(["01-empty-connections.png", "02-dashboard-overview.png", "03-add-docker-host.png", "04-connection-type-selector.png", "05-local-docker-socket.png", "06-docker-cli-detected.png", "07-ssh-password.png", "08-verify-ssh-host.png", "09-ssh-connection-success.png", "10-remember-ssh-password.png", "11-generate-ssh-key.png", "12-ssh-private-key-selection.png", "13-ssh-key-generation-complete.png", "14-install-public-key.png", "15-private-key-test-success.png", "16-remote-docker-api-mtls.png", "21-delete-connection.png", "22-current-environment.png"]);
     await Promise.all(embedded.map((filename) => access(`docs/images/user-guide/${filename}`)));
     const appendixStart = guide.indexOf("# Appendix A — Screenshot production checklist");
     expect(appendixStart).toBeGreaterThan(0);

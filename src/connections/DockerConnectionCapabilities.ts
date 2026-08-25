@@ -14,7 +14,6 @@ export function connectionCapabilities(profile: DockerConnectionProfile): Docker
     case "docker-context": return { connectionType: "docker-context", ...BASE, requiresRuntimeCredential: false, supportsHostKeyVerification: false, supportsCertificateVerification: false };
     case "ssh": return { connectionType: "ssh", ...BASE, requiresRuntimeCredential: profile.authentication.type === "password", supportsHostKeyVerification: true, supportsCertificateVerification: false };
     case "docker-tls": return { connectionType: "docker-tls", ...BASE, requiresRuntimeCredential: false, supportsHostKeyVerification: false, supportsCertificateVerification: true };
-    case "gateway": return { connectionType: "gateway", ...BASE, requiresRuntimeCredential: true, supportsHostKeyVerification: false, supportsCertificateVerification: true, supportsContainerActions: false };
     default: return assertNever(profile);
   }
 }

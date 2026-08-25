@@ -13,7 +13,5 @@ export function configuredServerConnection(profile: DockerConnectionProfile): { 
       return { label, detail: `SSH Host: ${profile.sshHost} · ${profile.authentication.type === "password" ? "Password" : "Private Key"}` };
     case "docker-tls":
       return { label, detail: `Docker Host: ${profile.host}:${profile.port}` };
-    case "gateway":
-      return { label, detail: profile.gatewayUrl };
   }
 }

@@ -1,6 +1,6 @@
 /**
  * The single runtime boundary between portable UI/core code and host-specific
- * transports.  Mobile intentionally exposes only the HTTPS gateway path.
+ * transports.
  */
 export interface PlatformCapabilities {
   isDesktop: boolean;
@@ -11,7 +11,6 @@ export interface PlatformCapabilities {
   supportsSshTransport: boolean;
   supportsNodeTls: boolean;
   supportsFilePathCredentials: boolean;
-  supportsMobileRemoteTransport: boolean;
   supportsContainerManagement: boolean;
 }
 
@@ -28,9 +27,6 @@ export function detectPlatformCapabilities(platform: ObsidianPlatform = (globalT
     supportsSshTransport: isDesktop,
     supportsNodeTls: isDesktop,
     supportsFilePathCredentials: isDesktop,
-    // Gateway requests use the Web Fetch API and normal HTTPS, both available
-    // in Obsidian's mobile WebView.
-    supportsMobileRemoteTransport: true,
     supportsContainerManagement: isDesktop
   };
 }
@@ -38,9 +34,8 @@ export function detectPlatformCapabilities(platform: ObsidianPlatform = (globalT
 export const platformCapabilities = (): PlatformCapabilities => detectPlatformCapabilities();
 
 export function isProfileSupportedOnPlatform(
-  connectionType: "local" | "ssh" | "docker-context" | "docker-tls" | "gateway",
+  connectionType: "local" | "ssh" | "docker-context" | "docker-tls",
   capabilities = platformCapabilities()
 ): boolean {
-  if (connectionType === "gateway") return capabilities.supportsMobileRemoteTransport;
   return capabilities.isDesktop;
 }
