@@ -265,20 +265,8 @@ For mutual TLS, a successful test loads the TLS files, confirms the certificate/
 
 Open **Connections** to manage every saved profile. The page begins with summary cards for **Configured hosts**, **Online**, and **Needs sign-in**; Needs sign-in counts only profiles in **Authentication Required**. For example, three configured profiles may show one Online and two Needs sign-in without changing either healthy profile’s state. It then provides **Add Docker Host** and a card for every profile. Each card uses one uniform structure: purple Docker host identity, textual connection method, transport-relevant safe endpoint details, inventory, runtime details, actions, and management row. Only the safe profile data and status vary by connection method.
 
-### Screenshot 18 — Connections management view
-> **Screenshot placeholder 18**
->
-> **Capture:** Docker connections summary cards, profile cards, statuses, and management actions.
->
-> **How to capture this screenshot:**
-> 1. Open Docker Connector and select **Connections**.
-> 2. Use a safe set of saved profiles that demonstrates more than one connection method if available.
-> 3. Wait for status evaluation so the cards show stable states such as **Online** or **Authentication Required**, rather than transient Connecting where possible.
-> 4. Ensure the **Configured hosts**, **Online**, and **Needs sign-in** summary cards, **Docker connections** heading, **Add Docker Host**, profile cards, status badges, inventory/runtime sections, left action group, and compact per-card **Container management** switch are visible. Each host card should use the same purple host icon, typography, and structure while showing only transport-relevant safe details. SSH cards should show only their `host:port` endpoint, without a username or passive Password/Private Key label.
-> 5. If any hostnames or addresses should not be public, use disposable test profiles before capturing.
-
->
-> **Suggested filename:** `docs/images/user-guide/18-connections-management.png`
+### Screenshot 18 — Docker connections overview
+![Docker connections overview](docs/images/user-guide/18-connections-overview.png)
 
 Cards expose the applicable management actions:
 
