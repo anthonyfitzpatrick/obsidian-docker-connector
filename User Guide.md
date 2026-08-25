@@ -228,20 +228,7 @@ The profile can save the private-key file path, not a copy of the key material. 
 ### 8.4 Remote Docker API (Mutual TLS)
 
 ### Screenshot 16 — Remote Docker API (Mutual TLS) form
-> **Screenshot placeholder 16**
->
-> **Capture:** Host, port, Server Name, CA, client certificate, and client key fields.
->
-> **How to capture this screenshot:**
-> 1. Open **Add Docker Host** and select **Remote Docker API (Mutual TLS)**.
-> 2. Use the disposable mutual-TLS endpoint on `192.168.1.2:2376` or another safe test endpoint.
-> 3. Fill Docker Host, Docker API Port, and Server Name with the test values.
-> 4. Select test CA, client certificate, and client private-key files if safe to show their paths; otherwise use redacted/test-only paths.
-> 5. Leave any passphrase blank for the capture.
-> 6. Capture the form so Host, Port, Server Name, CA, client certificate, and client key fields are visible.
-
->
-> **Suggested filename:** `docs/images/user-guide/16-mutual-tls-form.png`
+![Remote Docker API Mutual TLS form](docs/images/user-guide/16-remote-docker-api-mtls.png)
 
 **Remote Docker API (Mutual TLS)** is for a Docker Engine HTTPS endpoint that has deliberately been configured for mutual TLS. Unlike SSH, the Docker API endpoint is directly reachable on the network. Both sides authenticate:
 
