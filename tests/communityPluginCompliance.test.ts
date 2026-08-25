@@ -91,12 +91,12 @@ describe("Obsidian Community Plugin release guard", () => {
     const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
     const embedded = [...guide.matchAll(/!\[[^\]]*\]\(docs\/images\/user-guide\/(\d{2}-[^)]+)\)/g)].map((match) => match[1]);
     const expected = Array.from({ length: 41 }, (_, index) => screenshotNumber(index));
-    const placeholdersAndFilenames = ["06", ...expected.slice(22)];
+    const placeholdersAndFilenames = ["06", ...expected.slice(23)];
     expect(headings).toEqual(expected);
     expect(placeholders).toEqual(placeholdersAndFilenames);
     expect(filenames).toEqual(placeholdersAndFilenames);
     expect(checklist).toEqual(expected);
-    expect(embedded).toEqual(["01-empty-connections.png", "02-dashboard-overview.png", "03-add-docker-host.png", "04-connection-type-selector.png", "05-local-docker-socket.png", "06-docker-cli-detected.png", "07-ssh-password.png", "08-verify-ssh-host.png", "09-ssh-connection-success.png", "10-remember-ssh-password.png", "11-generate-ssh-key.png", "12-ssh-private-key-selection.png", "13-ssh-key-generation-complete.png", "14-install-public-key.png", "15-private-key-test-success.png", "16-remote-docker-api-mtls.png", "17-local-test-success.png", "18-connections-overview.png", "19-authentication-required-reconnect.png", "20-delete-connection.png", "21-current-environment.png", "22-applications-list.png"]);
+    expect(embedded).toEqual(["01-empty-connections.png", "02-dashboard-overview.png", "03-add-docker-host.png", "04-connection-type-selector.png", "05-local-docker-socket.png", "06-docker-cli-detected.png", "07-ssh-password.png", "08-verify-ssh-host.png", "09-ssh-connection-success.png", "10-remember-ssh-password.png", "11-generate-ssh-key.png", "12-ssh-private-key-selection.png", "13-ssh-key-generation-complete.png", "14-install-public-key.png", "15-private-key-test-success.png", "16-remote-docker-api-mtls.png", "17-local-test-success.png", "18-connections-overview.png", "19-authentication-required-reconnect.png", "20-delete-connection.png", "21-current-environment.png", "22-applications-list.png", "23-application-inspector.png"]);
     await Promise.all(embedded.map((filename) => access(`docs/images/user-guide/${filename}`)));
     const appendixStart = guide.indexOf("# Appendix A — Screenshot production checklist");
     expect(appendixStart).toBeGreaterThan(0);

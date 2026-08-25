@@ -309,21 +309,11 @@ Applications groups Docker Compose-managed containers into projects. Docker Conn
 Application cards show a project’s services, container counts, running and stopped counts, available-update count where known, and associated networks, volumes, and images. The list supports searching, status and update filtering, sorting, and an inspector. The inspector exposes project details, services, containers, and images; selecting a listed container opens that container in **Containers**.
 
 ### Screenshot 23 — Application detail inspector
-> **Screenshot placeholder 23**
->
-> **Capture:** Services, containers, images, networks, and volumes as available.
->
-> **How to capture this screenshot:**
-> 1. Open **Applications** on the test host.
-> 2. Select a Compose project with multiple services, preferably the `juliarosedelane` test application if it remains available.
-> 3. Ensure the inspector shows project Overview plus Services, Containers, Images, Networks, and Storage/Volumes where available.
-> 4. Position the view so service names are clearly distinct from container names and image tags.
-> 5. Capture the detail panel with enough list context to identify the selected application.
+![Application detail inspector](docs/images/user-guide/23-application-inspector.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/23-application-inspector.png`
+The inspector organizes project information into sections such as Overview, Services, Containers, Images, Networks, and storage information where available. Sections can be expanded as needed rather than displaying every relationship at once. Selecting a listed container opens that container in **Containers**.
 
-For example, a project named `juliarosedelane` can contain services `ghost` and `ghost-db`, containers named `juliarosedelane-ghost` and `juliarosedelane-ghost-db`, and images such as `ghost:5-alpine` and `mysql:8.4`. These are different concepts, and Docker Connector keeps them separate.
+For example, the `owncloud` Compose project shown above contains services including `euro-office`, `owncloud`, `owncloud-db`, and `owncloud-redis`. Its containers correspond to those services, while the Docker images used to create those containers remain separate image resources. Projects, services, containers, and images are different Docker and Compose concepts, and Docker Connector keeps those relationships distinct.
 
 Applications is read-only at the project level. Docker Connector does not run `docker compose up` or `docker compose down`, edit Compose files, or update a whole Compose application. A Compose-managed container can report that a newer image is available but remains blocked from the standalone Update workflow.
 
