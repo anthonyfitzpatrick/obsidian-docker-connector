@@ -51,5 +51,5 @@ export function isDockerTlsProfile(profile: DockerConnectionProfile): profile is
 /** Presentation states used by the dashboard; inspection currently persists online, offline, and authentication-required snapshots. */
 export type HostConnectionStatus = "unknown" | "connecting" | "online" | "offline" | "degraded" | "authentication-required";
 /** An in-memory refresh result. Snapshots are not persisted and may be discarded on unload. */
-export interface DockerHostSnapshot { hostId: string; status: HostConnectionStatus; refreshedAt: string; error?: string; stale?: boolean; system?: DockerSystemInfo; containers: DockerContainerSummary[]; images: DockerImageSummary[]; volumes: DockerVolumeSummary[]; networks: DockerNetworkSummary[]; }
+export interface DockerHostSnapshot { hostId: string; daemonId?: string; status: HostConnectionStatus; refreshedAt: string; error?: string; stale?: boolean; system?: DockerSystemInfo; containers: DockerContainerSummary[]; images: DockerImageSummary[]; volumes: DockerVolumeSummary[]; networks: DockerNetworkSummary[]; }
 export interface DockerSystemInfo { dockerVersion: string; apiVersion: string; operatingSystem: string; architecture: string; kernelVersion: string; cpuCount: number; totalMemory: number; }

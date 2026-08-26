@@ -11,6 +11,7 @@ import {
   uniqueNetworks,
   updateKey,
 } from "./ContainerSelectors";
+import { dockerResourceKey, selectedInventorySnapshots } from "../models/DockerHostSnapshotSelection";
 import {
   DEFAULT_CONTAINERS_VIEW_STATE,
   type ContainerDensity,
@@ -51,9 +52,11 @@ export class ContainersTab {
 
   render(root: HTMLElement, selectedHostId: string): void {
     const profiles = this.profiles(selectedHostId);
-    const snapshots = profiles
-      .map((profile) => this.plugin.snapshots.get(profile.id))
-      .filter((snapshot): snapshot is DockerHostSnapshot => Boolean(snapshot));
+    const snapshots = selectedInventorySnapshots(
+      this.plugin.settings.profiles,
+      this.plugin.snapshots,
+      selectedHostId,
+    );
     const all = snapshots.flatMap((snapshot) => snapshot.containers);
     const availableUpdateKeys = new Set(
       all.flatMap((container) =>
@@ -432,7 +435,7 @@ export class ContainersTab {
       this.state.detailState.status === "closed"
     ) {
       const selected = all.find(
-        (container) => container.id === this.state.selectedContainerId,
+        (container) => this.matchesSelected(container),
       );
       if (selected) void this.openDetails(selected, list);
     }
@@ -440,7 +443,7 @@ export class ContainersTab {
       this.detail(layout, profiles, snapshots);
   }
   private row(root: HTMLElement, container: DockerContainerSummary): void {
-    const selected = this.state.selectedContainerId === container.id;
+    const selected = this.matchesSelected(container);
     const row = root.createEl("button", {
       cls: `docker-connector__container-card${selected ? " is-selected" : ""}`,
       attr: {
@@ -540,7 +543,7 @@ export class ContainersTab {
     const id = this.state.selectedContainerId!;
     const summary = snapshots
       .flatMap((snapshot) => snapshot.containers)
-      .find((container) => container.id === id);
+      .find((container) => this.matchesSelected(container, id));
     if (!summary) {
       this.closeDetail();
       return;
@@ -1133,7 +1136,7 @@ export class ContainersTab {
     container: DockerContainerSummary,
     origin: HTMLElement,
   ): Promise<void> {
-    this.state.selectedContainerId = container.id;
+    this.state.selectedContainerId = this.key(container);
     this.detailOrigin = origin;
     const profile = this.plugin.settings.profiles.find(
       (item) => item.id === container.hostProfileId,
@@ -1151,10 +1154,10 @@ export class ContainersTab {
     if (
       !force &&
       this.state.detailState.status === "ready" &&
-      this.state.detailState.containerId === container.id
+      this.state.detailState.containerId === this.key(container)
     )
       return;
-    this.state.detailState = { status: "loading", containerId: container.id };
+    this.state.detailState = { status: "loading", containerId: this.key(container) };
     this.rerender();
     try {
       const details = await this.plugin.inspectContainer(
@@ -1164,14 +1167,14 @@ export class ContainersTab {
       );
       this.state.detailState = {
         status: "ready",
-        containerId: container.id,
+        containerId: this.key(container),
         details,
       };
       this.rerender();
     } catch (error) {
       this.state.detailState = {
         status: "error",
-        containerId: container.id,
+        containerId: this.key(container),
         error:
           error instanceof Error
             ? error.message
@@ -1192,7 +1195,7 @@ export class ContainersTab {
       this.state.selectedContainerId &&
       ![...this.plugin.snapshots.values()].some((snapshot) =>
         snapshot.containers.some(
-          (container) => container.id === this.state.selectedContainerId,
+          (container) => this.matchesSelected(container),
         ),
       )
     )
@@ -1225,11 +1228,11 @@ export class ContainersTab {
       !this.state.updatesOnly ||
       !this.state.selectedContainerId ||
       results.some(
-        (container) => container.id === this.state.selectedContainerId,
+          (container) => this.matchesSelected(container),
       )
     )
       return;
-    this.state.selectedContainerId = results[0]?.id ?? null;
+    this.state.selectedContainerId = results[0] ? this.key(results[0]) : null;
     this.state.detailState = { status: "closed" };
   }
   private empty(
@@ -1267,6 +1270,15 @@ export class ContainersTab {
       : this.plugin.settings.profiles.filter(
           (profile) => profile.id === selectedHostId,
         );
+  }
+  private key(container: DockerContainerSummary): string {
+    const snapshot = this.plugin.snapshots.get(container.hostProfileId);
+    return snapshot
+      ? dockerResourceKey(snapshot, container.id)
+      : `profile:${container.hostProfileId}\u0000${container.id}`;
+  }
+  private matchesSelected(container: DockerContainerSummary, selected = this.state.selectedContainerId): boolean {
+    return selected === this.key(container) || selected === container.id;
   }
   private hasFilters(): boolean {
     return Boolean(

@@ -8,7 +8,7 @@ import { VolumeMapper } from "../volumes/VolumeMapper";
 import { NetworkMapper } from "../networks/NetworkMapper";
 
 interface EngineVersion { Version: string; ApiVersion: string; }
-interface EngineInfo { OperatingSystem: string; Architecture: string; KernelVersion: string; NCPU: number; MemTotal: number; }
+interface EngineInfo { ID?: string; OperatingSystem: string; Architecture: string; KernelVersion: string; NCPU: number; MemTotal: number; }
 interface EngineContainer { Id: string; Names: string[]; Image: string; ImageID: string; State: string; Status: string; Created: number; Ports: Array<{ PrivatePort: number; PublicPort?: number; Type: string }>; Mounts: Array<{ Name?: string; Source?: string; Destination: string }>; }
 interface EngineImage { Id: string; RepoTags: string[]; Size: number; Created: number; Containers: number; }
 interface EngineVolume { Name: string; Driver: string; Mountpoint: string; }
@@ -35,7 +35,7 @@ export class DockerInspectionService {
       ]);
       const mappedContainers = containers.map((container) => ContainerMapper.summary(container, host.id));
       return {
-        hostId: host.id, status: "online", refreshedAt,
+        hostId: host.id, daemonId: info.ID?.trim() || undefined, status: "online", refreshedAt,
         system: this.mapSystem(version, info),
         containers: mappedContainers, images: images.map((image) => ImageMapper.summary(image, host.id)),
         volumes: (volumes.Volumes ?? []).map((volume) => VolumeMapper.summary(volume, host.id, mappedContainers)), networks: networks.map((network) => NetworkMapper.summary(network, host.id, mappedContainers))

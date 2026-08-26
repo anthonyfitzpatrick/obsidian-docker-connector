@@ -1,6 +1,7 @@
 import { Notice, setIcon } from "obsidian";
 import type DockerConnectorPlugin from "../main";
 import type { DockerConnectionProfile, DockerHostSnapshot } from "../models/DockerConnectionProfile";
+import { dockerResourceKey, selectedInventorySnapshots } from "../models/DockerHostSnapshotSelection";
 import { renderMetricCards } from "../ui/MetricCards";
 import { DEFAULT_IMAGES_VIEW_STATE, type DockerImageSummary, type ImageFilter, type ImageSort, type ImagesViewState } from "./ImageModels";
 import { selectImages, values } from "./ImageSelectors";
@@ -17,7 +18,7 @@ export class ImagesTab {
 
   render(root: HTMLElement, selectedHostId: string): void {
     const profiles = selectedHostId === "all" ? this.plugin.settings.profiles : this.plugin.settings.profiles.filter((profile) => profile.id === selectedHostId);
-    const snapshots = profiles.map((profile) => this.plugin.snapshots.get(profile.id)).filter((snapshot): snapshot is DockerHostSnapshot => Boolean(snapshot));
+    const snapshots = selectedInventorySnapshots(this.plugin.settings.profiles, this.plugin.snapshots, selectedHostId);
     const all = snapshots.flatMap((snapshot) => snapshot.images);
     const results = selectImages(all, this.state);
     root.addClass("dc-images-tab");
@@ -63,7 +64,7 @@ export class ImagesTab {
   }
 
   private row(list: HTMLElement, image: DockerImageSummary): void {
-    const selected = this.state.selectedImageId === image.id;
+    const selected = this.state.selectedImageId === this.key(image);
     const card = list.createEl("button", { cls: `docker-connector__image-card${selected ? " is-selected" : ""}`, attr: { "aria-label": `${image.repository}:${image.tag}`, "aria-pressed": String(selected) } });
     card.onclick = () => void this.open(image, card);
     const header = card.createDiv({ cls: "docker-connector__image-card-header" });
@@ -82,14 +83,15 @@ export class ImagesTab {
   }
 
   private detail(root: HTMLElement, profiles: DockerConnectionProfile[], snapshots: DockerHostSnapshot[]): void {
-    const image = snapshots.flatMap((snapshot) => snapshot.images).find((item) => item.id === this.state.selectedImageId);
-    const profile = image && profiles.find((item) => item.id === image.hostProfileId);
-    const snapshot = image && snapshots.find((item) => item.hostId === image.hostProfileId);
-    if (!image || !profile || !snapshot) return;
-    const panel = root.createEl("aside", { cls: "dc-image-detail-panel docker-connector__images-detail", attr: { "aria-label": `Details for ${image.repository}:${image.tag}`, tabindex: "-1" } });
-    const header = panel.createDiv({ cls: "dc-image-detail-header" }); header.createEl("h2", { text: `${image.repository}:${image.tag}` });
-    const copy = header.createEl("button", { attr: { "aria-label": "Copy full image ID" } }); setIcon(copy, "copy"); copy.onclick = () => { void navigator.clipboard.writeText(image.id); new Notice("Image ID copied"); };
-    const refresh = header.createEl("button", { attr: { "aria-label": "Refresh image details" } }); setIcon(refresh, "refresh-cw"); refresh.onclick = () => void this.load(profile, snapshot, image, true);
+    const image = snapshots.flatMap((snapshot) => snapshot.images.map((item) => ({ item, snapshot }))).find(({ item, snapshot }) => dockerResourceKey(snapshot, item.id) === this.state.selectedImageId);
+    const profile = image && profiles.find((item) => item.id === image.item.hostProfileId);
+    if (!image || !profile) return;
+    const summary = image.item;
+    const snapshot = image.snapshot;
+    const panel = root.createEl("aside", { cls: "dc-image-detail-panel docker-connector__images-detail", attr: { "aria-label": `Details for ${summary.repository}:${summary.tag}`, tabindex: "-1" } });
+    const header = panel.createDiv({ cls: "dc-image-detail-header" }); header.createEl("h2", { text: `${summary.repository}:${summary.tag}` });
+    const copy = header.createEl("button", { attr: { "aria-label": "Copy full image ID" } }); setIcon(copy, "copy"); copy.onclick = () => { void navigator.clipboard.writeText(summary.id); new Notice("Image ID copied"); };
+    const refresh = header.createEl("button", { attr: { "aria-label": "Refresh image details" } }); setIcon(refresh, "refresh-cw"); refresh.onclick = () => void this.load(profile, snapshot, summary, true);
     const close = header.createEl("button", { attr: { "aria-label": "Close image details" } }); setIcon(close, "x"); close.onclick = () => this.close();
     if (this.state.detail.status === "loading") { panel.createDiv({ text: "Loading read-only image details…", cls: "dc-container-loading", attr: { "aria-live": "polite" } }); return; }
     if (this.state.detail.status === "error") { panel.createDiv({ text: this.state.detail.message, cls: "dc-container-error" }); return; }
@@ -103,9 +105,10 @@ export class ImagesTab {
     details.containersUsingImage.length ? details.containersUsingImage.forEach((container) => { const button = used.createEl("button", { text: `${container.name} · ${container.state ?? "Unknown"}` }); button.onclick = () => this.openContainer(container.id); }) : used.createDiv({ text: "No visible container references.", cls: "docker-connector__muted" });
   }
 
-  private async open(image: DockerImageSummary, origin: HTMLElement): Promise<void> { this.state.selectedImageId = image.id; this.origin = origin; const profile = this.plugin.settings.profiles.find((item) => item.id === image.hostProfileId); const snapshot = this.plugin.snapshots.get(image.hostProfileId); if (profile && snapshot) await this.load(profile, snapshot, image); }
-  private async load(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot, image: DockerImageSummary, force = false): Promise<void> { if (!force && this.state.detail.status === "ready" && this.state.detail.id === image.id) return; this.state.detail = { status: "loading", id: image.id }; this.rerender(); try { this.state.detail = { status: "ready", id: image.id, value: await this.plugin.inspectImage(profile, snapshot, image.id) }; } catch (error) { this.state.detail = { status: "error", id: image.id, message: error instanceof Error ? error.message : "Image details could not be loaded." }; } this.rerender(); }
+  private async open(image: DockerImageSummary, origin: HTMLElement): Promise<void> { this.state.selectedImageId = this.key(image); this.origin = origin; const profile = this.plugin.settings.profiles.find((item) => item.id === image.hostProfileId); const snapshot = this.plugin.snapshots.get(image.hostProfileId); if (profile && snapshot) await this.load(profile, snapshot, image); }
+  private async load(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot, image: DockerImageSummary, force = false): Promise<void> { const key = dockerResourceKey(snapshot, image.id); if (!force && this.state.detail.status === "ready" && this.state.detail.id === key) return; this.state.detail = { status: "loading", id: key }; this.rerender(); try { this.state.detail = { status: "ready", id: key, value: await this.plugin.inspectImage(profile, snapshot, image.id) }; } catch (error) { this.state.detail = { status: "error", id: key, message: error instanceof Error ? error.message : "Image details could not be loaded." }; } this.rerender(); }
   private close(): void { this.state.selectedImageId = null; this.state.detail = { status: "closed" }; this.rerender(); this.origin?.focus(); }
+  private key(image: DockerImageSummary): string { const snapshot = this.plugin.snapshots.get(image.hostProfileId); return snapshot ? dockerResourceKey(snapshot, image.id) : `profile:${image.hostProfileId}\u0000${image.id}`; }
   private select(root: HTMLElement, name: string, value: string, options: Array<[string, string]>, change: (value: string) => void): void { const label = root.createEl("label", { cls: "dc-container-select" }); label.createSpan({ text: name }); const select = label.createEl("select", { attr: { "aria-label": `${name} image control` } }); options.forEach(([optionValue, text]) => select.createEl("option", { value: optionValue, text })); select.value = value; select.onchange = () => change(select.value); }
 }
 

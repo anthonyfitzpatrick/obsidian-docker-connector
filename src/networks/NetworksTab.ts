@@ -1,5 +1,6 @@
 import { setIcon } from "obsidian";
 import type DockerConnectorPlugin from "../main";
+import { dockerResourceKey, selectedInventorySnapshots } from "../models/DockerHostSnapshotSelection";
 import { renderMetricCards } from "../ui/MetricCards";
 import { selectNetworks, values } from "./NetworkSelectors";
 import type { NetworkFilter } from "./NetworkModels";
@@ -15,8 +16,8 @@ export class NetworksTab {
   constructor(private readonly plugin: DockerConnectorPlugin, private readonly rerender: () => void, private readonly openContainer: (id: string) => void) {}
 
   render(root: HTMLElement, host: string): void {
-    const snapshots = (host === "all" ? [...this.plugin.snapshots.values()] : [this.plugin.snapshots.get(host)]).filter(Boolean);
-    const all = snapshots.flatMap((snapshot) => snapshot!.networks);
+    const snapshots = selectedInventorySnapshots(this.plugin.settings.profiles, this.plugin.snapshots, host);
+    const all = snapshots.flatMap((snapshot) => snapshot.networks);
     const items = selectNetworks(all, this.q, this.filter, this.driver, this.scope);
     root.addClass("dc-networks-tab");
 
@@ -46,9 +47,9 @@ export class NetworksTab {
     const list = layout.createDiv({ cls: "dc-network-list docker-connector__networks-list", attr: { "aria-label": "Network results" } });
     if (!all.length) list.createDiv({ text: "No networks were returned by this Docker host.", cls: "dc-container-empty" });
     items.forEach((network) => {
-      const isSelected = this.selected === network.id;
+      const isSelected = this.selected === this.key(network);
       const card = list.createEl("button", { cls: `docker-connector__network-card${isSelected ? " is-selected" : ""}`, attr: { "aria-label": network.name, "aria-pressed": String(isSelected) } });
-      card.onclick = () => { this.selected = network.id; this.rerender(); };
+      card.onclick = () => { this.selected = this.key(network); this.rerender(); };
       const header = card.createDiv({ cls: "docker-connector__network-card-header" });
       const identity = header.createDiv({ cls: "docker-connector__network-card-identity" });
       const icon = identity.createDiv({ cls: "docker-connector__network-card-icon" }); setIcon(icon, "network");
@@ -60,7 +61,7 @@ export class NetworksTab {
       metadata.createSpan({ text: `Scope · ${network.scope}` });
       metadata.createSpan({ text: `Containers · ${network.containersAttached}` });
     });
-    const selected = all.find((network) => network.id === this.selected);
+    const selected = snapshots.flatMap((snapshot) => snapshot.networks.map((network) => ({ network, snapshot }))).find(({ network, snapshot }) => dockerResourceKey(snapshot, network.id) === this.selected)?.network;
     if (selected) {
       const panel = layout.createEl("aside", { cls: "dc-network-detail-panel docker-connector__networks-detail", attr: { "aria-label": `Details for ${selected.name}` } });
       const header = panel.createDiv({ cls: "dc-image-detail-header" });
@@ -77,4 +78,5 @@ export class NetworksTab {
   private select(root: HTMLElement, label: string, value: string, options: Array<[string, string]>, onchange: (value: string) => void): void {
     const control = root.createEl("label", { cls: "dc-container-select" }); control.createSpan({ text: label }); const select = control.createEl("select", { attr: { "aria-label": `${label} network filter` } }); options.forEach(([optionValue, text]) => select.createEl("option", { value: optionValue, text })); select.value = value; select.onchange = () => onchange(select.value);
   }
+  private key(network: { id: string; hostProfileId: string }): string { const snapshot = this.plugin.snapshots.get(network.hostProfileId); return snapshot ? dockerResourceKey(snapshot, network.id) : `profile:${network.hostProfileId}\u0000${network.id}`; }
 }

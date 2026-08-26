@@ -31,7 +31,7 @@ describe("Images resource layout", () => {
     expect(css).toContain('overflow-wrap: anywhere;');
     expect(css).toContain(".dc-images-tab .docker-connector__image-card { grid-template-columns: 20px minmax(0, 1fr); align-items: start; justify-items: stretch; justify-content: start; text-align: left; }");
     expect(css).toContain(".dc-images-tab .docker-connector__image-card-secondary, .dc-images-tab .docker-connector__image-card-id, .dc-images-tab .docker-connector__image-card-metadata { grid-column: 2; justify-self: stretch; width: 100%; text-align: left; }");
-    expect(css).toContain(".dc-images-tab .docker-connector__image-card-metadata { justify-items: start; text-align: left; }");
+    expect(css).toMatch(/\.dc-images-tab \.docker-connector__image-card-metadata \{[^}]*justify-items: start;[^}]*text-align: left;/);
     expect(css).toContain("@container (max-width: 620px) { .dc-images-tab .docker-connector__images-toolbar");
     expect(css).not.toContain("dc-resource-page");
     expect(tab).not.toContain("docker-connector__image-row");

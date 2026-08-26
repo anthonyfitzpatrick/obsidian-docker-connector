@@ -97,10 +97,10 @@ describe("DockerInspectionService", () => {
   });
   it("loads a complete TLS snapshot through the shared read-only API pipeline", async () => {
     const tls: DockerTlsProfile = { id: "tls", name: "TLS", enabled: true, createdAt: "", updatedAt: "", connectionType: "docker-tls", host: "docker.example.test", port: 2376, serverName: "docker.example.test", caCertificatePath: "/tmp/ca", clientCertificatePath: "/tmp/cert", clientKeyPath: "/tmp/key", tlsSnapshot: { serverName: "docker.example.test", importedAt: "" } };
-    const calls: string[] = []; const responses: Record<string, unknown> = { "/version": { Version: "1", ApiVersion: "1.0" }, "/info": { OperatingSystem: "Linux", Architecture: "x86_64", KernelVersion: "k", NCPU: 1, MemTotal: 1 }, "/containers/json?all=true": [], "/images/json": [], "/volumes": { Volumes: [] }, "/networks": [] };
+    const calls: string[] = []; const responses: Record<string, unknown> = { "/version": { Version: "1", ApiVersion: "1.0" }, "/info": { ID: "engine-identity", OperatingSystem: "Linux", Architecture: "x86_64", KernelVersion: "k", NCPU: 1, MemTotal: 1 }, "/containers/json?all=true": [], "/images/json": [], "/volumes": { Volumes: [] }, "/networks": [] };
     const transport: DockerTransport = { profile: tls, connect: async () => undefined, disconnect: async () => undefined, isConnected: () => true, request: async (request) => { calls.push(request.path); return responses[request.path] as never; }, testConnection: async () => ({ success: true, steps: [] }) };
     const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(tls);
-    expect(snapshot).toMatchObject({ status: "online", hostId: "tls" }); expect(calls.sort()).toEqual(Object.keys(responses).sort());
+    expect(snapshot).toMatchObject({ status: "online", hostId: "tls", daemonId: "engine-identity" }); expect(calls.sort()).toEqual(Object.keys(responses).sort());
   });
   it("classifies an encrypted TLS key without its session passphrase as authentication required", async () => {
     const tls: DockerTlsProfile = { id: "tls", name: "TLS", enabled: true, createdAt: "", updatedAt: "", connectionType: "docker-tls", host: "docker.example.test", port: 2376, serverName: "docker.example.test", caCertificatePath: "/tmp/ca", clientCertificatePath: "/tmp/cert", clientKeyPath: "/tmp/key", tlsSnapshot: { serverName: "docker.example.test", importedAt: "" } };

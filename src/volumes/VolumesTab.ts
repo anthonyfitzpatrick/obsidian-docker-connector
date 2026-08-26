@@ -1,6 +1,7 @@
 import { Notice, setIcon } from "obsidian";
 import type DockerConnectorPlugin from "../main";
 import type { DockerConnectionProfile, DockerHostSnapshot } from "../models/DockerConnectionProfile";
+import { dockerResourceKey, selectedInventorySnapshots } from "../models/DockerHostSnapshotSelection";
 import { renderMetricCards } from "../ui/MetricCards";
 import { DEFAULT_VOLUMES_STATE, type DockerVolumeSummary, type VolumeFilter, type VolumesViewState } from "./VolumeModels";
 import { selectVolumes, values } from "./VolumeSelectors";
@@ -16,7 +17,7 @@ export class VolumesTab {
 
   render(root: HTMLElement, selectedHostId: string): void {
     const profiles = selectedHostId === "all" ? this.plugin.settings.profiles : this.plugin.settings.profiles.filter((profile) => profile.id === selectedHostId);
-    const snapshots = profiles.map((profile) => this.plugin.snapshots.get(profile.id)).filter((snapshot): snapshot is DockerHostSnapshot => Boolean(snapshot));
+    const snapshots = selectedInventorySnapshots(this.plugin.settings.profiles, this.plugin.snapshots, selectedHostId);
     const all = snapshots.flatMap((snapshot) => snapshot.volumes);
     const results = selectVolumes(all, this.state);
     root.addClass("dc-volumes-tab");
@@ -52,7 +53,7 @@ export class VolumesTab {
   }
 
   private row(list: HTMLElement, volume: DockerVolumeSummary): void {
-    const selected = this.state.selected === volume.name;
+    const selected = this.state.selected === this.key(volume);
     const card = list.createEl("button", { cls: `docker-connector__volume-card${selected ? " is-selected" : ""}`, attr: { "aria-label": volume.name, "aria-pressed": String(selected) } });
     card.onclick = () => void this.open(volume, card);
     const header = card.createDiv({ cls: "docker-connector__volume-card-header" });
@@ -68,12 +69,13 @@ export class VolumesTab {
   }
 
   private detail(root: HTMLElement, profiles: DockerConnectionProfile[], snapshots: DockerHostSnapshot[]): void {
-    const volume = snapshots.flatMap((snapshot) => snapshot.volumes).find((item) => item.name === this.state.selected);
-    const profile = volume && profiles.find((item) => item.id === volume.hostProfileId);
-    const snapshot = volume && snapshots.find((item) => item.hostId === volume.hostProfileId);
-    if (!volume || !profile || !snapshot) return;
-    const panel = root.createEl("aside", { cls: "dc-volume-detail-panel docker-connector__volumes-detail", attr: { "aria-label": `Details for ${volume.name}` } });
-    const header = panel.createDiv({ cls: "dc-image-detail-header" }); header.createEl("h2", { text: volume.name });
+    const volume = snapshots.flatMap((snapshot) => snapshot.volumes.map((item) => ({ item, snapshot }))).find(({ item, snapshot }) => dockerResourceKey(snapshot, item.id) === this.state.selected);
+    const profile = volume && profiles.find((item) => item.id === volume.item.hostProfileId);
+    if (!volume || !profile) return;
+    const summary = volume.item;
+    const snapshot = volume.snapshot;
+    const panel = root.createEl("aside", { cls: "dc-volume-detail-panel docker-connector__volumes-detail", attr: { "aria-label": `Details for ${summary.name}` } });
+    const header = panel.createDiv({ cls: "dc-image-detail-header" }); header.createEl("h2", { text: summary.name });
     const close = header.createEl("button", { attr: { "aria-label": "Close volume details" } }); setIcon(close, "x"); close.onclick = () => { this.state.selected = null; this.state.detail = { status: "closed" }; this.rerender(); };
     if (this.state.detail.status === "loading") { panel.createDiv({ text: "Loading volume details…", cls: "dc-container-loading" }); return; }
     if (this.state.detail.status !== "ready") return;
@@ -84,7 +86,8 @@ export class VolumesTab {
     details.containersUsingVolume.length ? details.containersUsingVolume.forEach((container) => { const button = references.createEl("button", { text: `${container.name} · ${container.state ?? "Unknown"}` }); button.onclick = () => this.openContainer(container.id); }) : references.createDiv({ text: "No visible container references.", cls: "docker-connector__muted" });
   }
 
-  private async open(volume: DockerVolumeSummary, _origin: HTMLElement): Promise<void> { this.state.selected = volume.name; const profile = this.plugin.settings.profiles.find((item) => item.id === volume.hostProfileId); const snapshot = this.plugin.snapshots.get(volume.hostProfileId); if (!profile || !snapshot) return; this.state.detail = { status: "loading", name: volume.name }; this.rerender(); try { this.state.detail = { status: "ready", name: volume.name, value: await this.plugin.inspectVolume(profile, snapshot, volume.name) }; } catch (error) { this.state.detail = { status: "error", name: volume.name, message: error instanceof Error ? error.message : "Volume details could not be loaded." }; } this.rerender(); }
+  private async open(volume: DockerVolumeSummary, _origin: HTMLElement): Promise<void> { this.state.selected = this.key(volume); const profile = this.plugin.settings.profiles.find((item) => item.id === volume.hostProfileId); const snapshot = this.plugin.snapshots.get(volume.hostProfileId); if (!profile || !snapshot) return; const key = dockerResourceKey(snapshot, volume.id); this.state.detail = { status: "loading", name: key }; this.rerender(); try { this.state.detail = { status: "ready", name: key, value: await this.plugin.inspectVolume(profile, snapshot, volume.name) }; } catch (error) { this.state.detail = { status: "error", name: key, message: error instanceof Error ? error.message : "Volume details could not be loaded." }; } this.rerender(); }
+  private key(volume: DockerVolumeSummary): string { const snapshot = this.plugin.snapshots.get(volume.hostProfileId); return snapshot ? dockerResourceKey(snapshot, volume.id) : `profile:${volume.hostProfileId}\u0000${volume.id}`; }
   private select(root: HTMLElement, label: string, value: string, options: Array<[string, string]>, change: (value: string) => void): void { const control = root.createEl("label", { cls: "dc-container-select" }); control.createSpan({ text: label }); const select = control.createEl("select", { attr: { "aria-label": `${label} volume control` } }); options.forEach(([optionValue, text]) => select.createEl("option", { value: optionValue, text })); select.value = value; select.onchange = () => change(select.value); }
 }
 
