@@ -4,17 +4,17 @@ import { readFile } from "node:fs/promises";
 describe("container Update action activation", () => {
   it("uses one structured eligibility result to control the rendered Update button", async () => {
     const source = await readFile("src/containers/ContainersTab.ts", "utf8");
-    expect(source).toMatch(/const updateEligibility = getContainerUpdateEligibility\(summary\.image, details\.labels\)/);
-    expect(source).toMatch(/updateEligibility \}/);
-    expect(source).toMatch(/capabilities\.canUpdate, capabilities\.updateReason/);
+    expect(source).toMatch(/const updateEligibility = getContainerUpdateEligibility\(\s*summary\.image,\s*details\.labels,?\s*\)/);
+    expect(source).toMatch(/updateEligibility,?\s*\}/);
+    expect(source).toMatch(/capabilities\.canUpdate,\s*capabilities\.updateReason/);
     expect(source).toMatch(/button\.disabled = !enabled \|\| inProgress/);
     expect(source).toMatch(/button\.onclick = \(\) => void action\(\)/);
   });
 
   it("renders a direct Update-unavailable explanation and preserves the existing transaction handler", async () => {
     const source = await readFile("src/containers/ContainersTab.ts", "utf8");
-    expect(source).toMatch(/row\("ban", "Update unavailable", eligibilityReason/);
-    expect(source).toMatch(/new ContainerUpdateDialog\(this\.plugin, profile, summary/);
+    expect(source).toMatch(/row\(\s*"ban",\s*"Update unavailable",\s*eligibilityReason/);
+    expect(source).toMatch(/new ContainerUpdateDialog\(\s*this\.plugin,\s*profile,\s*summary,/);
     const dialog = await readFile("src/containers/ContainerUpdateDialog.ts", "utf8");
     expect(dialog).toMatch(/this\.plugin\.updateContainer\(this\.profile, this\.container\.id, true, this\.attemptId\)/);
     expect(dialog).toMatch(/Proceed with update/);

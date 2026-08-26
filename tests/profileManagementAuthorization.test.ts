@@ -35,7 +35,7 @@ describe("profile-scoped container management", () => {
     const [main, settings, actions, containers, dashboard] = await Promise.all([readFile("src/main.ts", "utf8"), readFile("src/settings/settings.ts", "utf8"), readFile("src/services/DockerContainerActionService.ts", "utf8"), readFile("src/containers/ContainersTab.ts", "utf8"), readFile("src/views/DockerDashboardView.ts", "utf8")]);
     expect(main).toMatch(/new ProfileManagementAuthorization/); expect(main).toMatch(/managementAuthorization\.clear\(\)/); expect(main).toMatch(/clearProfileManagementAuthorization\(profileId\)/);
     expect(settings).not.toMatch(/Container management/); expect(settings).not.toMatch(/containerManagementEnabled/);
-    expect(actions).toMatch(/managementEnabled\(profile\.id\)/); expect(containers).toMatch(/isProfileManagementEnabled\(profile\.id\)/);
+    expect(actions).toMatch(/managementEnabled\(profile\.id\)/); expect(containers).toMatch(/isProfileManagementEnabled\(\s*profile\.id,?\s*\)/);
     expect(main).toMatch(/revokeOnConnectionLoss/); expect(main).toMatch(/snapshots\.get\(profileId\)\?\.status === "online"/); expect(dashboard).toMatch(/role: "switch"/); expect(dashboard).toMatch(/selectedHostId === "all"/); expect(dashboard).not.toMatch(/renderManagementControl/);
   });
 });

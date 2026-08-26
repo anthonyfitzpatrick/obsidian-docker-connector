@@ -13,7 +13,7 @@ describe("container image update availability UI", () => {
     expect(source).toMatch(/Image is current/);
     expect(source).toMatch(/Could not check for updates/);
     const available = source.slice(source.indexOf('if (status.state === "available")'), source.indexOf('if (status.state === "current")'));
-    expect(available).toMatch(/if \(eligible\) add\("Update"/);
+    expect(available).toMatch(/if \(eligible\)\s+add\(\s*"Update"/);
     expect(available).toMatch(/Update unavailable/);
     const current = source.slice(source.indexOf('if (status.state === "current")'), source.indexOf('if (status.state === "error")'));
     expect(current).not.toMatch(/add\("Update"/);
@@ -22,8 +22,8 @@ describe("container image update availability UI", () => {
   it("uses the typed check service for Check now and rerenders without invoking the update transaction", async () => {
     const source = await readFile("src/containers/ContainersTab.ts", "utf8");
     const statusRenderer = source.slice(source.indexOf("private imageUpdate"), source.indexOf("private updateRows"));
-    expect(statusRenderer).toMatch(/checkContainerImageUpdate\(profile, summary\.id, true\)/);
-    expect(statusRenderer).toMatch(/await pending; this\.rerender\(\)/);
+    expect(statusRenderer).toMatch(/checkContainerImageUpdate\(\s*profile,\s*summary\.id,\s*true,?\s*\)/);
+    expect(statusRenderer).toMatch(/await pending;\s*this\.rerender\(\)/);
     expect(statusRenderer).not.toMatch(/updateContainer\(/);
   });
 

@@ -84,7 +84,7 @@
 .docker-connector button { cursor: pointer; }
 .docker-connector button:focus-visible, .docker-connector input:focus-visible, .docker-connector select:focus-visible, .docker-connector summary:focus-visible { outline: 2px solid var(--dc-accent); outline-offset: 2px; }
 .docker-connector button:disabled { cursor: not-allowed; opacity: .55; }
-.docker-connector__panel, .docker-connector__summary-card, .dc-container-row, .dc-image-row, .dc-volume-row, .dc-network-row { border-radius: var(--dc-radius); transition: border-color var(--dc-transition), background var(--dc-transition), box-shadow var(--dc-transition), transform var(--dc-transition); }
+.docker-connector__panel, .docker-connector__summary-card, .dc-container-row, .dc-image-row { border-radius: var(--dc-radius); transition: border-color var(--dc-transition), background var(--dc-transition), box-shadow var(--dc-transition), transform var(--dc-transition); }
 .docker-connector__panel { animation: dc-fade-in 180ms ease both; }
 .docker-connector__icon-button, .dc-container-refresh { min-height: var(--dc-control-height); }
 .docker-connector__status, .dc-container-badge { min-height: 22px; box-sizing: border-box; align-items: center; }
@@ -101,7 +101,6 @@
 .docker-connector__brand h2 { margin: 0; font-size: 1.26em; letter-spacing: -.02em; }
 .docker-connector__brand span, .docker-connector__panel-header span, .docker-connector__section-intro > span { color: var(--dc-text-muted); font-size: .82em; }
 .docker-connector__header-controls { justify-content: flex-end; flex-wrap: wrap; }
-.dc-management-switch { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 4px 8px; border: 1px solid var(--dc-border); border-radius: 10px; background: var(--dc-surface); }.dc-management-switch > div { display: grid; gap: 1px; }.dc-management-switch span { font-size: .78em; font-weight: 650; }.dc-management-switch small { color: var(--dc-text-muted); font-size: .68em; }.dc-management-switch input { appearance: none; width: 42px; height: 24px; margin: 0; border: 1px solid var(--dc-border); border-radius: 999px; background: var(--background-modifier-hover); cursor: pointer; }.dc-management-switch input::after { display: block; width: 18px; height: 18px; margin: 2px; border-radius: 50%; background: var(--text-muted); content: ""; transition: transform var(--dc-transition); }.dc-management-switch input:checked { border-color: var(--dc-success); background: color-mix(in srgb, var(--dc-success) 24%, transparent); }.dc-management-switch input:checked::after { transform: translateX(18px); background: var(--dc-success); }.dc-management-switch input:disabled { cursor: not-allowed; opacity: .55; }.dc-management-switch input:focus-visible { outline: 2px solid var(--dc-accent); outline-offset: 2px; }
 .dc-card-management-switch { display: inline-flex; align-items: center; flex: 0 0 auto; gap: 6px; min-height: 32px; white-space: nowrap; }.dc-card-management-switch span { font-size: .72em; font-weight: 650; }.dc-card-management-switch small { color: var(--dc-text-muted); font-size: .66em; }.dc-card-management-switch input { appearance: none; width: 38px; height: 22px; margin: 0; border: 1px solid var(--dc-border); border-radius: 999px; background: var(--background-modifier-hover); cursor: pointer; }.dc-card-management-switch input::after { display: block; width: 16px; height: 16px; margin: 2px; border-radius: 50%; background: var(--text-muted); content: ""; transition: transform var(--dc-transition); }.dc-card-management-switch input:checked { border-color: var(--dc-success); background: color-mix(in srgb, var(--dc-success) 24%, transparent); }.dc-card-management-switch input:checked::after { transform: translateX(16px); background: var(--dc-success); }.dc-card-management-switch input:disabled { cursor: not-allowed; opacity: .55; }.dc-card-management-switch input:focus-visible { outline: 2px solid var(--dc-accent); outline-offset: 2px; }
 .docker-connector__host-picker { border: 1px solid var(--dc-border); border-radius: 8px; padding: 5px 8px; background: var(--dc-surface); }
 .docker-connector__control-label { color: var(--dc-text-muted); font-size: .75em; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
@@ -247,8 +246,6 @@
 .dc-image-toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-bottom: 11px; padding: 10px; border: 1px solid var(--dc-border); border-radius: 11px; background: var(--dc-surface); }.dc-image-toolbar .dc-container-search { flex: 1 1 220px; }.dc-image-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, .72fr); align-items: start; gap: 13px; }.dc-image-list { display: grid; gap: 7px; }.dc-image-row { display: grid; grid-template-columns: minmax(160px, 1fr) 72px 70px auto 16px; align-items: center; gap: 10px; width: 100%; padding: 10px; border: 1px solid var(--dc-border); border-radius: 10px; background: var(--dc-surface-raised); color: var(--text-normal); text-align: left; }.dc-image-row:hover, .dc-image-row.is-selected { border-color: var(--dc-accent); background: color-mix(in srgb, var(--dc-accent) 7%, var(--dc-surface-raised)); }.dc-image-row > div { min-width: 0; }.dc-image-row strong, .dc-image-row > div > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.dc-image-detail-panel { position: sticky; top: 8px; max-height: calc(100vh - 120px); overflow: auto; padding: 13px; border: 1px solid var(--dc-border); border-radius: 11px; background: var(--dc-surface-raised); box-shadow: 0 9px 24px rgb(0 0 0 / .1); }.dc-image-detail-header { display: flex; align-items: center; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--dc-border); }.dc-image-detail-header h2 { flex: 1; min-width: 0; margin: 0; overflow-wrap: anywhere; font-size: 1em; }.dc-image-detail-header button { display: grid; place-items: center; border: 0; border-radius: 5px; padding: 4px; background: transparent; color: var(--dc-text-muted); }.dc-image-detail-section { margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--dc-border); }.dc-image-detail-section h3 { margin: 0 0 7px; font-size: .84em; }.dc-image-detail-section > button { display: block; width: 100%; margin: 4px 0; border: 0; border-radius: 5px; padding: 5px; background: var(--dc-surface); color: var(--dc-accent); text-align: left; font-size: .78em; }
 @container (max-width: 820px) { .dc-image-layout { grid-template-columns: 1fr; }.dc-image-detail-panel { position: static; max-height: none; } } @container (max-width: 500px) { .dc-image-header { flex-direction: column; }.dc-image-cards { justify-content: start; }.dc-image-row { grid-template-columns: minmax(110px, 1fr) auto 15px; }.dc-image-row > span:nth-of-type(1), .dc-image-row > span:nth-of-type(2) { display: none; } }
 
-.dc-volumes-tab { container-type: inline-size; }.dc-volume-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, .72fr); gap: 13px; align-items: start; }.dc-volume-list { display: grid; gap: 7px; }.dc-volume-row { display: grid; grid-template-columns: minmax(160px, 1fr) 85px 60px auto 76px 16px; gap: 9px; align-items: center; width: 100%; padding: 10px; border: 1px solid var(--dc-border); border-radius: 10px; background: var(--dc-surface-raised); color: var(--text-normal); text-align: left; }.dc-volume-row:hover, .dc-volume-row.is-selected { border-color: var(--dc-accent); background: color-mix(in srgb, var(--dc-accent) 7%, var(--dc-surface-raised)); }.dc-volume-row strong, .dc-volume-row div span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.dc-volume-detail-panel { position: sticky; top: 8px; max-height: calc(100vh - 120px); overflow: auto; padding: 13px; border: 1px solid var(--dc-border); border-radius: 11px; background: var(--dc-surface-raised); box-shadow: 0 9px 24px rgb(0 0 0 / .1); } @container (max-width: 820px) { .dc-volume-layout { grid-template-columns: 1fr; }.dc-volume-detail-panel { position: static; max-height: none; } } @container (max-width: 500px) { .dc-volume-row { grid-template-columns: minmax(120px, 1fr) auto 15px; }.dc-volume-row > span:nth-of-type(1), .dc-volume-row > span:nth-of-type(2), .dc-volume-row > span:nth-of-type(3) { display: none; } }
-.dc-networks-tab { container-type: inline-size; }.dc-network-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,.7fr); gap:13px; }.dc-network-list { display:grid; gap:7px; }.dc-network-row { display:grid; grid-template-columns:minmax(150px,1fr) 90px 60px 75px auto 15px; gap:9px; align-items:center; width:100%; padding:10px; border:1px solid var(--dc-border); border-radius:10px; background:var(--dc-surface-raised); color:var(--text-normal); text-align:left; }.dc-network-row:hover { border-color:var(--dc-accent); }.dc-network-row strong,.dc-network-row div span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.dc-network-detail-panel { position:sticky; top:8px; max-height:calc(100vh - 120px); overflow:auto; padding:13px; border:1px solid var(--dc-border); border-radius:11px; background:var(--dc-surface-raised); } @container (max-width:820px){.dc-network-layout{grid-template-columns:1fr}.dc-network-detail-panel{position:static;max-height:none}} @container (max-width:500px){.dc-network-row{grid-template-columns:minmax(120px,1fr) auto 15px}.dc-network-row>span:nth-of-type(1),.dc-network-row>span:nth-of-type(2),.dc-network-row>span:nth-of-type(3){display:none}}
 
 @media (max-width: 980px) { .docker-connector__header { align-items: flex-start; flex-direction: column; }.docker-connector__header-controls { justify-content: flex-start; }.docker-connector__summary-grid { grid-template-columns: repeat(3, minmax(130px, 1fr)); } }
 @media (max-width: 660px) { .docker-connector { padding: 15px 12px 24px; }.docker-connector__summary-grid { grid-template-columns: repeat(2, minmax(130px, 1fr)); }.docker-connector__overview-grid { grid-template-columns: 1fr; }.docker-connector__panel--wide { grid-column: span 1; }.docker-connector__detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.docker-connector__health-row { grid-template-columns: minmax(110px, 1fr) auto; }.docker-connector__health-metrics { display: none; }.docker-connector__inventory-row { grid-template-columns: 1fr; gap: 3px; }.docker-connector__header-controls { width: 100%; }.docker-connector__host-picker { flex: 1; }.docker-connector__host-picker select { width: 100%; max-width: none; } }
@@ -804,10 +801,7 @@ button.dc-metric-card:focus-visible,
 	gap: 11px;
 }
 
-.dc-container-row,
-.dc-image-row,
-.dc-volume-row,
-.dc-network-row {
+.dc-image-row {
 	min-height: 92px;
 	padding: 16px 17px;
 	border-color: color-mix(in srgb, var(--dc-border) 84%, transparent);
@@ -816,73 +810,11 @@ button.dc-metric-card:focus-visible,
 	transition: transform var(--dc-transition), border-color var(--dc-transition), box-shadow var(--dc-transition), background var(--dc-transition);
 }
 
-.dc-container-row:hover,
 .dc-image-row:hover,
-.dc-volume-row:hover,
-.dc-network-row:hover,
-.dc-container-row-selected,
-.dc-image-row.is-selected,
-.dc-volume-row.is-selected {
+.dc-image-row.is-selected {
 	border-color: color-mix(in srgb, var(--dc-accent) 58%, var(--dc-border));
 	box-shadow: var(--dc-card-shadow-hover);
 	transform: translateY(-1px);
-}
-
-.dc-container-state-dot {
-	width: 32px;
-	height: 32px;
-	border-radius: 10px;
-}
-
-.dc-container-primary {
-	gap: 4px 8px;
-}
-
-.dc-container-primary strong {
-	font-size: .98em;
-	font-weight: 720;
-}
-
-.dc-container-primary > span,
-.dc-container-secondary {
-	font-size: .79em;
-	line-height: 1.45;
-}
-
-.dc-container-badges {
-	gap: 6px;
-}
-
-.dc-container-secondary {
-	gap: 4px;
-}
-
-.dc-container-secondary span {
-	width: max-content;
-	max-width: 100%;
-	padding: 2px 0;
-}
-
-.dc-container-open {
-	display: grid;
-	place-items: center;
-	width: 30px;
-	height: 30px;
-	border: 1px solid color-mix(in srgb, var(--dc-accent) 28%, var(--dc-border));
-	border-radius: 8px;
-	background: var(--dc-accent-soft);
-	transition: background var(--dc-transition), transform var(--dc-transition);
-}
-
-.dc-container-open:hover {
-	background: color-mix(in srgb, var(--dc-accent) 22%, var(--dc-surface-raised));
-	transform: translateX(2px);
-}
-
-.dc-container-results.is-compact .dc-container-row {
-	min-height: 58px;
-	padding: 9px 12px;
-	box-shadow: none;
 }
 
 .dc-container-detail-panel,
@@ -948,7 +880,7 @@ button.dc-metric-card:focus-visible,
 	.docker-connector__summary-card strong { font-size: 2.05em; }
 	.docker-connector__panel { padding: 16px; }
 	.dc-container-toolbar, .dc-image-toolbar { padding: 10px; }
-	.dc-container-row, .dc-image-row, .dc-volume-row, .dc-network-row { min-height: 82px; padding: 13px; }
+	.dc-image-row { min-height: 82px; padding: 13px; }
 	.dc-container-detail-panel, .dc-image-detail-panel, .dc-volume-detail-panel, .dc-network-detail-panel { padding: 16px; }
 }
 
@@ -991,11 +923,7 @@ button.dc-metric-card:focus-visible,
 @media (prefers-reduced-motion: reduce) {
 	.docker-connector__summary-card,
 	.docker-connector__nav-item,
-	.dc-container-row,
-	.dc-image-row,
-	.dc-volume-row,
-	.dc-network-row,
-	.dc-container-open { transition: none; }
+	.dc-image-row { transition: none; }
 }
 
 /* Host-health cards deliberately reserve room for their name, category, and engine summary. */
@@ -1315,136 +1243,6 @@ button.dc-metric-card:focus-visible,
 	.docker-connector__summary-icon { top: 13px; right: 13px; width: 32px; height: 32px; padding: 8px; }
 }
 
-/* Containers: stable information zones prevent metadata from escaping its card. */
-.dc-container-layout {
-	grid-template-columns: minmax(0, 1.22fr) minmax(360px, .78fr);
-	gap: 20px;
-}
-
-.docker-connector button.dc-container-row {
-	height: auto !important;
-	min-height: 126px;
-	grid-template-columns: 38px minmax(180px, 1fr) minmax(250px, 1.05fr) 34px;
-	grid-template-rows: auto auto;
-	align-items: center;
-	gap: 8px 16px;
-	padding: 16px 17px;
-	border-color: color-mix(in srgb, var(--dc-border) 88%, transparent);
-	background: var(--dc-surface-raised) !important;
-	box-shadow: var(--dc-card-shadow);
-	overflow: hidden;
-}
-
-.dc-container-row .dc-container-state-dot {
-	grid-column: 1;
-	grid-row: 1 / span 2;
-	width: 36px;
-	height: 36px;
-	border-radius: 11px;
-}
-
-.dc-container-row .dc-container-primary {
-	grid-column: 2;
-	grid-row: 1 / span 2;
-	align-self: center;
-	gap: 5px 8px;
-}
-
-.dc-container-row .dc-container-primary strong {
-	font-size: 1em;
-	line-height: 1.2;
-}
-
-.dc-container-row .dc-container-primary > span {
-	line-height: 1.3;
-}
-
-.dc-container-row .dc-container-badges {
-	grid-column: 3;
-	grid-row: 1;
-	align-self: end;
-}
-
-.dc-container-row .dc-container-secondary {
-	grid-column: 3;
-	grid-row: 2;
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 6px 12px;
-	align-self: start;
-	font-size: .76em;
-	line-height: 1.35;
-}
-
-.dc-container-row .dc-container-secondary span {
-	width: auto;
-	min-width: 0;
-	padding: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.dc-container-row .dc-container-secondary span:first-child {
-	font-weight: 640;
-	color: var(--text-normal);
-}
-
-.dc-container-row .dc-container-open {
-	grid-column: 4;
-	grid-row: 1 / span 2;
-	justify-self: end;
-	align-self: center;
-	width: 34px;
-	height: 34px;
-}
-
-.docker-connector button.dc-container-row:hover,
-.docker-connector button.dc-container-row.dc-container-row-selected {
-	background: color-mix(in srgb, var(--dc-accent) 5%, var(--dc-surface-raised)) !important;
-	border-color: color-mix(in srgb, var(--dc-accent) 58%, var(--dc-border));
-	box-shadow: var(--dc-card-shadow-hover);
-}
-
-.dc-container-results.is-compact .dc-container-row {
-	min-height: 72px;
-	grid-template-columns: 32px minmax(0, 1fr) auto 30px;
-	padding: 10px 12px;
-}
-
-.dc-container-results.is-compact .dc-container-row .dc-container-state-dot {
-	width: 30px;
-	height: 30px;
-	border-radius: 9px;
-}
-
-.dc-container-results.is-compact .dc-container-row .dc-container-secondary {
-	display: none;
-}
-
-@container (max-width: 980px) {
-	.dc-container-layout { grid-template-columns: minmax(0, 1fr) minmax(310px, .7fr); }
-	.docker-connector button.dc-container-row { grid-template-columns: 36px minmax(145px, 1fr) minmax(200px, .95fr) 32px; gap: 8px 12px; }
-}
-
-@container (max-width: 820px) {
-	.dc-container-layout { grid-template-columns: 1fr; }
-	.docker-connector button.dc-container-row { min-height: 114px; grid-template-columns: 36px minmax(0, 1fr) auto 32px; }
-	.dc-container-row .dc-container-primary { grid-column: 2; }
-	.dc-container-row .dc-container-badges { grid-column: 3; justify-self: end; }
-	.dc-container-row .dc-container-secondary { grid-column: 2 / 4; grid-row: 2; }
-	.dc-container-row .dc-container-open { grid-column: 4; }
-}
-
-@container (max-width: 500px) {
-	.docker-connector button.dc-container-row { min-height: 104px; grid-template-columns: 34px minmax(0, 1fr) 30px; gap: 7px 10px; padding: 12px; }
-	.dc-container-row .dc-container-state-dot { width: 32px; height: 32px; }
-	.dc-container-row .dc-container-primary { grid-column: 2; grid-row: 1; }
-	.dc-container-row .dc-container-badges { grid-column: 2; grid-row: 2; justify-self: start; }
-	.dc-container-row .dc-container-secondary { display: none; }
-	.dc-container-row .dc-container-open { grid-column: 3; grid-row: 1 / span 2; }
-}
-
 /* Detail metadata must never escape its label/value grid in a narrow side panel. */
 .dc-container-detail-row {
 	grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr);
@@ -1478,344 +1276,6 @@ button.dc-metric-card:focus-visible,
 		font-size: .9em;
 		font-weight: 650;
 	}
-}
-
-/* Images, volumes, and networks share the same protected card rhythm as Containers. */
-.dc-images-tab,
-.dc-volumes-tab,
-.dc-networks-tab {
-	container-type: inline-size;
-}
-
-.dc-image-header {
-	align-items: end;
-	margin-bottom: 18px;
-}
-
-.dc-image-cards {
-	gap: 8px;
-}
-
-.dc-image-card,
-.dc-image-cards > button {
-	min-height: 32px;
-	padding: 6px 10px;
-	border: 1px solid color-mix(in srgb, var(--dc-border) 88%, transparent);
-	border-radius: 999px;
-	background: var(--dc-surface);
-	color: var(--dc-text-muted);
-	font-size: .77em;
-	font-weight: 650;
-	transition: border-color var(--dc-transition), background var(--dc-transition), color var(--dc-transition);
-}
-
-.dc-image-cards > button:hover,
-.dc-image-card:hover,
-.dc-image-card.is-active {
-	border-color: color-mix(in srgb, var(--dc-accent) 45%, var(--dc-border));
-	background: var(--dc-accent-soft);
-	color: var(--dc-accent);
-}
-
-/* Shared inventory summary cards: clear totals and one-click entry points. */
-.dc-image-cards,
-.dc-container-header-metrics {
-	gap: 11px;
-}
-
-.dc-image-card,
-.dc-image-cards > button,
-.dc-image-cards > span,
-.dc-container-header-metrics span {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-height: 54px;
-	padding: 10px 15px;
-	border: 1px solid color-mix(in srgb, var(--dc-border) 82%, transparent);
-	border-radius: 14px;
-	background: linear-gradient(145deg, var(--dc-surface-raised), var(--dc-surface));
-	box-shadow: 0 2px 7px rgb(15 23 42 / .045);
-	color: var(--text-normal);
-	font-size: .9em;
-	font-weight: 700;
-	letter-spacing: .005em;
-	white-space: nowrap;
-	transition: border-color var(--dc-transition), background var(--dc-transition), color var(--dc-transition), box-shadow var(--dc-transition), transform var(--dc-transition);
-}
-
-.dc-image-cards > span,
-.dc-container-header-metrics span {
-	color: var(--dc-text-muted);
-	font-weight: 620;
-}
-
-.dc-image-cards > button:hover,
-.dc-image-card:hover,
-.dc-container-header-metrics span:hover {
-	border-color: color-mix(in srgb, var(--dc-accent) 52%, var(--dc-border));
-	box-shadow: 0 7px 16px rgb(15 23 42 / .09);
-	transform: translateY(-1px);
-}
-
-.dc-image-card.is-active {
-	border-color: color-mix(in srgb, var(--dc-accent) 64%, var(--dc-border));
-	background: linear-gradient(145deg, var(--dc-accent-soft), color-mix(in srgb, var(--dc-surface-raised) 90%, var(--dc-accent-soft)));
-	color: var(--dc-accent);
-	box-shadow: 0 5px 14px color-mix(in srgb, var(--dc-accent) 14%, transparent);
-}
-
-@container (max-width: 720px) {
-	.dc-image-cards,
-	.dc-container-header-metrics {
-		justify-content: start;
-		gap: 8px;
-	}
-
-	.dc-image-card,
-	.dc-image-cards > button,
-	.dc-image-cards > span,
-	.dc-container-header-metrics span {
-		min-height: 48px;
-		padding: 8px 11px;
-		border-radius: 12px;
-		font-size: .82em;
-	}
-}
-
-.dc-image-layout,
-.dc-volume-layout,
-.dc-network-layout {
-	grid-template-columns: minmax(0, 1.22fr) minmax(330px, .78fr);
-	gap: 20px;
-}
-
-.docker-connector button.dc-image-row,
-.docker-connector button.dc-volume-row,
-.docker-connector button.dc-network-row {
-	height: auto !important;
-	min-height: 96px;
-	padding: 14px 16px;
-	border-color: color-mix(in srgb, var(--dc-border) 88%, transparent);
-	border-radius: 13px;
-	background: var(--dc-surface-raised) !important;
-	box-shadow: var(--dc-card-shadow);
-	overflow: hidden;
-	transition: transform var(--dc-transition), border-color var(--dc-transition), box-shadow var(--dc-transition), background var(--dc-transition);
-}
-
-.docker-connector button.dc-image-row:hover,
-.docker-connector button.dc-volume-row:hover,
-.docker-connector button.dc-network-row:hover,
-.docker-connector button.dc-image-row.is-selected,
-.docker-connector button.dc-volume-row.is-selected {
-	border-color: color-mix(in srgb, var(--dc-accent) 55%, var(--dc-border));
-	background: color-mix(in srgb, var(--dc-accent) 5%, var(--dc-surface-raised)) !important;
-	box-shadow: var(--dc-card-shadow-hover);
-	transform: translateY(-1px);
-}
-
-.docker-connector button.dc-image-row {
-	grid-template-columns: minmax(190px, 1fr) minmax(72px, auto) minmax(82px, auto) max-content 34px;
-	gap: 12px;
-}
-
-.docker-connector button.dc-volume-row,
-.docker-connector button.dc-network-row {
-	grid-template-columns: minmax(190px, 1fr) minmax(72px, auto) minmax(58px, auto) max-content minmax(84px, auto) 34px;
-	gap: 12px;
-}
-
-.dc-image-row > div,
-.dc-volume-row > div,
-.dc-network-row > div {
-	min-width: 0;
-	display: grid;
-	gap: 4px;
-}
-
-.dc-image-row strong,
-.dc-volume-row strong,
-.dc-network-row strong {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	font-size: .97em;
-	font-weight: 720;
-}
-
-.dc-image-row > div > span,
-.dc-volume-row > div > span,
-.dc-network-row > div > span {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	line-height: 1.3;
-}
-
-.dc-image-row > span,
-.dc-volume-row > span,
-.dc-network-row > span {
-	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	font-size: .78em;
-}
-
-.dc-image-row > span:last-child,
-.dc-volume-row > span:last-child,
-.dc-network-row > span:last-child {
-	display: grid;
-	place-items: center;
-	width: 34px;
-	height: 34px;
-	border: 1px solid color-mix(in srgb, var(--dc-accent) 28%, var(--dc-border));
-	border-radius: 8px;
-	background: var(--dc-accent-soft);
-	color: var(--dc-accent);
-}
-
-.dc-image-detail-panel,
-.dc-volume-detail-panel,
-.dc-network-detail-panel {
-	top: 14px;
-	padding: 20px;
-	border-radius: 14px;
-	background: color-mix(in srgb, var(--dc-surface-raised) 97%, var(--dc-accent-soft));
-	box-shadow: var(--dc-card-shadow-hover);
-}
-
-.dc-network-detail-panel > h2 {
-	margin: 0 0 14px;
-	padding-bottom: 14px;
-	border-bottom: 1px solid var(--dc-border);
-	font-size: 1.05em;
-	overflow-wrap: anywhere;
-}
-
-.dc-image-detail-section {
-	margin-top: 16px;
-	padding-top: 15px;
-	border-top-color: color-mix(in srgb, var(--dc-border) 85%, transparent);
-}
-
-.dc-image-detail-section h3 {
-	margin-bottom: 10px;
-	font-size: .9em;
-}
-
-.dc-image-detail-section > button {
-	min-height: 34px;
-	padding: 7px 9px;
-	border: 1px solid color-mix(in srgb, var(--dc-border) 85%, transparent);
-	border-radius: 8px;
-	background: var(--dc-surface);
-	transition: border-color var(--dc-transition), background var(--dc-transition);
-}
-
-.dc-image-detail-section > button:hover {
-	border-color: color-mix(in srgb, var(--dc-accent) 40%, var(--dc-border));
-	background: var(--dc-accent-soft);
-}
-
-@container (max-width: 900px) {
-	.dc-image-layout,
-	.dc-volume-layout,
-	.dc-network-layout { grid-template-columns: minmax(0, 1fr) minmax(290px, .72fr); }
-	.docker-connector button.dc-image-row { grid-template-columns: minmax(150px, 1fr) auto auto max-content 32px; gap: 9px; }
-	.docker-connector button.dc-volume-row,
-	.docker-connector button.dc-network-row { grid-template-columns: minmax(150px, 1fr) auto auto max-content 32px; gap: 9px; }
-	.dc-volume-row > span:nth-of-type(2),
-	.dc-network-row > span:nth-of-type(2) { display: none; }
-}
-
-@container (max-width: 760px) {
-	.dc-image-layout,
-	.dc-volume-layout,
-	.dc-network-layout { grid-template-columns: 1fr; }
-	.dc-image-detail-panel,
-	.dc-volume-detail-panel,
-	.dc-network-detail-panel { position: static; max-height: none; }
-}
-
-@container (max-width: 520px) {
-	.dc-image-header { align-items: start; flex-direction: column; }
-	.dc-image-cards { justify-content: start; }
-	.docker-connector button.dc-image-row,
-	.docker-connector button.dc-volume-row,
-	.docker-connector button.dc-network-row { min-height: 82px; grid-template-columns: minmax(0, 1fr) max-content 30px; padding: 12px; }
-	.dc-image-row > span:nth-of-type(1),
-	.dc-image-row > span:nth-of-type(2),
-	.dc-volume-row > span:nth-of-type(1),
-	.dc-volume-row > span:nth-of-type(2),
-	.dc-volume-row > span:nth-of-type(3),
-	.dc-network-row > span:nth-of-type(1),
-	.dc-network-row > span:nth-of-type(2),
-	.dc-network-row > span:nth-of-type(3) { display: none; }
-	.dc-image-row > span:last-child,
-	.dc-volume-row > span:last-child,
-	.dc-network-row > span:last-child { width: 30px; height: 30px; }
-}
-
-/* Resource identity icons mirror the container state icon while retaining resource semantics. */
-.dc-resource-icon {
-	display: grid;
-	place-items: center;
-	width: 36px;
-	height: 36px;
-	border-radius: 11px;
-}
-
-.dc-resource-icon.is-image {
-	background: color-mix(in srgb, var(--dc-info) 15%, transparent);
-	color: var(--dc-info);
-}
-
-.dc-resource-icon.is-volume {
-	background: color-mix(in srgb, var(--dc-warning) 16%, transparent);
-	color: var(--dc-warning);
-}
-
-.dc-resource-icon.is-network {
-	background: var(--dc-accent-soft);
-	color: var(--dc-accent);
-}
-
-.docker-connector button.dc-image-row {
-	grid-template-columns: 36px minmax(190px, 1fr) minmax(72px, auto) minmax(82px, auto) max-content 34px;
-}
-
-.docker-connector button.dc-volume-row,
-.docker-connector button.dc-network-row {
-	grid-template-columns: 36px minmax(190px, 1fr) minmax(72px, auto) minmax(58px, auto) max-content minmax(84px, auto) 34px;
-}
-
-.dc-image-row > div:not(.dc-resource-icon),
-.dc-volume-row > div:not(.dc-resource-icon),
-.dc-network-row > div:not(.dc-resource-icon) {
-	min-width: 0;
-}
-
-@container (max-width: 900px) {
-	.docker-connector button.dc-image-row { grid-template-columns: 34px minmax(150px, 1fr) auto auto max-content 32px; }
-	.docker-connector button.dc-volume-row,
-	.docker-connector button.dc-network-row { grid-template-columns: 34px minmax(150px, 1fr) auto auto max-content 32px; }
-}
-
-@container (max-width: 520px) {
-	.docker-connector button.dc-image-row,
-	.docker-connector button.dc-volume-row,
-	.docker-connector button.dc-network-row { grid-template-columns: 32px minmax(0, 1fr) max-content 30px; }
-	.dc-resource-icon { width: 32px; height: 32px; border-radius: 10px; }
-	.dc-image-row > span:nth-of-type(1),
-	.dc-image-row > span:nth-of-type(2),
-	.dc-volume-row > span:nth-of-type(1),
-	.dc-volume-row > span:nth-of-type(2),
-	.dc-volume-row > span:nth-of-type(3),
-	.dc-network-row > span:nth-of-type(1),
-	.dc-network-row > span:nth-of-type(2),
-	.dc-network-row > span:nth-of-type(3) { display: none; }
 }
 
 /* Make the selected Docker environment a first-class header control. */
@@ -1876,3 +1336,149 @@ button.dc-metric-card:focus-visible,
 		max-width: none;
 	}
 }
+
+/* Applications is a dense, selectable project index; these overrides do not affect other dashboard views. */
+.docker-connector__applications-tab .docker-connector__applications-header { margin-bottom: 10px; }
+.docker-connector__applications-tab .docker-connector__summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.docker-connector__applications-tab .docker-connector__summary-card { height: 84px; padding: 11px 12px; }
+.docker-connector__applications-tab .docker-connector__summary-card > div:not(.docker-connector__summary-icon) { max-width: calc(100% - 36px); gap: 2px; }
+.docker-connector__applications-tab .docker-connector__summary-card span { font-size: .72em; }
+.docker-connector__applications-tab .docker-connector__summary-card strong { margin-top: 0; font-size: 1.7em; }
+.docker-connector__applications-tab .docker-connector__summary-card small { margin-top: 0; font-size: .72em; line-height: 1.25; }
+.docker-connector__applications-tab .docker-connector__summary-icon { top: 11px; right: 11px; width: 28px; height: 28px; padding: 6px; border-radius: 9px; }
+.docker-connector__applications-tab .docker-connector__applications-toolbar { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(118px, auto) minmax(128px, auto) minmax(140px, auto); align-items: end; gap: 8px; margin-bottom: 12px; padding: 8px; }
+.docker-connector__applications-tab .docker-connector__applications-toolbar .dc-container-search { min-height: var(--dc-control-height); padding: 0 8px; }
+.docker-connector__applications-tab .docker-connector__applications-toolbar .dc-container-select { gap: 3px; font-size: .74em; }
+.docker-connector__applications-tab .docker-connector__applications-toolbar .dc-container-select select { min-height: var(--dc-control-height); }
+.docker-connector__applications-tab .docker-connector__applications-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.docker-connector__applications-tab .docker-connector__applications-layout.is-detail-open .docker-connector__applications-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.docker-connector__applications-tab .docker-connector__application-card { gap: 7px; padding: 11px 12px; }
+.docker-connector__applications-tab .docker-connector__application-card, .dc-containers-tab .docker-connector__container-card, .dc-images-tab .docker-connector__image-card, .dc-volumes-tab .docker-connector__volume-card, .dc-networks-tab .docker-connector__network-card { border: 1px solid var(--dc-border); background: var(--dc-surface); color: var(--text-normal); }
+.docker-connector__applications-tab .docker-connector__application-card:hover, .docker-connector__applications-tab .docker-connector__application-card.is-selected, .dc-containers-tab .docker-connector__container-card:hover, .dc-containers-tab .docker-connector__container-card.is-selected, .dc-images-tab .docker-connector__image-card:hover, .dc-images-tab .docker-connector__image-card.is-selected, .dc-volumes-tab .docker-connector__volume-card:hover, .dc-volumes-tab .docker-connector__volume-card.is-selected, .dc-networks-tab .docker-connector__network-card:hover, .dc-networks-tab .docker-connector__network-card.is-selected { border-color: var(--dc-accent); background: color-mix(in srgb, var(--dc-accent) 7%, var(--dc-surface-raised)); box-shadow: 0 4px 10px rgb(0 0 0 / .06); }
+.docker-connector__applications-tab .docker-connector__application-card-header { gap: 8px; }
+.docker-connector__applications-tab .docker-connector__application-summary { gap: 2px; line-height: 1.3; }
+.docker-connector__applications-tab .docker-connector__application-services { gap: 4px; }
+.docker-connector__applications-tab .docker-connector__application-service-chips { gap: 4px; }
+.docker-connector__applications-tab .docker-connector__application-service-chips span { padding: 2px 7px; }
+.docker-connector__applications-tab .docker-connector__application-footer { padding-top: 6px; }
+@container (max-width: 980px) { .docker-connector__applications-tab .docker-connector__applications-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (max-width: 720px) { .docker-connector__applications-tab .docker-connector__summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.docker-connector__applications-tab .docker-connector__applications-toolbar { grid-template-columns: minmax(200px, 1fr) repeat(2, minmax(120px, auto)); }.docker-connector__applications-tab .docker-connector__applications-toolbar .dc-container-select:last-child { grid-column: span 2; } }
+@container (max-width: 520px) { .docker-connector__applications-tab .docker-connector__applications-toolbar { grid-template-columns: 1fr 1fr; }.docker-connector__applications-tab .docker-connector__applications-toolbar .dc-container-search { grid-column: 1 / -1; }.docker-connector__applications-tab .docker-connector__applications-toolbar .dc-container-select:last-child { grid-column: auto; }.docker-connector__applications-tab .docker-connector__applications-list { grid-template-columns: 1fr; }.docker-connector__applications-tab .docker-connector__summary-card { height: 82px; } }
+@container (max-width: 360px) { .docker-connector__applications-tab .docker-connector__applications-toolbar { grid-template-columns: 1fr; }.docker-connector__applications-tab .docker-connector__applications-toolbar .dc-container-search { grid-column: auto; } }
+
+/* Images, volumes, and networks retain their domain rows with direct, scoped presentation. */
+.dc-images-tab, .dc-volumes-tab, .dc-networks-tab { container-type: inline-size; }
+.dc-images-tab .docker-connector__images-header, .dc-volumes-tab .docker-connector__volumes-header, .dc-networks-tab .docker-connector__networks-header { display: flex; align-items: start; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+.dc-images-tab .docker-connector__images-header h1, .dc-volumes-tab .docker-connector__volumes-header h1, .dc-networks-tab .docker-connector__networks-header h1 { margin: 0; font-size: 1.35em; }
+.dc-images-tab .docker-connector__images-header .dc-image-count, .dc-volumes-tab .docker-connector__volumes-header .dc-image-count, .dc-networks-tab .docker-connector__networks-header .dc-image-count { display: block; margin-top: 3px; color: var(--dc-accent); font-size: .86em; font-weight: 650; }
+.dc-images-tab .docker-connector__summary-grid, .dc-volumes-tab .docker-connector__summary-grid, .dc-networks-tab .docker-connector__summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.dc-images-tab .docker-connector__summary-card, .dc-volumes-tab .docker-connector__summary-card, .dc-networks-tab .docker-connector__summary-card { height: 84px; padding: 11px 12px; }
+.dc-images-tab .docker-connector__summary-card > div:not(.docker-connector__summary-icon), .dc-volumes-tab .docker-connector__summary-card > div:not(.docker-connector__summary-icon), .dc-networks-tab .docker-connector__summary-card > div:not(.docker-connector__summary-icon) { max-width: calc(100% - 36px); gap: 2px; }
+.dc-images-tab .docker-connector__summary-card span, .dc-images-tab .docker-connector__summary-card small, .dc-volumes-tab .docker-connector__summary-card span, .dc-volumes-tab .docker-connector__summary-card small, .dc-networks-tab .docker-connector__summary-card span, .dc-networks-tab .docker-connector__summary-card small { font-size: .72em; line-height: 1.25; }
+.dc-images-tab .docker-connector__summary-card strong, .dc-volumes-tab .docker-connector__summary-card strong, .dc-networks-tab .docker-connector__summary-card strong { margin-top: 0; font-size: 1.7em; }
+.dc-images-tab .docker-connector__summary-icon, .dc-volumes-tab .docker-connector__summary-icon, .dc-networks-tab .docker-connector__summary-icon { top: 11px; right: 11px; width: 28px; height: 28px; padding: 6px; border-radius: 9px; }
+.dc-images-tab .docker-connector__images-toolbar, .dc-volumes-tab .docker-connector__volumes-toolbar, .dc-networks-tab .docker-connector__networks-toolbar { display: grid; align-items: end; gap: 8px; margin-bottom: 12px; padding: 8px; }
+.dc-images-tab .docker-connector__images-toolbar, .dc-volumes-tab .docker-connector__volumes-toolbar { grid-template-columns: minmax(220px, 1fr) repeat(4, minmax(112px, auto)); }
+.dc-networks-tab .docker-connector__networks-toolbar { grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(112px, auto)); }
+.dc-images-tab .dc-container-search, .dc-volumes-tab .dc-container-search, .dc-networks-tab .dc-container-search { min-height: var(--dc-control-height); padding: 0 8px; }
+.dc-images-tab .dc-container-select, .dc-volumes-tab .dc-container-select, .dc-networks-tab .dc-container-select { gap: 3px; font-size: .74em; }
+.dc-images-tab .dc-container-select select, .dc-volumes-tab .dc-container-select select, .dc-networks-tab .dc-container-select select { min-height: var(--dc-control-height); }
+.dc-images-tab .docker-connector__images-layout, .dc-volumes-tab .docker-connector__volumes-layout, .dc-networks-tab .docker-connector__networks-layout { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 13px; width: 100%; }
+.dc-images-tab .docker-connector__images-layout.is-detail-open, .dc-volumes-tab .docker-connector__volumes-layout.is-detail-open, .dc-networks-tab .docker-connector__networks-layout.is-detail-open { grid-template-columns: minmax(0, 1fr) minmax(320px, .72fr); }
+.dc-images-tab .docker-connector__images-list, .dc-volumes-tab .docker-connector__volumes-list, .dc-networks-tab .docker-connector__networks-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; min-width: 0; }
+.dc-images-tab .docker-connector__images-layout.is-detail-open .docker-connector__images-list, .dc-volumes-tab .docker-connector__volumes-layout.is-detail-open .docker-connector__volumes-list, .dc-networks-tab .docker-connector__networks-layout.is-detail-open .docker-connector__networks-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dc-images-tab .docker-connector__image-card { display: grid; align-content: start; gap: 7px; width: 100%; min-width: 0; min-height: 0; height: auto; padding: 11px 12px; border-radius: 11px; overflow: visible; text-align: left; }
+.dc-images-tab .docker-connector__image-card { grid-template-columns: 20px minmax(0, 1fr); align-items: start; justify-items: stretch; justify-content: start; text-align: left; }
+.dc-images-tab .docker-connector__image-card-header { grid-column: 1 / -1; text-align: left; }
+.dc-images-tab .docker-connector__image-card-secondary, .dc-images-tab .docker-connector__image-card-id, .dc-images-tab .docker-connector__image-card-metadata { grid-column: 2; justify-self: stretch; width: 100%; text-align: left; }
+.dc-images-tab .docker-connector__image-card-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 8px; min-width: 0; }
+.dc-images-tab .docker-connector__image-card-identity { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.dc-images-tab .docker-connector__image-card-identity strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+.dc-images-tab .docker-connector__image-card-icon { display: grid; flex: 0 0 auto; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: var(--dc-accent-soft); color: var(--dc-accent); }
+.dc-images-tab .docker-connector__image-card-secondary { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .76em; line-height: 1.35; }
+.dc-images-tab .docker-connector__image-card-id { display: block; justify-self: start; min-width: 0; color: var(--dc-text-muted); font-family: var(--font-monospace); font-size: .72em; line-height: 1.3; overflow-wrap: anywhere; }
+.dc-images-tab .docker-connector__image-card-id:hover { color: var(--dc-accent); text-decoration: underline; }
+.dc-images-tab .docker-connector__image-card-metadata { display: grid; gap: 3px; min-width: 0; padding-top: 1px; color: var(--dc-text-muted); font-size: .76em; line-height: 1.35; justify-items: start; text-align: left; }
+.dc-images-tab .docker-connector__image-card-metadata span { min-width: 0; overflow-wrap: anywhere; white-space: normal; justify-self: stretch; text-align: left; }
+
+/* Volume cards reserve icon, text, and badge tracks so every text line shares one left edge. */
+.dc-volumes-tab .docker-connector__volume-card { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-content: start; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; width: 100%; min-width: 0; min-height: 0; height: auto; padding: 11px 12px; border-radius: 11px; overflow: visible; text-align: left; }
+.dc-volumes-tab .docker-connector__volume-card-header { grid-column: 1 / -1; display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; min-width: 0; text-align: left; }
+.dc-volumes-tab .docker-connector__volume-card-identity { display: contents; }
+.dc-volumes-tab .docker-connector__volume-card-icon { grid-column: 1; align-self: start; display: grid; align-content: start; justify-content: start; width: 20px; height: 20px; padding: 2px; border-radius: 6px; background: var(--dc-accent-soft); color: var(--dc-accent); }
+.dc-volumes-tab .docker-connector__volume-card-identity strong { grid-column: 2; align-self: stretch; justify-self: stretch; min-width: 0; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.dc-volumes-tab .docker-connector__volume-card-header > .dc-container-badge { grid-column: 3; align-self: start; justify-self: start; }
+.dc-volumes-tab .docker-connector__volume-card-secondary, .dc-volumes-tab .docker-connector__volume-card-metadata { grid-column: 2; align-self: stretch; justify-self: stretch; width: 100%; min-width: 0; text-align: left; }
+.dc-volumes-tab .docker-connector__volume-card-secondary { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .76em; line-height: 1.35; }
+.dc-volumes-tab .docker-connector__volume-card-metadata { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 3px; padding-top: 1px; color: var(--dc-text-muted); font-size: .76em; line-height: 1.35; text-align: left; }
+.dc-volumes-tab .docker-connector__volume-card-metadata span { align-self: stretch; min-width: 0; overflow-wrap: anywhere; text-align: left; white-space: normal; }
+
+/* Network cards use the same fixed icon and independent badge track. */
+.dc-networks-tab .docker-connector__network-card { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-content: start; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; width: 100%; min-width: 0; min-height: 0; height: auto; padding: 11px 12px; border-radius: 11px; overflow: visible; text-align: left; }
+.dc-networks-tab .docker-connector__network-card-header { grid-column: 1 / -1; display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; min-width: 0; text-align: left; }
+.dc-networks-tab .docker-connector__network-card-identity { display: contents; }
+.dc-networks-tab .docker-connector__network-card-icon { grid-column: 1; align-self: start; display: grid; align-content: start; justify-content: start; width: 20px; height: 20px; padding: 2px; border-radius: 6px; background: var(--dc-accent-soft); color: var(--dc-accent); }
+.dc-networks-tab .docker-connector__network-card-identity strong { grid-column: 2; align-self: stretch; justify-self: stretch; min-width: 0; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.dc-networks-tab .docker-connector__network-card-header > .dc-container-badge { grid-column: 3; align-self: start; justify-self: start; }
+.dc-networks-tab .docker-connector__network-card-secondary, .dc-networks-tab .docker-connector__network-card-metadata { grid-column: 2; align-self: stretch; justify-self: stretch; width: 100%; min-width: 0; text-align: left; }
+.dc-networks-tab .docker-connector__network-card-secondary { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .76em; line-height: 1.35; }
+.dc-networks-tab .docker-connector__network-card-metadata { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 3px; padding-top: 1px; color: var(--dc-text-muted); font-size: .76em; line-height: 1.35; text-align: left; }
+.dc-networks-tab .docker-connector__network-card-metadata span { align-self: stretch; min-width: 0; overflow-wrap: anywhere; text-align: left; white-space: normal; }
+.dc-images-tab .docker-connector__images-detail, .dc-volumes-tab .docker-connector__volumes-detail, .dc-networks-tab .docker-connector__networks-detail { position: sticky; top: 8px; max-height: calc(100vh - 120px); overflow: auto; padding: 13px; border: 1px solid var(--dc-border); border-radius: 11px; background: var(--dc-surface-raised); box-shadow: 0 9px 24px rgb(0 0 0 / .1); }
+.dc-images-tab .docker-connector__images-detail h2, .dc-volumes-tab .docker-connector__volumes-detail h2, .dc-networks-tab .docker-connector__networks-detail h2 { min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+.dc-images-tab .docker-connector__images-detail .dc-image-detail-header, .dc-volumes-tab .docker-connector__volumes-detail .dc-image-detail-header, .dc-networks-tab .docker-connector__networks-detail .dc-image-detail-header { display: flex; align-items: center; gap: 7px; padding-bottom: 10px; border-bottom: 1px solid var(--dc-border); }
+.dc-images-tab .docker-connector__images-detail .dc-image-detail-header h2, .dc-volumes-tab .docker-connector__volumes-detail .dc-image-detail-header h2, .dc-networks-tab .docker-connector__networks-detail .dc-image-detail-header h2 { flex: 1; margin: 0; font-size: 1em; }
+.dc-images-tab .docker-connector__images-detail .dc-image-detail-section, .dc-volumes-tab .docker-connector__volumes-detail .dc-image-detail-section, .dc-networks-tab .docker-connector__networks-detail h3 { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--dc-border); }
+.dc-images-tab .docker-connector__images-detail .dc-container-detail-row, .dc-volumes-tab .docker-connector__volumes-detail .dc-container-detail-row, .dc-networks-tab .docker-connector__networks-detail .dc-container-detail-row { gap: 7px 10px; line-height: 1.35; }
+.dc-images-tab .docker-connector__images-detail .dc-container-detail-row span, .dc-volumes-tab .docker-connector__volumes-detail .dc-container-detail-row span, .dc-networks-tab .docker-connector__networks-detail .dc-container-detail-row span { min-width: 0; overflow-wrap: anywhere; word-break: break-word; white-space: normal; }
+@container (max-width: 1060px) { .dc-images-tab .docker-connector__images-toolbar, .dc-volumes-tab .docker-connector__volumes-toolbar { grid-template-columns: minmax(210px, 1fr) repeat(3, minmax(112px, auto)); } }
+@container (max-width: 980px) { .dc-images-tab .docker-connector__images-list, .dc-volumes-tab .docker-connector__volumes-list, .dc-networks-tab .docker-connector__networks-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (max-width: 820px) { .dc-images-tab .docker-connector__summary-grid, .dc-volumes-tab .docker-connector__summary-grid, .dc-networks-tab .docker-connector__summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.dc-images-tab .docker-connector__images-layout.is-detail-open, .dc-volumes-tab .docker-connector__volumes-layout.is-detail-open, .dc-networks-tab .docker-connector__networks-layout.is-detail-open { grid-template-columns: 1fr; }.dc-images-tab .docker-connector__images-detail, .dc-volumes-tab .docker-connector__volumes-detail, .dc-networks-tab .docker-connector__networks-detail { position: static; max-height: none; } }
+@container (max-width: 620px) { .dc-images-tab .docker-connector__images-toolbar, .dc-volumes-tab .docker-connector__volumes-toolbar, .dc-networks-tab .docker-connector__networks-toolbar { grid-template-columns: 1fr 1fr; }.dc-images-tab .dc-container-search, .dc-volumes-tab .dc-container-search, .dc-networks-tab .dc-container-search { grid-column: 1 / -1; } }
+@container (max-width: 520px) { .dc-images-tab .docker-connector__images-list, .dc-volumes-tab .docker-connector__volumes-list, .dc-networks-tab .docker-connector__networks-list { grid-template-columns: 1fr; }.dc-images-tab .docker-connector__summary-card, .dc-volumes-tab .docker-connector__summary-card, .dc-networks-tab .docker-connector__summary-card { height: 82px; } }
+@container (max-width: 380px) { .dc-images-tab .docker-connector__images-toolbar, .dc-volumes-tab .docker-connector__volumes-toolbar, .dc-networks-tab .docker-connector__networks-toolbar { grid-template-columns: 1fr; }.dc-images-tab .dc-container-search, .dc-volumes-tab .dc-container-search, .dc-networks-tab .dc-container-search { grid-column: auto; } }
+
+/* Containers follows the Applications card grid while retaining container-specific details. */
+.dc-containers-tab .docker-connector__containers-header { margin-bottom: 10px; }
+.dc-containers-tab .docker-connector__summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.dc-containers-tab .docker-connector__summary-card { height: 84px; padding: 11px 12px; }
+.dc-containers-tab .docker-connector__summary-card > div:not(.docker-connector__summary-icon) { max-width: calc(100% - 36px); gap: 2px; }
+.dc-containers-tab .docker-connector__summary-card span { font-size: .72em; }
+.dc-containers-tab .docker-connector__summary-card strong { margin-top: 0; font-size: 1.7em; }
+.dc-containers-tab .docker-connector__summary-card small { margin-top: 0; font-size: .72em; line-height: 1.25; }
+.dc-containers-tab .docker-connector__summary-icon { top: 11px; right: 11px; width: 28px; height: 28px; padding: 6px; border-radius: 9px; }
+.dc-containers-tab .docker-connector__containers-toolbar { display: grid; grid-template-columns: minmax(220px, 1fr) repeat(4, minmax(112px, auto)) auto auto; align-items: end; gap: 8px; margin-bottom: 12px; padding: 8px; }
+.dc-containers-tab .docker-connector__containers-toolbar .dc-container-search { min-height: var(--dc-control-height); padding: 0 8px; }
+.dc-containers-tab .docker-connector__containers-toolbar .dc-container-select { gap: 3px; font-size: .74em; }
+.dc-containers-tab .docker-connector__containers-toolbar .dc-container-select select { min-height: var(--dc-control-height); }
+.dc-containers-tab .docker-connector__containers-toolbar .dc-container-density, .dc-containers-tab .docker-connector__containers-toolbar .dc-container-refresh { min-height: var(--dc-control-height); }
+.dc-containers-tab .docker-connector__containers-toolbar .dc-container-refresh { min-width: var(--dc-control-height); }
+.dc-containers-tab .docker-connector__containers-layout { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 13px; width: 100%; }
+.dc-containers-tab .docker-connector__containers-layout.is-detail-open { grid-template-columns: minmax(0, 1fr) minmax(320px, .72fr); }
+.dc-containers-tab .docker-connector__containers-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; min-width: 0; }
+.dc-containers-tab .docker-connector__containers-layout.is-detail-open .docker-connector__containers-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dc-containers-tab .docker-connector__container-card { display: grid; grid-template-columns: 20px minmax(0, 1fr); align-content: start; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; width: 100%; min-width: 0; height: auto; min-height: 0; overflow: visible; padding: 11px 12px; border-radius: 11px; text-align: left; }
+.dc-containers-tab .docker-connector__container-card-header { grid-column: 1 / -1; display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; min-width: 0; text-align: left; }
+.dc-containers-tab .docker-connector__container-card-identity { display: contents; }
+.dc-containers-tab .docker-connector__container-card-name { grid-column: 2; align-self: stretch; justify-self: stretch; min-width: 0; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.dc-containers-tab .docker-connector__container-card-identity .dc-container-state-dot { grid-column: 1; align-self: start; width: 20px; height: 20px; border-radius: 6px; }
+.dc-containers-tab .docker-connector__container-card-badges { grid-column: 3; display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: flex-start; justify-content: flex-start; gap: 4px; }
+.dc-containers-tab .docker-connector__container-card-secondary { grid-column: 2; align-self: stretch; justify-self: stretch; display: block; min-width: 0; color: var(--dc-text-muted); font-size: .76em; line-height: 1.35; overflow-wrap: anywhere; text-align: left; }
+.dc-containers-tab .docker-connector__container-card-id { grid-column: 2; align-self: stretch; justify-self: stretch; display: block; min-width: 0; color: var(--dc-text-muted); font-family: var(--font-monospace); font-size: .72em; line-height: 1.3; overflow-wrap: anywhere; text-align: left; }
+.dc-containers-tab .docker-connector__container-card-id:hover { color: var(--dc-accent); text-decoration: underline; }
+.dc-containers-tab .docker-connector__container-card-metadata { grid-column: 2; align-self: stretch; justify-self: stretch; display: grid; align-items: start; justify-items: stretch; gap: 3px; min-width: 0; padding-top: 1px; color: var(--dc-text-muted); font-size: .76em; line-height: 1.35; text-align: left; }
+.dc-containers-tab .docker-connector__container-card-metadata span { align-self: stretch; justify-self: stretch; min-width: 0; overflow-wrap: anywhere; text-align: left; white-space: normal; }
+.dc-containers-tab .docker-connector__containers-results.is-compact .docker-connector__container-card { gap: 5px; padding: 8px 10px; }
+.dc-containers-tab .docker-connector__containers-results.is-compact .docker-connector__container-card-metadata { display: none; }
+.dc-containers-tab .docker-connector__containers-detail { padding: 13px; }
+.dc-containers-tab .docker-connector__containers-detail .dc-container-detail-header { gap: 8px; }
+.dc-containers-tab .docker-connector__containers-detail .dc-container-detail-section { margin-top: 12px; padding-top: 12px; }
+.dc-containers-tab .docker-connector__containers-detail .dc-container-detail-row { grid-template-columns: minmax(110px, .75fr) minmax(0, 1fr); gap: 8px 12px; line-height: 1.35; }
+.dc-containers-tab .docker-connector__containers-detail .dc-container-detail-row span { min-width: 0; overflow-wrap: anywhere; word-break: break-word; white-space: normal; }
+@container (max-width: 1060px) { .dc-containers-tab .docker-connector__containers-toolbar { grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(112px, auto)); }.dc-containers-tab .docker-connector__containers-toolbar .dc-container-density { grid-column: span 2; } }
+@container (max-width: 980px) { .dc-containers-tab .docker-connector__containers-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (max-width: 820px) { .dc-containers-tab .docker-connector__summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.dc-containers-tab .docker-connector__containers-layout.is-detail-open { grid-template-columns: 1fr; }.dc-containers-tab .docker-connector__containers-detail { position: static; max-height: none; } }
+@container (max-width: 620px) { .dc-containers-tab .docker-connector__containers-toolbar { grid-template-columns: 1fr 1fr; }.dc-containers-tab .docker-connector__containers-toolbar .dc-container-search { grid-column: 1 / -1; }.dc-containers-tab .docker-connector__containers-toolbar .dc-container-density { grid-column: 1; }.dc-containers-tab .docker-connector__containers-toolbar .dc-container-refresh { grid-column: 2; justify-self: stretch; } }
+@container (max-width: 380px) { .dc-containers-tab .docker-connector__containers-toolbar { grid-template-columns: 1fr; }.dc-containers-tab .docker-connector__containers-toolbar .dc-container-search, .dc-containers-tab .docker-connector__containers-toolbar .dc-container-density, .dc-containers-tab .docker-connector__containers-toolbar .dc-container-refresh { grid-column: auto; } }
+
+@container (max-width: 520px) { .dc-containers-tab .docker-connector__containers-list { grid-template-columns: 1fr; }.dc-containers-tab .docker-connector__summary-card { height: 82px; } }

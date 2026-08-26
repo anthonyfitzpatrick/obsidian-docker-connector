@@ -1,18 +1,114 @@
 import { Notice, setIcon } from "obsidian";
 import type DockerConnectorPlugin from "../main";
 import type { DockerConnectionProfile, DockerHostSnapshot } from "../models/DockerConnectionProfile";
+import { renderMetricCards } from "../ui/MetricCards";
 import { DEFAULT_IMAGES_VIEW_STATE, type DockerImageSummary, type ImageFilter, type ImageSort, type ImagesViewState } from "./ImageModels";
 import { selectImages, values } from "./ImageSelectors";
-import { renderMetricCards } from "../ui/MetricCards";
+
 /** Interactive read-only image inventory. Documentation: [[Docker Connector - Images View]]. */
-export class ImagesTab { readonly state: ImagesViewState = { ...DEFAULT_IMAGES_VIEW_STATE, detail: { status: "closed" } }; private timer?: number; private origin?: HTMLElement; constructor(private readonly plugin: DockerConnectorPlugin, private readonly rerender: () => void, private readonly openContainer: (id: string) => void) {} dispose() { if (this.timer) window.clearTimeout(this.timer); } route(filter?: ImageFilter) { if (filter) this.state.filter = filter; }
-  render(root: HTMLElement, selectedHostId: string): void { const profiles = selectedHostId === "all" ? this.plugin.settings.profiles : this.plugin.settings.profiles.filter((p) => p.id === selectedHostId); const snapshots = profiles.map((p) => this.plugin.snapshots.get(p.id)).filter((s): s is DockerHostSnapshot => Boolean(s)); const all = snapshots.flatMap((s) => s.images); const results = selectImages(all, this.state); root.addClass("dc-images-tab"); this.header(root, all, results, profiles); this.controls(root, all); this.list(root, results, profiles, snapshots, all); }
-  private header(root: HTMLElement, all: DockerImageSummary[], results: DockerImageSummary[], profiles: DockerConnectionProfile[]) { const h = root.createDiv({ cls: "dc-image-header" }); const copy = h.createDiv(); copy.createEl("h1", { text: "Images" }); copy.createSpan({ text: results.length === all.length ? `${all.length} ${all.length === 1 ? "image" : "images"}` : `${results.length} of ${all.length} images`, cls: "dc-image-count", attr: { "aria-live": "polite" } }); renderMetricCards(root, [{ label: "Images", value: all.length, detail: "Available image library", icon: "layers-3", active: this.state.filter === "all", onClick: () => { this.state.filter = "all"; this.rerender(); } }, { label: "In use", value: all.filter((image) => image.containersUsingImage > 0).length, detail: "Referenced by containers", icon: "circle-check", tone: "success", active: this.state.filter === "in-use", onClick: () => { this.state.filter = "in-use"; this.rerender(); } }, { label: "Dangling", value: all.filter((image) => image.dangling).length, detail: "Untagged Docker images", icon: "tag", tone: "warning", active: this.state.filter === "dangling", onClick: () => { this.state.filter = "dangling"; this.rerender(); } }, { label: "No visible references", value: all.filter((image) => image.containersUsingImage === 0).length, detail: "No visible container use", icon: "circle-minus", tone: "muted", active: this.state.filter === "unused", onClick: () => { this.state.filter = "unused"; this.rerender(); } }], "Image summary"); }
-  private controls(root: HTMLElement, all: DockerImageSummary[]) { const bar = root.createDiv({ cls: "dc-image-toolbar" }); const search = bar.createDiv({ cls: "dc-container-search" }); const icon = search.createSpan(); setIcon(icon, "search"); const input = search.createEl("input", { type: "search", value: this.state.search, placeholder: "Search images…", attr: { "aria-label": "Search images" } }); input.oninput = () => { if (this.timer) window.clearTimeout(this.timer); this.timer = window.setTimeout(() => { this.state.search = input.value; this.rerender(); }, 180); }; input.onkeydown = (e) => { if (e.key === "Escape") { this.state.search = ""; this.rerender(); } }; this.select(bar, "Filter", this.state.filter, [["all", "All"], ["in-use", "In use"], ["unused", "No visible references"], ["dangling", "Dangling"], ["tagged", "Tagged"], ["untagged", "Untagged"]], (v) => { this.state.filter = v as ImageFilter; this.rerender(); }); this.select(bar, "Architecture", this.state.architecture ?? "all", [["all", "All architectures"], ...values(all, "architecture").map((v) => [v, v] as [string, string])], (v) => { this.state.architecture = v === "all" ? null : v; this.rerender(); }); this.select(bar, "OS", this.state.operatingSystem ?? "all", [["all", "All operating systems"], ...values(all, "operatingSystem").map((v) => [v, v] as [string, string])], (v) => { this.state.operatingSystem = v === "all" ? null : v; this.rerender(); }); this.select(bar, "Sort", this.state.sort, [["repository", "Repository"], ["tag", "Tag"], ["created-newest", "Created newest"], ["created-oldest", "Created oldest"], ["size-largest", "Size largest"], ["size-smallest", "Size smallest"], ["usage-count", "Usage count"]], (v) => { this.state.sort = v as ImageSort; this.rerender(); }); }
-  private list(root: HTMLElement, results: DockerImageSummary[], profiles: DockerConnectionProfile[], snapshots: DockerHostSnapshot[], all: DockerImageSummary[]) { const layout = root.createDiv({ cls: "dc-image-layout" }); const list = layout.createDiv({ cls: "dc-image-list", attr: { "aria-label": "Image results" } }); if (!all.length) { list.createDiv({ text: "No images were returned by this Docker host.", cls: "dc-container-empty" }); return; } if (!results.length) { list.createDiv({ text: this.state.search ? "No images match your search." : "No images match the current filters.", cls: "dc-container-empty" }); return; } results.forEach((image) => { const row = list.createEl("button", { cls: `dc-image-row${this.state.selectedImageId === image.id ? " is-selected" : ""}`, attr: { "aria-label": `${image.repository}:${image.tag}` } }); row.onclick = () => void this.open(image, row); const icon = row.createDiv({ cls: "dc-resource-icon is-image" }); setIcon(icon, "layers-3"); const copy = row.createDiv(); copy.createEl("strong", { text: image.repository }); copy.createSpan({ text: `Tag · ${image.tag}`, cls: "docker-connector__muted" }); const id = copy.createEl("button", { text: image.shortId, cls: "dc-container-id", attr: { "aria-label": "Copy full image ID" } }); id.onclick = (e) => { e.stopPropagation(); void navigator.clipboard.writeText(image.id); new Notice("Image ID copied"); }; row.createSpan({ text: bytes(image.sizeBytes) }); row.createSpan({ text: image.containersUsingImage < 0 ? "Usage unknown" : `${image.containersUsingImage} in use`, cls: "docker-connector__muted" }); if (image.dangling) row.appendChild(badge("Dangling", "dangling")); else row.appendChild(badge(image.containersUsingImage > 0 ? "In use" : "Unused", image.containersUsingImage > 0 ? "in-use" : "unused")); const open = row.createSpan(); setIcon(open, "panel-right-open"); }); if (this.state.selectedImageId) this.detail(layout, profiles, snapshots); }
-  private detail(root: HTMLElement, profiles: DockerConnectionProfile[], snapshots: DockerHostSnapshot[]) { const image = snapshots.flatMap((s) => s.images).find((i) => i.id === this.state.selectedImageId); const profile = image && profiles.find((p) => p.id === image.hostProfileId); const snapshot = image && snapshots.find((s) => s.hostId === image.hostProfileId); if (!image || !profile || !snapshot) return; const panel = root.createEl("aside", { cls: "dc-image-detail-panel", attr: { "aria-label": `Details for ${image.repository}:${image.tag}`, tabindex: "-1" } }); const h = panel.createDiv({ cls: "dc-image-detail-header" }); h.createEl("h2", { text: `${image.repository}:${image.tag}` }); const copy = h.createEl("button", { attr: { "aria-label": "Copy full image ID" } }); setIcon(copy, "copy"); copy.onclick = () => { void navigator.clipboard.writeText(image.id); new Notice("Image ID copied"); }; const refresh = h.createEl("button", { attr: { "aria-label": "Refresh image details" } }); setIcon(refresh, "refresh-cw"); refresh.onclick = () => void this.load(profile, snapshot, image, true); const close = h.createEl("button", { attr: { "aria-label": "Close image details" } }); setIcon(close, "x"); close.onclick = () => this.close(); if (this.state.detail.status === "loading") { panel.createDiv({ text: "Loading read-only image details…", cls: "dc-container-loading", attr: { "aria-live": "polite" } }); return; } if (this.state.detail.status === "error") { panel.createDiv({ text: this.state.detail.message, cls: "dc-container-error" }); return; } if (this.state.detail.status === "ready") { const d = this.state.detail.value; section(panel, "Overview", [["Full ID", d.id], ["Created", d.createdAt], ["Size", bytes(d.sizeBytes)], ["Architecture", d.architecture], ["Operating system", d.operatingSystem], ["Docker version", d.dockerVersion], ["Author", d.author], ["Comment", d.comment]]); section(panel, "Repository tags", d.repositoryTags.map((x) => ["Tag", x])); section(panel, "Repository digests", d.repositoryDigests.map((x) => ["Digest", x])); section(panel, "Labels", Object.entries(d.labels)); const used = panel.createEl("section", { cls: "dc-image-detail-section" }); used.createEl("h3", { text: "Containers using image" }); d.containersUsingImage.length ? d.containersUsingImage.forEach((c) => { const button = used.createEl("button", { text: `${c.name} · ${c.state ?? "Unknown"}` }); button.onclick = () => this.openContainer(c.id); }) : used.createDiv({ text: "No visible container references.", cls: "docker-connector__muted" }); } }
-  private async open(image: DockerImageSummary, origin: HTMLElement) { this.state.selectedImageId = image.id; this.origin = origin; const profile = this.plugin.settings.profiles.find((p) => p.id === image.hostProfileId); const snapshot = this.plugin.snapshots.get(image.hostProfileId); if (profile && snapshot) await this.load(profile, snapshot, image); }
-  private async load(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot, image: DockerImageSummary, force = false) { if (!force && this.state.detail.status === "ready" && this.state.detail.id === image.id) return; this.state.detail = { status: "loading", id: image.id }; this.rerender(); try { this.state.detail = { status: "ready", id: image.id, value: await this.plugin.inspectImage(profile, snapshot, image.id) }; } catch (e) { this.state.detail = { status: "error", id: image.id, message: e instanceof Error ? e.message : "Image details could not be loaded." }; } this.rerender(); }
-  private close() { this.state.selectedImageId = null; this.state.detail = { status: "closed" }; this.rerender(); this.origin?.focus(); } private select(root: HTMLElement, name: string, value: string, opts: Array<[string, string]>, change: (v: string) => void) { const l = root.createEl("label", { cls: "dc-container-select" }); l.createSpan({ text: name }); const s = l.createEl("select", { attr: { "aria-label": `${name} image control` } }); opts.forEach(([v, t]) => s.createEl("option", { value: v, text: t })); s.value = value; s.onchange = () => change(s.value); }
+export class ImagesTab {
+  readonly state: ImagesViewState = { ...DEFAULT_IMAGES_VIEW_STATE, detail: { status: "closed" } };
+  private timer?: number;
+  private origin?: HTMLElement;
+
+  constructor(private readonly plugin: DockerConnectorPlugin, private readonly rerender: () => void, private readonly openContainer: (id: string) => void) {}
+  dispose(): void { if (this.timer) window.clearTimeout(this.timer); }
+  route(filter?: ImageFilter): void { if (filter) this.state.filter = filter; }
+
+  render(root: HTMLElement, selectedHostId: string): void {
+    const profiles = selectedHostId === "all" ? this.plugin.settings.profiles : this.plugin.settings.profiles.filter((profile) => profile.id === selectedHostId);
+    const snapshots = profiles.map((profile) => this.plugin.snapshots.get(profile.id)).filter((snapshot): snapshot is DockerHostSnapshot => Boolean(snapshot));
+    const all = snapshots.flatMap((snapshot) => snapshot.images);
+    const results = selectImages(all, this.state);
+    root.addClass("dc-images-tab");
+    this.header(root, all, results, profiles, selectedHostId);
+    this.controls(root, all);
+    this.list(root, results, profiles, snapshots, all);
+  }
+
+  private header(root: HTMLElement, all: DockerImageSummary[], results: DockerImageSummary[], profiles: DockerConnectionProfile[], selectedHostId: string): void {
+    const header = root.createDiv({ cls: "dc-image-header docker-connector__images-header" });
+    const copy = header.createDiv();
+    copy.createEl("h1", { text: "Images" });
+    copy.createSpan({ text: results.length === all.length ? `${all.length} ${all.length === 1 ? "image" : "images"}` : `${results.length} of ${all.length} images`, cls: "dc-image-count", attr: { "aria-live": "polite" } });
+    copy.createSpan({ text: selectedHostId === "all" ? "All Docker hosts" : profiles[0]?.name ?? "Selected host", cls: "docker-connector__muted" });
+    renderMetricCards(root, [
+      { label: "Images", value: all.length, detail: "Available image library", icon: "layers-3", active: this.state.filter === "all", onClick: () => { this.state.filter = "all"; this.rerender(); } },
+      { label: "In use", value: all.filter((image) => image.containersUsingImage > 0).length, detail: "Referenced by containers", icon: "circle-check", tone: "success", active: this.state.filter === "in-use", onClick: () => { this.state.filter = "in-use"; this.rerender(); } },
+      { label: "Dangling", value: all.filter((image) => image.dangling).length, detail: "Untagged Docker images", icon: "tag", tone: "warning", active: this.state.filter === "dangling", onClick: () => { this.state.filter = "dangling"; this.rerender(); } },
+      { label: "No visible references", value: all.filter((image) => image.containersUsingImage === 0).length, detail: "No visible container use", icon: "circle-minus", tone: "muted", active: this.state.filter === "unused", onClick: () => { this.state.filter = "unused"; this.rerender(); } }
+    ], "Image summary");
+  }
+
+  private controls(root: HTMLElement, all: DockerImageSummary[]): void {
+    const toolbar = root.createDiv({ cls: "dc-image-toolbar docker-connector__images-toolbar" });
+    const search = toolbar.createDiv({ cls: "dc-container-search" });
+    setIcon(search.createSpan(), "search");
+    const input = search.createEl("input", { type: "search", value: this.state.search, placeholder: "Search images…", attr: { "aria-label": "Search images" } });
+    input.oninput = () => { if (this.timer) window.clearTimeout(this.timer); this.timer = window.setTimeout(() => { this.state.search = input.value; this.rerender(); }, 180); };
+    input.onkeydown = (event) => { if (event.key === "Escape") { this.state.search = ""; this.rerender(); } };
+    this.select(toolbar, "Filter", this.state.filter, [["all", "All"], ["in-use", "In use"], ["unused", "No visible references"], ["dangling", "Dangling"], ["tagged", "Tagged"], ["untagged", "Untagged"]], (value) => { this.state.filter = value as ImageFilter; this.rerender(); });
+    this.select(toolbar, "Architecture", this.state.architecture ?? "all", [["all", "All architectures"], ...values(all, "architecture").map((value) => [value, value] as [string, string])], (value) => { this.state.architecture = value === "all" ? null : value; this.rerender(); });
+    this.select(toolbar, "OS", this.state.operatingSystem ?? "all", [["all", "All operating systems"], ...values(all, "operatingSystem").map((value) => [value, value] as [string, string])], (value) => { this.state.operatingSystem = value === "all" ? null : value; this.rerender(); });
+    this.select(toolbar, "Sort", this.state.sort, [["repository", "Repository"], ["tag", "Tag"], ["created-newest", "Created newest"], ["created-oldest", "Created oldest"], ["size-largest", "Size largest"], ["size-smallest", "Size smallest"], ["usage-count", "Usage count"]], (value) => { this.state.sort = value as ImageSort; this.rerender(); });
+  }
+
+  private list(root: HTMLElement, results: DockerImageSummary[], profiles: DockerConnectionProfile[], snapshots: DockerHostSnapshot[], all: DockerImageSummary[]): void {
+    const layout = root.createDiv({ cls: `dc-image-layout docker-connector__images-layout${this.state.selectedImageId ? " is-detail-open" : ""}` });
+    const list = layout.createDiv({ cls: "dc-image-list docker-connector__images-list", attr: { "aria-label": "Image results" } });
+    if (!all.length) { list.createDiv({ text: "No images were returned by this Docker host.", cls: "dc-container-empty" }); return; }
+    if (!results.length) { list.createDiv({ text: this.state.search ? "No images match your search." : "No images match the current filters.", cls: "dc-container-empty" }); return; }
+    results.forEach((image) => this.row(list, image));
+    if (this.state.selectedImageId) this.detail(layout, profiles, snapshots);
+  }
+
+  private row(list: HTMLElement, image: DockerImageSummary): void {
+    const selected = this.state.selectedImageId === image.id;
+    const card = list.createEl("button", { cls: `docker-connector__image-card${selected ? " is-selected" : ""}`, attr: { "aria-label": `${image.repository}:${image.tag}`, "aria-pressed": String(selected) } });
+    card.onclick = () => void this.open(image, card);
+    const header = card.createDiv({ cls: "docker-connector__image-card-header" });
+    const identity = header.createDiv({ cls: "docker-connector__image-card-identity" });
+    const icon = identity.createDiv({ cls: "docker-connector__image-card-icon" }); setIcon(icon, "layers-3");
+    identity.createEl("strong", { text: image.repository, attr: { title: image.repository } });
+    header.appendChild(badge(image.dangling ? "Dangling" : image.containersUsingImage > 0 ? "In use" : "Unused", image.dangling ? "dangling" : image.containersUsingImage > 0 ? "in-use" : "unused"));
+    card.createSpan({ text: `Tag · ${image.tag}`, cls: "docker-connector__image-card-secondary docker-connector__muted", attr: { title: image.tag } });
+    const id = card.createSpan({ text: image.shortId, cls: "docker-connector__image-card-id dc-container-id", attr: { role: "button", tabindex: "0", "aria-label": "Copy full image ID" } });
+    const copyId = (event: Event) => { event.stopPropagation(); void navigator.clipboard.writeText(image.id); new Notice("Image ID copied"); };
+    id.onclick = copyId;
+    id.onkeydown = (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); copyId(event); } };
+    const metadata = card.createDiv({ cls: "docker-connector__image-card-metadata" });
+    metadata.createSpan({ text: `Size · ${bytes(image.sizeBytes)}` });
+    metadata.createSpan({ text: image.containersUsingImage < 0 ? "Usage unknown" : `${image.containersUsingImage} in use` });
+  }
+
+  private detail(root: HTMLElement, profiles: DockerConnectionProfile[], snapshots: DockerHostSnapshot[]): void {
+    const image = snapshots.flatMap((snapshot) => snapshot.images).find((item) => item.id === this.state.selectedImageId);
+    const profile = image && profiles.find((item) => item.id === image.hostProfileId);
+    const snapshot = image && snapshots.find((item) => item.hostId === image.hostProfileId);
+    if (!image || !profile || !snapshot) return;
+    const panel = root.createEl("aside", { cls: "dc-image-detail-panel docker-connector__images-detail", attr: { "aria-label": `Details for ${image.repository}:${image.tag}`, tabindex: "-1" } });
+    const header = panel.createDiv({ cls: "dc-image-detail-header" }); header.createEl("h2", { text: `${image.repository}:${image.tag}` });
+    const copy = header.createEl("button", { attr: { "aria-label": "Copy full image ID" } }); setIcon(copy, "copy"); copy.onclick = () => { void navigator.clipboard.writeText(image.id); new Notice("Image ID copied"); };
+    const refresh = header.createEl("button", { attr: { "aria-label": "Refresh image details" } }); setIcon(refresh, "refresh-cw"); refresh.onclick = () => void this.load(profile, snapshot, image, true);
+    const close = header.createEl("button", { attr: { "aria-label": "Close image details" } }); setIcon(close, "x"); close.onclick = () => this.close();
+    if (this.state.detail.status === "loading") { panel.createDiv({ text: "Loading read-only image details…", cls: "dc-container-loading", attr: { "aria-live": "polite" } }); return; }
+    if (this.state.detail.status === "error") { panel.createDiv({ text: this.state.detail.message, cls: "dc-container-error" }); return; }
+    if (this.state.detail.status !== "ready") return;
+    const details = this.state.detail.value;
+    section(panel, "Overview", [["Full ID", details.id], ["Created", details.createdAt], ["Size", bytes(details.sizeBytes)], ["Architecture", details.architecture], ["Operating system", details.operatingSystem], ["Docker version", details.dockerVersion], ["Author", details.author], ["Comment", details.comment]]);
+    section(panel, "Repository tags", details.repositoryTags.map((tag) => ["Tag", tag]));
+    section(panel, "Repository digests", details.repositoryDigests.map((digest) => ["Digest", digest]));
+    section(panel, "Labels", Object.entries(details.labels));
+    const used = panel.createEl("section", { cls: "dc-image-detail-section" }); used.createEl("h3", { text: "Containers using image" });
+    details.containersUsingImage.length ? details.containersUsingImage.forEach((container) => { const button = used.createEl("button", { text: `${container.name} · ${container.state ?? "Unknown"}` }); button.onclick = () => this.openContainer(container.id); }) : used.createDiv({ text: "No visible container references.", cls: "docker-connector__muted" });
+  }
+
+  private async open(image: DockerImageSummary, origin: HTMLElement): Promise<void> { this.state.selectedImageId = image.id; this.origin = origin; const profile = this.plugin.settings.profiles.find((item) => item.id === image.hostProfileId); const snapshot = this.plugin.snapshots.get(image.hostProfileId); if (profile && snapshot) await this.load(profile, snapshot, image); }
+  private async load(profile: DockerConnectionProfile, snapshot: DockerHostSnapshot, image: DockerImageSummary, force = false): Promise<void> { if (!force && this.state.detail.status === "ready" && this.state.detail.id === image.id) return; this.state.detail = { status: "loading", id: image.id }; this.rerender(); try { this.state.detail = { status: "ready", id: image.id, value: await this.plugin.inspectImage(profile, snapshot, image.id) }; } catch (error) { this.state.detail = { status: "error", id: image.id, message: error instanceof Error ? error.message : "Image details could not be loaded." }; } this.rerender(); }
+  private close(): void { this.state.selectedImageId = null; this.state.detail = { status: "closed" }; this.rerender(); this.origin?.focus(); }
+  private select(root: HTMLElement, name: string, value: string, options: Array<[string, string]>, change: (value: string) => void): void { const label = root.createEl("label", { cls: "dc-container-select" }); label.createSpan({ text: name }); const select = label.createEl("select", { attr: { "aria-label": `${name} image control` } }); options.forEach(([optionValue, text]) => select.createEl("option", { value: optionValue, text })); select.value = value; select.onchange = () => change(select.value); }
 }
-function badge(text: string, kind: string) { const e = document.createElement("span"); e.addClass("dc-container-badge", `is-${kind}`); e.setText(text); return e; } function bytes(n: number) { if (!n) return "0 B"; const u = ["B", "KB", "MB", "GB", "TB"]; const i = Math.min(Math.floor(Math.log(n) / Math.log(1024)), u.length - 1); return `${(n / 1024 ** i).toFixed(i ? 1 : 0)} ${u[i]}`; } function section(root: HTMLElement, title: string, rows: Array<[string, string | undefined]>) { const s = root.createEl("section", { cls: "dc-image-detail-section" }); s.createEl("h3", { text: title }); rows.filter(([, v]) => Boolean(v)).forEach(([l, v]) => { const r = s.createDiv({ cls: "dc-container-detail-row" }); r.createSpan({ text: l }); r.createSpan({ text: v! }); }); }
+
+function badge(text: string, kind: string): HTMLElement { const element = document.createElement("span"); element.addClass("dc-container-badge", `is-${kind}`); element.setText(text); return element; }
+function bytes(value: number): string { if (!value) return "0 B"; const units = ["B", "KB", "MB", "GB", "TB"]; const index = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1); return `${(value / 1024 ** index).toFixed(index ? 1 : 0)} ${units[index]}`; }
+function section(root: HTMLElement, title: string, rows: Array<[string, string | undefined]>): void { const section = root.createEl("section", { cls: "dc-image-detail-section" }); section.createEl("h3", { text: title }); rows.filter(([, value]) => Boolean(value)).forEach(([label, value]) => { const row = section.createDiv({ cls: "dc-container-detail-row" }); row.createSpan({ text: label }); row.createSpan({ text: value! }); }); }
