@@ -614,7 +614,7 @@ Container management is intentionally not a Setting. It is controlled only by th
 > **Capture:** Automatic refresh, interval, and theme integration.
 >
 > **How to capture this screenshot:**
-> 1. Open **Settings → Community plugins → Docker Connector** (or the plugin’s settings tab in the current Obsidian UI).
+> 1. Open the plugin's own settings tab: select the gear control in the Docker Connector header, or open **Settings** and choose **Docker Connector** in the left sidebar beneath **Community plugins**. Searching **Browse** under Community plugins will not lead here — that list installs plugins from the public catalogue rather than showing an installed plugin's settings.
 > 2. Position the settings pane so **Automatic refresh**, **Refresh interval**, and **Theme integration** are all visible; scroll only as needed.
 > 3. Use normal/safe values and avoid showing unrelated vault/account settings.
 > 4. Do not look for or capture Container management here: it is not a Setting. Capture only the persistent refresh and theme controls.

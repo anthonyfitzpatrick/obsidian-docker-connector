@@ -31,7 +31,6 @@ export class DockerConnectorSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Docker Connector" });
     new Setting(containerEl).setName("Automatic refresh").setDesc("Refresh configured hosts in the background.")
       .addToggle((toggle) => toggle.setValue(this.plugin.settings.automaticRefresh).onChange(async (value) => {
         this.plugin.settings.automaticRefresh = value;

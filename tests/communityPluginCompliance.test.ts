@@ -80,6 +80,15 @@ describe("Obsidian Community Plugin release guard", () => {
     expect(styles).toMatch(/\.docker-connector/);
   });
 
+  it("leaves the settings tab without a redundant title heading", async () => {
+    // Obsidian labels the tab itself, so a plugin-name heading above a short
+    // list of settings only repeats what the sidebar already says.
+    const settings = await source("src/settings/settings.ts");
+    expect(settings).not.toMatch(/createEl\("h[12]"/);
+    expect(settings).not.toContain('text: "Docker Connector"');
+    for (const setting of ["Automatic refresh", "Refresh interval", "Theme integration"]) expect(settings).toContain(setting);
+  });
+
   it("ships documentation with valid README links and a complete screenshot capture plan", async () => {
     const [readme, guide] = await Promise.all([source("README.md"), source("User Guide.md")]);
     const links = [...readme.matchAll(/\]\(([^)#]+)(?:#[^)]+)?\)/g)].map((match) => decodeURIComponent(match[1]));
