@@ -400,20 +400,13 @@ The **Networks** tab lists Docker network definitions. It distinguishes built-in
 Selecting a network shows driver, scope, internal and attachable settings, IPv6 status, gateways, and attached containers. When a subnet is available it is shown in the list. Docker Connector does not create, change, or delete networks.
 
 ### Screenshot 30 — Networks view
-> **Screenshot placeholder 30**
->
-> **Capture:** Network inventory and attached-container details.
->
-> **How to capture this screenshot:**
-> 1. Select a test environment with user-defined Docker networks.
-> 2. Open **Networks** and wait for inventory to load.
-> 3. Select a non-sensitive network with attached test containers if possible.
-> 4. Ensure driver, scope, internal/attachable/IPv6 information and attached containers are visible as available.
-> 5. Avoid exposing network ranges that should remain private; use the isolated test network if needed.
-> 6. Capture the populated Networks view and inspector.
+![Networks inventory with a user-defined network inspected](docs/images/user-guide/30-networks-view.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/30-networks-view.png`
+Each network card carries a **Built-in** or **User defined** badge, its subnet where one exists, driver, scope, and the number of attached containers. Docker creates `bridge`, `host`, and `none` on every daemon, so an **All Docker hosts** inventory lists those names once per daemon; the last line of each card names the connection whose inventory it came from, which is what tells the repeats apart.
+
+The inspector adds the internal, attachable, and IPv6 settings, the gateways, and the attached containers with the address each one holds on that network. Selecting a container opens it in **Containers**.
+
+The addresses come from the container inventory rather than a separate lookup, so a container attached to a network without an address of its own — `host` networking, for example — is listed without one.
 
 ## 18. Image update checking
 
