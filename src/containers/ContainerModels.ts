@@ -10,7 +10,7 @@ export type ContainerDensity = "comfortable" | "compact";
 
 export interface DockerPortSummary { privatePort?: number; publicPort?: number; protocol: string; ip?: string; type: "published" | "exposed"; }
 export interface DockerMountSummary { type: string; source?: string; destination: string; readOnly?: boolean; name?: string; }
-export interface DockerNetworkAttachmentSummary { name: string; }
+export interface DockerNetworkAttachmentSummary { name: string; ipAddress?: string; globalIPv6Address?: string; macAddress?: string; }
 export interface DockerContainerSummary {
   id: string; shortId: string; names: string[]; displayName: string; image: string; imageId?: string; command?: string;
   createdAt: string; createdTimestamp: number; state: DockerContainerState; statusText: string; health: DockerContainerHealth;
