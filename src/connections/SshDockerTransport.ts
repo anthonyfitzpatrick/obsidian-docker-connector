@@ -278,7 +278,7 @@ export class SshDockerTransport implements DockerTransport {
 export function normalizeSshTarget(profile: SshDockerProfile): SshTarget {
   const clean = (value: string) => value.trim().replace(/[\r\n]+/g, "");
   const host = clean(profile.sshHost); const user = clean(profile.sshUsername); const socket = clean(profile.remoteSocketPath);
-  if (!host || !user || !socket || /[\x00-\x1F\x7F]/.test(host + user + socket) || /:\/\//.test(host) || (/^[^\[]*:\d+$/.test(host)) || !socket.startsWith("/")) throw new DockerConnectionError("PROFILE_INVALID", "SSH host, username, and remote Docker socket path are invalid.");
+  if (!host || !user || !socket || /[\x00-\x1F\x7F]/.test(host + user + socket) || /['"`$\\]/.test(socket) || /:\/\//.test(host) || (/^[^\[]*:\d+$/.test(host)) || !socket.startsWith("/")) throw new DockerConnectionError("PROFILE_INVALID", "SSH host, username, and remote Docker socket path are invalid.");
   const port = Number(profile.sshPort);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new DockerConnectionError("SSH_PORT_INVALID", "SSH port must be an integer from 1 to 65535.");
   const unbracketed = host.startsWith("[") && host.endsWith("]") ? host.slice(1, -1) : host;

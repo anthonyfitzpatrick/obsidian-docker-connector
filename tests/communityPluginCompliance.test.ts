@@ -30,7 +30,6 @@ describe("Obsidian Community Plugin release guard", () => {
       "src/connections/DockerContextDiscovery.ts",
       "src/connections/DockerCliResolver.ts",
       "src/connections/DockerMutualTlsTransport.ts",
-      "src/connections/SystemSshDiagnostics.ts",
       "src/services/DockerApiClient.ts"
     ];
     const production = (await Promise.all(files.map(source))).join("\n");
@@ -71,7 +70,9 @@ describe("Obsidian Community Plugin release guard", () => {
     const [main, dashboard, styles] = await Promise.all([source("src/main.ts"), source("src/views/DockerDashboardView.ts"), source("styles.css")]);
     expect(main).toMatch(/containerImageUpdates\.clearAll\(\)/);
     expect(main).toMatch(/connectionFactory\.disconnectAll\(\)/);
-    expect(main).toMatch(/workspace\.detachLeavesOfType/);
+    // Obsidian restores its own leaves; a plugin that detaches them on unload
+    // destroys the user's layout on every update.
+    expect(main).not.toMatch(/detachLeavesOfType/);
     expect(dashboard).toMatch(/removeSettingsListener\?\.\(\)/);
     expect(dashboard).toMatch(/window\.clearInterval\(this\.relativeTimeTimer\)/);
     expect(styles).not.toMatch(/(^|\n)button\s*\{/);

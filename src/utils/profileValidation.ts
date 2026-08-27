@@ -37,5 +37,8 @@ export function validateProfile(profile: DockerConnectionProfile): void {
   if (!profile.sshUsername) throw new Error("SSH username is required.");
   if (profile.authentication.type === "private-key" && !profile.authentication.privateKeyPath) throw new Error("Private key file is required.");
   if (!profile.remoteSocketPath.startsWith("/")) throw new Error("Remote Docker socket must be an absolute Unix path.");
+  // The remote capability probe runs through a shell, so the socket path must
+  // not be able to contribute shell syntax even if quoting were to regress.
+  if (/['"`$\\]/.test(profile.remoteSocketPath)) throw new Error("Remote Docker socket path cannot contain quotes, backslashes, or shell expansion characters.");
 }
 function isIpLiteral(value: string): boolean { return /^\d{1,3}(?:\.\d{1,3}){3}$/.test(value) || /^[0-9a-fA-F:]+$/.test(value) && value.includes(":"); }

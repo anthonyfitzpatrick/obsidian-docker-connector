@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyCapability, parseDockerCapability } from "../src/connections/DockerCapabilityProbe";
+import { buildProbeCommand, classifyCapability, parseDockerCapability } from "../src/connections/DockerCapabilityProbe";
 
 const base = "__IDENTITY_USERNAME__\nobsidian\n__IDENTITY_UID__\n1000\n__IDENTITY_PRIMARY_GID__\n1000\n__IDENTITY_ALL_GIDS__\n1000 999\n__IDENTITY_GROUP_NAMES__\nobsidian docker\n__DOCKER_PATH__\n/usr/bin/docker\n__DOCKER_CONTEXT__\ndefault\n__DOCKER_HOST__\n\n__DOCKER_SOCKET_STAT__\n0 999 660 socket\n__DOCKER_SOCKET_GROUP__\ndocker:x:999:obsidian\n__DOCKER_VERSION__\n{}\n__DOCKER_VERSION_EXIT__\n0\n";
 
@@ -21,5 +21,17 @@ describe("Docker capability probe", () => {
     expect(parseDockerCapability(base.replace("__DOCKER_HOST__\n\n", "__DOCKER_HOST__\nunix:///run/user/1000/docker.sock\n")).rootless).toBe(true);
     try { classifyCapability({ ...parseDockerCapability(base), versionOutput: "Cannot connect to the Docker daemon", exitCode: 1 }); }
     catch (error) { expect(error).toMatchObject({ code: "DOCKER_DAEMON_UNAVAILABLE" }); }
+  });
+});
+
+describe("probe command quoting", () => {
+  it("keeps a socket path containing an apostrophe as one literal argument", () => {
+    const command = buildProbeCommand("/var/run/x'; echo INJECTED; :'");
+    // The POSIX form closes the quote, emits a literal apostrophe, and reopens.
+    expect(command).toContain(`'/var/run/x'"'"'; echo INJECTED; :'"'"''`);
+    expect(command).not.toContain('\\"');
+  });
+  it("quotes an ordinary socket path without escaping", () => {
+    expect(buildProbeCommand("/var/run/docker.sock")).toContain("'/var/run/docker.sock'");
   });
 });

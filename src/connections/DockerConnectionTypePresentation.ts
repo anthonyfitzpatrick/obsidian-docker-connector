@@ -61,7 +61,3 @@ export function getDockerConnectionTypeDisplayName(type: DockerConnectionType): 
 export function getDockerConnectionTypeDescription(type: DockerConnectionType): string {
   return getDockerConnectionTypePresentation(type).description;
 }
-
-export function getDockerConnectionTypeShortDescription(type: DockerConnectionType): string {
-  return getDockerConnectionTypePresentation(type).helper;
-}

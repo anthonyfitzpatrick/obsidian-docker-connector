@@ -22,7 +22,7 @@ export class DockerConnectionFactory {
     const current = this.transports.get(profile.id);
     if (current && current.profile === profile) return current;
     if (current) void current.disconnect();
-    const transport = !isProfileSupportedOnPlatform(profile.connectionType, platformCapabilities())
+    const transport = !isProfileSupportedOnPlatform(platformCapabilities())
       ? new UnsupportedDesktopTransport(profile)
       : this.loadDesktop().createDesktopTransport(profile, this.credentials);
     this.transports.set(profile.id, transport);

@@ -117,7 +117,6 @@ export default class DockerConnectorPlugin extends Plugin {
     this.publicImageReleases.clear();
     this.contextLifecycle.clear();
     await this.connectionFactory.disconnectAll();
-    this.app.workspace.detachLeavesOfType(DOCKER_CONNECTOR_VIEW);
   }
   async loadSettings(): Promise<void> {
     const persisted = await this.loadData() as (Partial<DockerConnectorSettings> & { hosts?: unknown[]; reportFolder?: unknown }) | null;

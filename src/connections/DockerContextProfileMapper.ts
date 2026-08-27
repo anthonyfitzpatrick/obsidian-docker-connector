@@ -36,7 +36,7 @@ export function mapDiscoveredDockerContextToProfile(input: {
 export function mapDiscoveredDockerContextSnapshot(context: DiscoveredDockerContext, now: string, importedAt = now): DockerContextProfile["contextSnapshot"] {
   if (!canSaveDiscoveredDockerContext(context)) throw new Error("DOCKER_CONTEXT_UNSUPPORTED");
   const endpoint = context.dockerEndpoint!;
-  return { description: optional(context.description), isCurrentWhenSaved: context.isCurrent, endpointType: endpoint.type, endpointDisplay: optional(safeEndpointDisplay(endpoint.displayHost, endpoint.type)), skipTlsVerify: endpoint.skipTlsVerify, supported: true, importedAt, lastDiscoveredAt: now };
+  return { description: optional(context.description), isCurrentWhenSaved: context.isCurrent, endpointType: endpoint.type, endpointDisplay: optional(safeEndpointDisplay(endpoint.displayHost)), skipTlsVerify: endpoint.skipTlsVerify, supported: true, importedAt, lastDiscoveredAt: now };
 }
 
 /** Applies an edit draft to an existing Context profile without retaining discovery data. */
@@ -61,4 +61,4 @@ export function updateDockerContextProfile(input: {
 
 function clean(value: string): string { return value.trim().replace(/[\x00-\x1F\x7F]/g, ""); }
 function optional(value: string | undefined): string | undefined { const result = value === undefined ? undefined : clean(value); return result || undefined; }
-function safeEndpointDisplay(value: string, _type: string): string { return value.replace(/^[^@]+@/, ""); }
+function safeEndpointDisplay(value: string): string { return value.replace(/^[^@]+@/, ""); }

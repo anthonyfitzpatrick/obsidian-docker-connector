@@ -44,10 +44,6 @@ export interface DockerTlsProfile extends DockerHostProfileBase { connectionType
  */
 export type DockerConnectionProfile = SshDockerProfile | LocalDockerProfile | DockerContextProfile | DockerTlsProfile;
 export type DockerConnectionType = DockerConnectionProfile["connectionType"];
-export function isLocalDockerProfile(profile: DockerConnectionProfile): profile is LocalDockerProfile { return profile.connectionType === "local"; }
-export function isSshDockerProfile(profile: DockerConnectionProfile): profile is SshDockerProfile { return profile.connectionType === "ssh"; }
-export function isDockerContextProfile(profile: DockerConnectionProfile): profile is DockerContextProfile { return profile.connectionType === "docker-context"; }
-export function isDockerTlsProfile(profile: DockerConnectionProfile): profile is DockerTlsProfile { return profile.connectionType === "docker-tls"; }
 /** Presentation states used by the dashboard; inspection currently persists online, offline, and authentication-required snapshots. */
 export type HostConnectionStatus = "unknown" | "connecting" | "online" | "offline" | "degraded" | "authentication-required";
 /** An in-memory refresh result. Snapshots are not persisted and may be discarded on unload. */

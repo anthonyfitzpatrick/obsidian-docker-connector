@@ -11,12 +11,14 @@ const profiles: DockerConnectionProfile[] = [
   { ...base, connectionType: "docker-tls", host: "host", port: 2376, serverName: "host", caCertificatePath: "/tmp/ca", clientCertificatePath: "/tmp/cert", clientKeyPath: "/tmp/key", tlsSnapshot: { serverName: "host", importedAt: "" } }
 ];
 describe("four-method connection capability matrix", () => {
-  it("assigns only the intended verification and credential capabilities", () => {
-    const [local, context, ssh, tls] = profiles.map(connectionCapabilities);
-    expect(local).toMatchObject({ requiresRuntimeCredential: false, supportsHostKeyVerification: false, supportsCertificateVerification: false, supportsDashboard: true });
-    expect(context).toMatchObject({ connectionType: "docker-context", supportsAutomaticRefresh: true });
-    expect(ssh).toMatchObject({ requiresRuntimeCredential: true, supportsHostKeyVerification: true });
-    expect(tls).toMatchObject({ supportsCertificateVerification: true, supportsLazyDetails: true, supportsReports: true });
+  it("reports the transport type and the two capabilities callers consume", () => {
+    // Each method reports its own type and is refreshable and manageable; the
+    // capability object carries nothing that no caller reads.
+    const capabilities = profiles.map(connectionCapabilities);
+    expect(capabilities.map((entry) => entry.connectionType)).toEqual(["local", "docker-context", "ssh", "docker-tls"]);
+    for (const entry of capabilities) {
+      expect(entry).toEqual({ connectionType: entry.connectionType, supportsAutomaticRefresh: true, supportsContainerActions: true });
+    }
   });
   it("keeps runtime credential slots isolated by profile and method", () => { const store = new RuntimeCredentialStore(); store.setPassword("ssh-password", "p"); store.setPrivateKeyPassphrase("ssh-key", "k"); store.setTlsClientKeyPassphrase("tls", "t"); store.clearProfile("ssh-password"); expect(store.getPassword("ssh-password")).toBeUndefined(); expect(store.getPrivateKeyPassphrase("ssh-key")).toBe("k"); expect(store.getTlsClientKeyPassphrase("tls")).toBe("t"); });
 });

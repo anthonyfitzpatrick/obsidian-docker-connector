@@ -9,7 +9,7 @@ import type { DockerTransport } from "../connections/DockerTransport";
  * route-specific methods in DockerContainerActionService, where the opt-in,
  * input validation, transaction state, and rollback rules are enforced.
  */
-const ALLOWED_PATHS = [/^\/version$/, /^\/info$/, /^\/containers\/json\?all=true$/, /^\/containers\/[a-f0-9]{12,64}\/json$/, /^\/images\/json(?:\?all=true)?$/, /^\/images\/[a-zA-Z0-9:._/@-]+\/json$/, /^\/volumes$/, /^\/volumes\/[a-zA-Z0-9._-]+$/, /^\/networks$/, /^\/networks\/[a-zA-Z0-9._-]+$/];
+const ALLOWED_PATHS = [/^\/version$/, /^\/info$/, /^\/containers\/json\?all=true$/, /^\/containers\/[a-f0-9]{12,64}\/json$/, /^\/images\/json(?:\?all=true)?$/, /^\/images\/(?!.*\.\.)[a-zA-Z0-9][a-zA-Z0-9:._/@-]*\/json$/, /^\/volumes$/, /^\/volumes\/[a-zA-Z0-9._-]+$/, /^\/networks$/, /^\/networks\/[a-zA-Z0-9._-]+$/];
 /** Enforces the read-only Docker API policy independently of all UI controls. */
 export class DockerApiClient {
   constructor(private readonly transport: DockerTransport) {}

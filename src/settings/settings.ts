@@ -19,12 +19,6 @@ export const DEFAULT_SETTINGS: DockerConnectorSettings = {
   containerDensity: "comfortable"
 };
 
-export function toSafeSettingsErrorMessage(error: unknown): string {
-  const raw = error instanceof Error ? error.message : typeof error === "string" ? error : "Unknown persistence error.";
-  const withoutStack = raw.split("\n")[0].replace(/(?:[A-Za-z]:\\|\/)[^\s]+/g, "<path>").trim();
-  return (withoutStack || "Unknown persistence error.").slice(0, 180);
-}
-
 /** Settings UI and persistence boundary. Documentation: Docker Connector - Settings.md */
 export class DockerConnectorSettingTab extends PluginSettingTab {
   constructor(app: App, private readonly plugin: DockerConnectorPlugin) { super(app, plugin); }
