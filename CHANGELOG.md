@@ -1,6 +1,18 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 — 2026-08-27
+
+Initial public release. Docker Connector was developed to 1.0.0 in private; the notes below cover everything in it.
+
+### Security and compliance
+
+- Corrected the remote capability probe's shell quoting, which allowed an apostrophe in a saved remote socket path to run commands on the remote host, and refused shell metacharacters in that path at the persistence and transport boundaries.
+- Tightened the read-only Docker API allowlist so an image path cannot traverse to another route.
+- Stopped detaching the plugin's own leaves on unload, per Obsidian's plugin guidelines.
+- Removed unreachable code, including the macOS system-SSH diagnostic and its child processes, and reduced the connection and platform capability records to the fields callers read.
+- Dropped the redundant settings-tab title heading.
+
+### Features and fixes
 
 - Moved User Guide screenshot placeholders into the sections they directly illustrate while retaining the screenshot-production checklist.
 - Completed the Community Plugin compliance and documentation pass: lifecycle and settings hardening, current security/release guidance, expanded README and User Guide, numbered screenshot capture specifications, troubleshooting, FAQ, and manual release-test checklists.
@@ -11,7 +23,6 @@
 - Refresh a newly saved Docker Context profile immediately so its runtime snapshot and status are published instead of remaining Unknown.
 - Add confirmed Delete connection actions for every saved profile; deletion clears Docker Connector state only and never deletes Docker resources or credential files.
 
-## Unreleased
 
 - Clarified all connection-method labels and descriptions: Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS). The dialog now provides dynamic security and recommendation guidance without changing saved profile discriminator values or transport behavior.
 
@@ -47,7 +58,7 @@
 - Added Image update status presentation and per-container Check now controls. Update is enabled only for a confirmed newer image, and the preview now proceeds directly from its prominent writable-layer warning without a redundant acknowledgement checkbox.
 - Added an Updates Available Containers-dashboard card with a live count, additive one-click filter, active filter chip, and no-updates empty state.
 
-## 1.0.0 — 2026-08-03
+### Foundation
 
 - Read-only SSH-to-Docker dashboard with host, container, image, volume, network, connection, and Markdown report views.
 - Password-only runtime credential model with SSH host-key verification and `docker system dial-stdio` transport.
