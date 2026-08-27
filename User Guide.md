@@ -361,7 +361,7 @@ The inspector opens beside the list, and the container it describes stays highli
 
 Metadata lists environment variable *names* only. Docker Connector never displays the values, so opening that section cannot reveal a secret held in a container's environment.
 
-The **Image update** area is part of the Actions section and appears only while Container management is enabled for that connection, which is why it is absent above. Screenshots 31 and 32 cover it.
+The **Image update** area is part of the Actions section and appears only while Container management is enabled for that connection, which is why it is absent above. Screenshot 31 covers it.
 
 ## 15. Images
 
@@ -425,23 +425,12 @@ The **Image update** area sits inside **Actions** and appears only while Contain
 
 No **Update** action is offered, because there is nothing newer to move to. **Check now** stays available for an immediate re-check.
 
+When a check finds a newer image the panel reports **Update available** instead, and the two IDs no longer match: **Current image** stays on the ID the container is running, while **Available image** shows the one just resolved for the configured tag. Nothing on the Docker host has changed at that point. The check resolves image metadata and leaves the container running exactly as it was.
+
+What to do next depends on the container. An eligible standalone container gains an **Update** action beside **Check again**; selecting it opens the preview described in **20. Safe container update workflow** rather than changing anything immediately. A Compose-managed container shows **Update unavailable** with the reason instead of an action, because Compose owns that container's configuration: update it through its Compose project. Doing nothing is also a valid response — the advisory persists, and the next automatic check simply refreshes it.
+
 > [!note] Availability is not eligibility
 > **Update available** means a newer image is available. **Update eligibility** means Docker Connector can safely use its standalone update transaction. Compose-managed containers can have an available image but remain ineligible for the standalone Update action.
-
-### Screenshot 32 — Update available
-> **Screenshot placeholder 32**
->
-> **Capture:** Confirmed Update available state for an eligible standalone container.
->
-> **How to capture this screenshot:**
-> 1. Use only an eligible standalone disposable test container for which a newer tagged image can safely be made available.
-> 2. Run **Check now** and wait for Docker Connector to confirm **Update available**.
-> 3. Ensure the standalone **Update** action is visible/enabled and the status clearly identifies the newer image availability.
-> 4. Do not use a Compose-managed or production container for this screenshot.
-> 5. Capture before beginning the update transaction.
-
->
-> **Suggested filename:** `docs/images/user-guide/32-update-available.png`
 
 ## 19. Container management
 
@@ -451,8 +440,8 @@ Authorization is valid only while the profile remains continuously verified as *
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
-### Screenshot 33 — Container management disabled
-> **Screenshot placeholder 33**
+### Screenshot 32 — Container management disabled
+> **Screenshot placeholder 32**
 >
 > **Capture:** Read-only Actions panel and enable guidance.
 >
@@ -465,10 +454,10 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. Do not enable management until after this screenshot is complete.
 
 >
-> **Suggested filename:** `docs/images/user-guide/33-management-disabled.png`
+> **Suggested filename:** `docs/images/user-guide/32-management-disabled.png`
 
-### Screenshot 34 — Per-profile Container management enabled
-> **Screenshot placeholder 34**
+### Screenshot 33 — Per-profile Container management enabled
+> **Screenshot placeholder 33**
 >
 > **Capture:** An individual Online host with management enabled on its Connections card.
 >
@@ -481,7 +470,7 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. If desired, disable management again after all management/update screenshots are finished.
 
 >
-> **Suggested filename:** `docs/images/user-guide/34-management-enabled.png`
+> **Suggested filename:** `docs/images/user-guide/33-management-enabled.png`
 
 ### Start, Stop, Shut down, and Restart
 
@@ -490,8 +479,8 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 - **Stop** uses the normal stop action with a 10-second wait.
 - **Restart** uses Docker’s restart action with a 10-second wait.
 
-### Screenshot 35 — Stopped container Start control
-> **Screenshot placeholder 35**
+### Screenshot 34 — Stopped container Start control
+> **Screenshot placeholder 34**
 >
 > **Capture:** Start action for a stopped standalone container.
 >
@@ -504,12 +493,12 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. After capturing, return the test container to its desired normal state.
 
 >
-> **Suggested filename:** `docs/images/user-guide/35-stopped-start.png`
+> **Suggested filename:** `docs/images/user-guide/34-stopped-start.png`
 
 Docker Connector asks for confirmation before lifecycle actions and coordinates a refresh after an accepted action. These controls never appear as a bulk-action interface.
 
-### Screenshot 36 — Running container lifecycle controls
-> **Screenshot placeholder 36**
+### Screenshot 35 — Running container lifecycle controls
+> **Screenshot placeholder 35**
 >
 > **Capture:** Shut down, Stop, Restart, and Update eligibility where applicable.
 >
@@ -522,7 +511,7 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 > 6. Capture the Actions section and container identity clearly enough to show it is a test target.
 
 >
-> **Suggested filename:** `docs/images/user-guide/36-running-actions.png`
+> **Suggested filename:** `docs/images/user-guide/35-running-actions.png`
 
 ### Update
 
@@ -532,8 +521,8 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 
 An eligible Update begins with a confirmation preview. It identifies the container and image, summarizes supported configuration preservation, shows warnings, and offers Cancel or a direct proceed action. There is no acknowledgement checkbox; the writable-layer warning remains prominent.
 
-### Screenshot 37 — Update preview
-> **Screenshot placeholder 37**
+### Screenshot 36 — Update preview
+> **Screenshot placeholder 36**
 >
 > **Capture:** Preview, configuration summary, and writable-layer warning.
 >
@@ -546,12 +535,12 @@ An eligible Update begins with a confirmation preview. It identifies the contain
 > 6. Capture the complete preview dialog before selecting Proceed.
 
 >
-> **Suggested filename:** `docs/images/user-guide/37-update-preview.png`
+> **Suggested filename:** `docs/images/user-guide/36-update-preview.png`
 
 The transaction is designed for standalone containers. It inspects the original container, validates eligibility, pulls the candidate image, compares image IDs, stops the original if needed, preserves it as a backup, creates and configures a replacement, restores supported networking, starts and verifies the replacement, then cleans up the backup where safe. The exact progress view reports the stage actually in progress.
 
-### Screenshot 38 — Update progress
-> **Screenshot placeholder 38**
+### Screenshot 37 — Update progress
+> **Screenshot placeholder 37**
 >
 > **Capture:** Real in-progress transaction stages.
 >
@@ -564,12 +553,12 @@ The transaction is designed for standalone containers. It inspects the original 
 > 6. If the operation completes too quickly to capture reliably, repeat only on the disposable test target when safe.
 
 >
-> **Suggested filename:** `docs/images/user-guide/38-update-progress.png`
+> **Suggested filename:** `docs/images/user-guide/37-update-progress.png`
 
 Docker Connector attempts to preserve the supported Docker configuration needed to recreate an eligible standalone container, including its relevant mounts, ports, restart configuration, and network attachments. No update workflow can make writable-layer-only data persistent.
 
-### Screenshot 39 — Successful update result
-> **Screenshot placeholder 39**
+### Screenshot 38 — Successful update result
+> **Screenshot placeholder 38**
 >
 > **Capture:** Completed replacement and image identifiers.
 >
@@ -582,7 +571,7 @@ Docker Connector attempts to preserve the supported Docker configuration needed 
 > 6. Capture the final success/result panel.
 
 >
-> **Suggested filename:** `docs/images/user-guide/39-update-success.png`
+> **Suggested filename:** `docs/images/user-guide/38-update-success.png`
 
 ## 21. Rollback and recovery
 
@@ -590,8 +579,8 @@ If a replacement cannot be created, started, or verified after mutation starts, 
 
 Rollback is a recovery attempt, not an absolute guarantee against every host, storage, or Docker failure. If the result says a backup was retained, rollback is incomplete, or manual recovery is required, pause and inspect the reported container names and Docker state before taking further action. Do not repeatedly retry an unclear update result.
 
-### Screenshot 40 — Rollback or recovery result
-> **Screenshot placeholder 40**
+### Screenshot 39 — Rollback or recovery result
+> **Screenshot placeholder 39**
 >
 > **Capture:** Safe rollback, backup-retained, or manual-recovery guidance.
 >
@@ -604,7 +593,7 @@ Rollback is a recovery attempt, not an absolute guarantee against every host, st
 > 6. If no safe real recovery result is available, leave this placeholder uncaptured rather than manufacturing a misleading screenshot.
 
 >
-> **Suggested filename:** `docs/images/user-guide/40-update-recovery.png`
+> **Suggested filename:** `docs/images/user-guide/39-update-recovery.png`
 
 > [!warning] Writable-layer data
 > Data kept only in a container’s writable layer is not equivalent to a named volume or bind mount. Recreating a container can lose writable-layer-only changes. Persist important data with Docker volumes or bind mounts before updating.
@@ -623,8 +612,8 @@ Docker Connector Settings provide:
 
 Container management is intentionally not a Setting. It is controlled only by the per-profile Connections-card switches and never persists across a restart or reload.
 
-### Screenshot 41 — Settings page
-> **Screenshot placeholder 41**
+### Screenshot 40 — Settings page
+> **Screenshot placeholder 40**
 >
 > **Capture:** Automatic refresh, interval, and theme integration.
 >
@@ -636,7 +625,7 @@ Container management is intentionally not a Setting. It is controlled only by th
 > 5. Capture the Docker Connector settings page at a width where labels, descriptions, and controls are readable.
 
 >
-> **Suggested filename:** `docs/images/user-guide/41-settings.png`
+> **Suggested filename:** `docs/images/user-guide/40-settings.png`
 
 ## 24. Security model and saved information
 
@@ -836,13 +825,12 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 29 | `29-volumes-view.png` | Volumes | Inventory |
 | 30 | `30-networks-view.png` | Networks | Inventory |
 | 31 | `31-image-current.png` | Image updates | Current |
-| 32 | `32-update-available.png` | Image updates | Available |
-| 33 | `33-management-disabled.png` | Container management | Read-only |
-| 34 | `34-management-enabled.png` | Container management | Per-profile enabled |
-| 35 | `35-stopped-start.png` | Container management | Start |
-| 36 | `36-running-actions.png` | Container management | Running actions |
-| 37 | `37-update-preview.png` | Update | Preview |
-| 38 | `38-update-progress.png` | Update | Progress |
-| 39 | `39-update-success.png` | Update | Result |
-| 40 | `40-update-recovery.png` | Recovery | Result |
-| 41 | `41-settings.png` | Settings | Full page |
+| 32 | `32-management-disabled.png` | Container management | Read-only |
+| 33 | `33-management-enabled.png` | Container management | Per-profile enabled |
+| 34 | `34-stopped-start.png` | Container management | Start |
+| 35 | `35-running-actions.png` | Container management | Running actions |
+| 36 | `36-update-preview.png` | Update | Preview |
+| 37 | `37-update-progress.png` | Update | Progress |
+| 38 | `38-update-success.png` | Update | Result |
+| 39 | `39-update-recovery.png` | Recovery | Result |
+| 40 | `40-settings.png` | Settings | Full page |

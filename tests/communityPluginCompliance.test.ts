@@ -90,7 +90,7 @@ describe("Obsidian Community Plugin release guard", () => {
     const filenames = [...guide.matchAll(/^> \*\*Suggested filename:\*\* `[^`/]+(?:\/[^`/]+)*\/(\d{2})-[^`]+`$/gm)].map((match) => match[1]);
     const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
     const embedded = [...guide.matchAll(/!\[[^\]]*\]\(docs\/images\/user-guide\/(\d{2}-[^)]+)\)/g)].map((match) => match[1]);
-    const expected = Array.from({ length: 41 }, (_, index) => screenshotNumber(index));
+    const expected = Array.from({ length: 40 }, (_, index) => screenshotNumber(index));
     const placeholdersAndFilenames = ["06", ...expected.slice(31)];
     expect(headings).toEqual(expected);
     expect(placeholders).toEqual(placeholdersAndFilenames);
