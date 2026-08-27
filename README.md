@@ -2,7 +2,7 @@
 
 Docker Connector brings multi-host Docker monitoring and deliberately opt-in container management into Obsidian. Connect to local or remote Docker Engines, inspect Docker Compose applications and Docker resources, check image availability, and use explicit lifecycle actions without leaving your vault.
 
-Docker Connector supports desktop Obsidian on macOS, Windows, and Linux with Local Docker Socket, Docker Context, SSH, and mutual TLS connections. Docker Connector is read-only by default; the header and connection-card switches control the same session-only management authorization for one Online Docker connection. SSH usernames are shown only while adding or editing a host, not in normal dashboard cards.
+Docker Connector supports desktop Obsidian on macOS, Windows, and Linux with Local Docker Socket, Docker Context, SSH, and mutual TLS connections. Docker Connector is read-only by default; each Online connection's Connections-card switch controls its own session-only management authorization. SSH usernames are shown only while adding or editing a host, not in normal dashboard cards.
 
 > **Docker access is highly privileged.** A user or process that can control Docker can often gain extensive control of that Docker host. Connect only to Docker hosts, Docker Contexts, and credentials you trust.
 
@@ -10,7 +10,7 @@ Docker Connector supports desktop Obsidian on macOS, Windows, and Linux with Loc
 
 - Connect multiple Docker environments and switch the **Current Environment** at any time.
 - Use Local Docker Socket, Docker Context, Remote Docker via SSH, or Remote Docker API (Mutual TLS).
-- Read consistent host cards: the same purple host identity, safe endpoint details, inventory/runtime preview, action row, and synchronized per-profile management row for every transport.
+- Read consistent host cards: the same purple host identity, safe endpoint details, inventory/runtime preview, action row, and per-profile management row for every transport.
 - Manage saved connections from **Connections**: add, edit, reconnect or retry when relevant, inspect status, and delete the plugin-only profile safely.
 - Browse host Overview data, Docker Compose **Applications**, **Containers**, **Images**, **Volumes**, and **Networks**.
 - Inspect container, image, volume, network, and Compose application details without opening a separate Docker dashboard.
@@ -38,7 +38,7 @@ Plain unauthenticated Docker TCP is not supported.
 
 ## Read-only by default
 
-The normal Docker Engine client is restricted to approved read-only GET requests. **Container management** is disabled by default, resets after restarting or reloading Obsidian, and is enabled only from the header switch for an individual Online connection. It turns off immediately if that connection is lost and never restores automatically after reconnecting. Even then, Docker Connector exposes only explicit typed actions—Start, Shut down, Stop, Restart, and eligible Update—not a general-purpose Docker command shell or arbitrary API interface.
+The normal Docker Engine client is restricted to approved read-only GET requests. **Container management** is disabled by default, resets after restarting or reloading Obsidian, and is enabled only from the Connections-card switch for an individual Online connection. It turns off immediately if that connection is lost and never restores automatically after reconnecting. Even then, Docker Connector exposes only explicit typed actions—Start, Shut down, Stop, Restart, and eligible Update—not a general-purpose Docker command shell or arbitrary API interface.
 
 ## Applications and Docker resources
 

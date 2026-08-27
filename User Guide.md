@@ -34,7 +34,7 @@ Plain unauthenticated Docker TCP is not supported.
 
 Docker Connector is designed to make its boundaries visible:
 
-- It is read-only until **Container management** is enabled for the selected Online connection from the header switch.
+- It is read-only until **Container management** is enabled for an Online connection from its Connections-card switch.
 - Its normal Docker Engine client is limited to approved GET requests. Start, Stop, Shut down, Restart, and Update use dedicated, typed operations rather than a general-purpose Docker API console.
 - Passwords and private-key passphrases are runtime-only by default. An SSH password profile can explicitly opt in to separate, unencrypted local plugin-data storage on a trusted device; see [[#Password authentication]].
 - Remote Docker via SSH keeps Docker API traffic inside the SSH session. It does not require a direct Docker API listener.
@@ -68,7 +68,7 @@ On first launch there are no saved Docker connections. Open **Connections** and 
 
 ## 6. Understanding the interface
 
-The header identifies the Current Environment and its connection status. Use the refresh control for an immediate read-only snapshot refresh. When automatic refresh is enabled, Docker Connector also refreshes configured hosts in the background at the interval chosen in Settings. With one individual **Online** host selected, the compact header **Container management** switch is available: **Read-only** is off and **Enabled** is on for that profile only. It is unavailable for **All Docker hosts** and for any non-Online profile.
+The header identifies the Current Environment and its connection status. Use the refresh control for an immediate read-only snapshot refresh. When automatic refresh is enabled, Docker Connector also refreshes configured hosts in the background at the interval chosen in Settings. **Container management** is not part of the header. Each host's switch is on its own card in **Connections**, where **Read-only** is off and **Enabled** is on for that profile only. It is unavailable for **All Docker hosts** and for any non-Online profile.
 
 The primary navigation contains **Overview**, **Applications**, **Containers**, **Images**, **Volumes**, **Networks**, and **Connections**. The resource tabs show data for the Current Environment; their search, filter, sort, and detail controls never mutate Docker resources.
 
@@ -479,7 +479,7 @@ Choose **Check now** in the container inspector to perform a one-off check. The 
 
 ## 19. Container management
 
-**Container management** is disabled by default, per connection, and session-only. Select an individual **Online** Docker connection and use either its header switch or its Connections-card switch to enable it only for that profile when you trust it. The two switches stay synchronized; more than one profile can be authorized independently. Enabling asks for confirmation because lifecycle and update actions change the Docker host.
+**Container management** is disabled by default, per connection, and session-only. Open **Connections** and use an **Online** host's **Container management** switch to enable it only for that profile when you trust it. Each profile is authorized independently. Enabling asks for confirmation because lifecycle and update actions change the Docker host.
 
 Authorization is valid only while the profile remains continuously verified as **Online**. It is immediately cleared if that profile becomes Offline, Degraded, Authentication Required, Unknown, Connecting, or unsupported; other authorized profiles are unaffected. A successful reconnect returns that profile to **Read-only**—it never restores authorization automatically. The backend also refuses a mutation unless the profile is still Online when the action runs.
 
@@ -491,7 +491,7 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > **Capture:** Read-only Actions panel and enable guidance.
 >
 > **How to capture this screenshot:**
-> 1. Select an individual Online connection and ensure the header **Container management** switch is off.
+> 1. Open **Connections** and ensure an Online host's **Container management** switch reads **Read-only**.
 > 2. Return to **Containers** and select any test container.
 > 3. Open the **Actions** area.
 > 4. Confirm it displays the read-only message/guidance rather than lifecycle controls.
@@ -504,13 +504,13 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 ### Screenshot 34 — Per-profile Container management enabled
 > **Screenshot placeholder 34**
 >
-> **Capture:** An individual Online host with management enabled in the compact header and on its matching Connections card.
+> **Capture:** An individual Online host with management enabled on its Connections card.
 >
 > **How to capture this screenshot:**
 > 1. Select an individual known-safe **Online** test host in Docker Connector; do not use **All Docker hosts**.
-> 2. Turn on **Container management** from either the header or that host’s Connections card.
+> 2. Turn on **Container management** on that host’s Connections card.
 > 3. Accept the confirmation only in an isolated test environment after confirming the configured environments are understood and you intend to continue test work.
-> 4. Confirm the matching header/card controls are synchronized and show **Enabled** for that profile only.
+> 4. Confirm the card shows **Enabled** for that profile only and that other hosts remain **Read-only**.
 > 5. Capture the enabled profile state; do not include credentials, unrelated settings, or Docker actions in progress.
 > 6. If desired, disable management again after all management/update screenshots are finished.
 
@@ -655,7 +655,7 @@ Docker Connector Settings provide:
 - **Refresh interval** — minutes between background refreshes.
 - **Theme integration** — use Obsidian’s native theme variables.
 
-Container management is intentionally not a Setting. It is controlled only by the synchronized per-profile header/card switches and never persists across a restart or reload.
+Container management is intentionally not a Setting. It is controlled only by the per-profile Connections-card switches and never persists across a restart or reload.
 
 ### Screenshot 41 — Settings page
 > **Screenshot placeholder 41**

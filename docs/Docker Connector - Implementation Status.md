@@ -14,7 +14,7 @@ Implemented: deletion of saved Docker Connector connection profiles with explici
 
 Implemented: Remote Docker API (Mutual TLS) profile modeling, HTTPS mutual-TLS Test Connection, dashboard refresh, and lazy details. Local Docker Socket, Docker Context, Remote Docker via SSH, and Remote Docker API (Mutual TLS) share the read-only API policy and cleanup lifecycle. Not implemented: SSH Agent, SSH config import, and OS credential storage; the only remembered credential is the explicit unencrypted plugin-data SSH password option. See [[Docker Connector - Connectivity Overview]].
 
-Implemented: Container management is opt-in, disabled by default, profile-scoped, and session-only. The synchronized header/card switches are available only for an individual Online profile, revoke authorization immediately on connection loss, and never restore it automatically after reconnect. Manual Obsidian verification of the installed bundle remains outstanding.
+Implemented: Container management is opt-in, disabled by default, profile-scoped, and session-only. The Connections-card switch is available only for an individual Online profile, revoke authorization immediately on connection loss, and never restore it automatically after reconnect. Manual Obsidian verification of the installed bundle remains outstanding.
 
 Implemented: lifecycle actions use typed routes and accept valid empty Docker responses, including Start's `204 No Content`. The Actions panel has a responsive grid and bounded safe error presentation. Manual Obsidian and disposable-container validation remains outstanding.
 
