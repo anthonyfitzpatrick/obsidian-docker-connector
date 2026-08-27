@@ -36,7 +36,7 @@ export interface DockerPortBindingSummary { containerPort: string; bindings: Arr
 export interface ContainersViewState {
   searchQuery: string; stateFilter: DockerContainerStateFilter; healthFilter: DockerContainerHealthFilter; networkFilter: string | null;
   updatesOnly: boolean; sortMode: ContainerSortMode; density: ContainerDensity; selectedContainerId: string | null;
-  detailState: { status: "closed" } | { status: "loading"; containerId: string } | { status: "ready"; containerId: string; details: DockerContainerDetails } | { status: "error"; containerId: string; error: string };
+  detailState: { status: "closed" } | { status: "loading"; containerId: string } | { status: "ready"; containerId: string; snapshotAt: string; details: DockerContainerDetails } | { status: "error"; containerId: string; error: string };
 }
 
 export const DEFAULT_CONTAINERS_VIEW_STATE: ContainersViewState = { searchQuery: "", stateFilter: "all", healthFilter: "all", networkFilter: null, updatesOnly: false, sortMode: "name-asc", density: "comfortable", selectedContainerId: null, detailState: { status: "closed" } };

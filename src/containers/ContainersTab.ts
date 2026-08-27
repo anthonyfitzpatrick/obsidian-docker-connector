@@ -612,7 +612,10 @@ export class ContainersTab {
         void this.loadDetail(profile, snapshot, summary, true);
       return;
     }
-    if (this.state.detailState.status === "ready")
+    if (this.state.detailState.status === "ready") {
+      // Deferred: loadDetail re-renders, which must not run inside this one.
+      if (this.state.detailState.snapshotAt !== snapshot.refreshedAt)
+        queueMicrotask(() => void this.loadDetail(profile, snapshot, summary, true));
       this.detailSections(
         panel,
         this.state.detailState.details,
@@ -620,6 +623,7 @@ export class ContainersTab {
         profile,
         snapshot,
       );
+    }
   }
   private detailSections(
     panel: HTMLElement,
@@ -1155,7 +1159,8 @@ export class ContainersTab {
     if (
       !force &&
       this.state.detailState.status === "ready" &&
-      this.state.detailState.containerId === this.key(container)
+      this.state.detailState.containerId === this.key(container) &&
+      this.state.detailState.snapshotAt === snapshot.refreshedAt
     )
       return;
     this.state.detailState = { status: "loading", containerId: this.key(container) };
@@ -1169,6 +1174,7 @@ export class ContainersTab {
       this.state.detailState = {
         status: "ready",
         containerId: this.key(container),
+        snapshotAt: snapshot.refreshedAt,
         details,
       };
       this.rerender();

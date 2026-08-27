@@ -70,6 +70,17 @@ describe("Containers card layout", () => {
     expect(tab).not.toContain("header switch");
   });
 
+  it("reloads open container details when the host snapshot moves on", () => {
+    // A lifecycle action refreshes the host; the panel must not keep showing
+    // the state the container was in before the action.
+    const models = readFileSync(resolve(process.cwd(), "src/containers/ContainerModels.ts"), "utf8");
+    expect(models).toContain('status: "ready"; containerId: string; snapshotAt: string');
+    expect(tab).toContain("this.state.detailState.snapshotAt === snapshot.refreshedAt");
+    expect(tab).toContain("this.state.detailState.snapshotAt !== snapshot.refreshedAt");
+    expect(tab).toContain("queueMicrotask(() => void this.loadDetail(profile, snapshot, summary, true))");
+    expect(tab).toContain("snapshotAt: snapshot.refreshedAt");
+  });
+
   it("keeps container inspection, copying, and authorized management safeguards intact", () => {
     for (const value of ["navigator.clipboard.writeText(container.id)", 'role: "button"', 'tabindex: "0"', "Refresh container details", "getContainerActionCapabilities", "isProfileManagementEnabled", "getContainerUpdateEligibility", "Container management enabled"]) expect(tab).toContain(value);
   });
