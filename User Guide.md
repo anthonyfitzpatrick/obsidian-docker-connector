@@ -448,20 +448,11 @@ Every saved connection carries its own **Container management** switch at the bo
 The switch is available only while that connection is **Online**; the card above also shows the host's inventory counts, Docker Engine details, and the endpoint the connection uses, so you can confirm you are enabling the host you intended.
 
 ### Screenshot 33 — Container management disabled
-> **Screenshot placeholder 33**
->
-> **Capture:** Read-only Actions panel and enable guidance.
->
-> **How to capture this screenshot:**
-> 1. Open **Connections** and ensure an Online host's **Container management** switch reads **Read-only**.
-> 2. Return to **Containers** and select any test container.
-> 3. Open the **Actions** area.
-> 4. Confirm it displays the read-only message/guidance rather than lifecycle controls.
-> 5. Capture only the Actions area and enough container context to show what is being inspected.
-> 6. Do not enable management until after this screenshot is complete.
+![A container inspector with the read-only Actions message](docs/images/user-guide/33-management-disabled.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/33-management-disabled.png`
+This is what a container's **Actions** section shows while its connection is read-only: a statement of the current mode and where to change it, in place of the Start, Shut down, Stop, Restart, and Update controls. The **Image update** area is absent for the same reason, since update checking belongs to Actions.
+
+Nothing else is withheld. Overview, State, and the remaining sections stay fully readable, because read-only restricts what Docker Connector may change, not what it may show you. The **Docker host** row names the connection whose switch governs this container — useful when several connections reach the same Docker host.
 
 ### Screenshot 34 — Enabling asks for confirmation
 ![Confirmation dialog shown when enabling Container management](docs/images/user-guide/34-management-confirmation.png)
