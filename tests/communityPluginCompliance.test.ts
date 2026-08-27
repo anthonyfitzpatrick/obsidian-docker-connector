@@ -89,31 +89,23 @@ describe("Obsidian Community Plugin release guard", () => {
     for (const setting of ["Automatic refresh", "Refresh interval", "Theme integration"]) expect(settings).toContain(setting);
   });
 
-  it("ships documentation with valid README links and a complete screenshot capture plan", async () => {
+  it("ships documentation with valid README links and a fully illustrated guide", async () => {
     const [readme, guide] = await Promise.all([source("README.md"), source("User Guide.md")]);
     const links = [...readme.matchAll(/\]\(([^)#]+)(?:#[^)]+)?\)/g)].map((match) => decodeURIComponent(match[1]));
     await Promise.all(links.filter((link) => !/^[a-z]+:/i.test(link)).map((link) => access(link)));
 
-    const headings = [...guide.matchAll(/^### Screenshot (\d{2}) —/gm)].map((match) => match[1]);
-    const placeholders = [...guide.matchAll(/^> \*\*Screenshot placeholder (\d{2})\*\*/gm)].map((match) => match[1]);
-    const filenames = [...guide.matchAll(/^> \*\*Suggested filename:\*\* `[^`/]+(?:\/[^`/]+)*\/(\d{2})-[^`]+`$/gm)].map((match) => match[1]);
-    const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
     const embedded = [...guide.matchAll(/!\[[^\]]*\]\(docs\/images\/user-guide\/(\d{2}-[^)]+)\)/g)].map((match) => match[1]);
-    const expected = Array.from({ length: 41 }, (_, index) => screenshotNumber(index));
-    // Captured screenshots need not be a contiguous run, so require instead
-    // that every planned number is either embedded or still has a brief, and
-    // that each brief keeps its own suggested filename.
-    const covered = [...new Set([...embedded.map((filename) => filename.slice(0, 2)), ...placeholders])].sort();
-    expect(headings).toEqual(expected);
-    expect(placeholders).toEqual(filenames);
-    expect(covered).toEqual(expected);
-    expect(checklist).toEqual(expected);
     expect(embedded).toEqual(["01-empty-connections.png", "02-dashboard-overview.png", "03-add-docker-host.png", "04-connection-type-selector.png", "05-local-docker-socket.png", "06-docker-cli-detected.png", "07-ssh-password.png", "08-verify-ssh-host.png", "09-ssh-connection-success.png", "10-remember-ssh-password.png", "11-generate-ssh-key.png", "12-ssh-private-key-selection.png", "13-ssh-key-generation-complete.png", "14-install-public-key.png", "15-private-key-test-success.png", "16-remote-docker-api-mtls.png", "17-local-test-success.png", "18-connections-overview.png", "19-authentication-required-reconnect.png", "20-delete-connection.png", "21-current-environment.png", "22-applications-list.png", "23-application-inspector.png", "24-containers-view.png", "25-updates-filter.png", "26-compact-density.png", "27-container-health-badges.png", "28-container-inspector.png", "29-images-view.png", "30-volumes-view.png", "31-networks-view.png", "32-image-current.png", "33-management-card-read-only.png", "34-management-disabled.png", "35-management-confirmation.png", "36-management-enabled.png", "37-running-actions.png", "38-action-confirmation.png", "39-stopped-start.png", "40-start-confirmation.png", "41-settings.png"]);
+    expect(isSequential(embedded.map((file) => file.slice(0, 2)))).toBe(true);
     await Promise.all(embedded.map((filename) => access(`docs/images/user-guide/${filename}`)));
-    const appendixStart = guide.indexOf("# Appendix A — Screenshot production checklist");
-    expect(appendixStart).toBeGreaterThan(0);
-    expect(guide.slice(appendixStart)).not.toMatch(/^### Screenshot |^> \*\*Screenshot placeholder/m);
-    expect([...guide.matchAll(/^> \*\*Screenshot placeholder \d{2}\*\*/gm)].every((match) => match.index! < appendixStart)).toBe(true);
+
+    // Every screenshot is captured, so no capture apparatus should remain.
+    for (const retired of ["Screenshot placeholder", "Suggested filename:", "Appendix A", "### Screenshot "]) expect(guide).not.toContain(retired);
+
+    // Each screenshot is centred and sized rather than dropped in at full width.
+    const centred = [...guide.matchAll(/<div align="center">\n\n!\[[^\]]*\|(\d+)\]\(docs\/images\/user-guide\/\d{2}-[^)]+\)\n\n<\/div>/g)];
+    expect(centred).toHaveLength(embedded.length);
+    for (const [, width] of centred) expect(Number(width)).toBeLessThanOrEqual(880);
   });
 
   it("rejects complete screenshot sets that are out of document order", () => {

@@ -63,8 +63,12 @@ For a manual release installation, the plugin directory needs only `main.js`, `m
 
 On first launch there are no saved Docker connections. Open **Connections** and choose **Add Docker Host**. After testing and saving a host, choose it as the Current Environment to populate the dashboard.
 
-### Screenshot 01 — Empty Docker connections state
-![Empty Docker connections state](docs/images/user-guide/01-empty-connections.png)
+### Empty Docker connections state
+<div align="center">
+
+![Empty Docker connections state|880](docs/images/user-guide/01-empty-connections.png)
+
+</div>
 
 ## 6. Understanding the interface
 
@@ -72,8 +76,12 @@ The header identifies the Current Environment and its connection status. Use the
 
 The primary navigation contains **Overview**, **Applications**, **Containers**, **Images**, **Volumes**, **Networks**, and **Connections**. The resource tabs show data for the Current Environment; their search, filter, sort, and detail controls never mutate Docker resources.
 
-### Screenshot 02 — Main Docker Connector dashboard
-![Docker Connector dashboard](docs/images/user-guide/02-dashboard-overview.png)
+### Main Docker Connector dashboard
+<div align="center">
+
+![Docker Connector dashboard|880](docs/images/user-guide/02-dashboard-overview.png)
+
+</div>
 
 ## 7. Adding a Docker host
 
@@ -87,15 +95,23 @@ The primary navigation contains **Overview**, **Applications**, **Containers**, 
 
 On desktop, drag the dialog by its title bar or resize it from its lower-right edge. On touch and narrow layouts, it remains viewport-safe without draggable controls.
 
-### Screenshot 03 — Add Docker Host dialog
-![Add Docker Host dialog](docs/images/user-guide/03-add-docker-host.png)
+### Add Docker Host dialog
+<div align="center">
+
+![Add Docker Host dialog|738](docs/images/user-guide/03-add-docker-host.png)
+
+</div>
 
 Testing before saving is strongly recommended. A successful test proves the selected profile can validate its endpoint and obtain safe Docker information; saving then registers the profile for the normal dashboard refresh lifecycle.
 
 ## 8. Connection methods
 
-### Screenshot 04 — Connection Type selector
-![Connection Type selector](docs/images/user-guide/04-connection-type-selector.png)
+### Connection Type selector
+<div align="center">
+
+![Connection Type selector|693](docs/images/user-guide/04-connection-type-selector.png)
+
+</div>
 
 ### 8.1 Local Docker Socket
 
@@ -105,8 +121,12 @@ On macOS, Docker Desktop commonly uses a user socket such as `~/.docker/run/dock
 
 The **Docker Endpoint** field can show the detected local Unix socket or Windows named pipe. If Docker Desktop is stopped, the endpoint is missing, the symlink is broken, or your account cannot open it, Test Connection explains that local endpoint problem.
 
-### Screenshot 05 — Local Docker Socket configuration
-![Local Docker Socket configuration](docs/images/user-guide/05-local-docker-socket.png)
+### Local Docker Socket configuration
+<div align="center">
+
+![Local Docker Socket configuration|880](docs/images/user-guide/05-local-docker-socket.png)
+
+</div>
 
 ### 8.2 Docker Context
 
@@ -116,24 +136,12 @@ This distinction matters: Docker Connector uses the context you select without c
 
 The plugin performs bounded discovery of the Docker CLI from the current process PATH and standard platform locations. This helps normal macOS GUI launches, where Obsidian can inherit a different PATH than Terminal, without invoking a login shell or reading shell startup files.
 
-### Screenshot 06 — Docker CLI detected
-> **Screenshot placeholder 06**
->
-> **Capture:** Docker Context configuration showing the detected Docker CLI/version and a discovered supported context.
->
-> **How to capture this screenshot:**
-> 1. Open **Add Docker Host** and select **Docker Context**.
-> 2. Run context discovery and wait for Docker CLI discovery to finish.
-> 3. Ensure the detected Docker CLI/version message and available-context count are visible.
-> 4. Ensure at least one safe discovered context is visible, preferably `desktop-linux`, together with its **Current** marker when applicable.
-> 5. Include the selected context's supported endpoint summary.
-> 6. Use a normal test/local context setup; do not change the active Docker Context merely for the screenshot.
-> 7. Avoid displaying private remote endpoints not intended for documentation.
-> 8. Capture enough diagnostics to demonstrate that Docker Connector found the CLI, enumerated contexts, and resolved the selected context successfully.
->
-> **Suggested filename:** `docs/images/user-guide/06-docker-cli-detected.png`
+### Docker CLI detected
+<div align="center">
 
-![Docker CLI and Context discovery](docs/images/user-guide/06-docker-cli-detected.png)
+![Docker CLI and Context discovery|851](docs/images/user-guide/06-docker-cli-detected.png)
+
+</div>
 
 Docker Connector resolves a selected Context to the right physical transport each time it is used:
 
@@ -164,8 +172,12 @@ With **Password** selected, enter the SSH password during connection or reconnec
 
 For a password profile only, **Remember password on this device** is an optional, off-by-default choice. It stores the password separately in local plugin data so Docker Connector can reconnect after Obsidian restarts. Obsidian does not provide this plugin a supported keychain or guaranteed encryption, so use it only on a trusted device, prefer SSH keys where possible, and use **Forget stored password** to remove it immediately. It never applies to private-key passphrases, TLS passphrases, keys, or certificates. Host-key verification is still mandatory: a changed host key blocks reconnection even when a password is remembered.
 
-### Screenshot 07 — Remote Docker via SSH password
-![Remote Docker via SSH password](docs/images/user-guide/07-ssh-password.png)
+### Remote Docker via SSH password
+<div align="center">
+
+![Remote Docker via SSH password|768](docs/images/user-guide/07-ssh-password.png)
+
+</div>
 
 #### Host-key verification
 
@@ -176,14 +188,26 @@ The **Host Key Fingerprint** identifies the remote SSH server. Docker Connector 
 3. **Trust and Continue** performs exactly one automatic retest with the same session-only credential. A successful SSH test shows the completed SSH handshake, host-key verification, SSH authentication, Docker `GET /_ping`, and Docker `GET /version` diagnostics. Authentication stages not selected for the profile are marked **SKIPPED**.
 4. Select **Save Host** only after that successful retest. Saving persists the verified host-key fingerprint metadata, never a password or private-key passphrase.
 
-### Screenshot 08 — Verify SSH Host
-![Verify SSH Host dialog](docs/images/user-guide/08-verify-ssh-host.png)
+### Verify SSH Host
+<div align="center">
 
-### Screenshot 09 — SSH connection success diagnostics
-![SSH connection success diagnostics](docs/images/user-guide/09-ssh-connection-success.png)
+![Verify SSH Host dialog|542](docs/images/user-guide/08-verify-ssh-host.png)
 
-### Screenshot 10 — Remember SSH password option
-![Remember SSH password option](docs/images/user-guide/10-remember-ssh-password.png)
+</div>
+
+### SSH connection success diagnostics
+<div align="center">
+
+![SSH connection success diagnostics|880](docs/images/user-guide/09-ssh-connection-success.png)
+
+</div>
+
+### Remember SSH password option
+<div align="center">
+
+![Remember SSH password option|647](docs/images/user-guide/10-remember-ssh-password.png)
+
+</div>
 
 With the option off, an Obsidian restart returns the profile to **Authentication Required** and **Reconnect** asks for the password again. With the option explicitly on, Docker Connector rehydrates the stored password only for that profile and only when the saved host-key fingerprint still matches. Use **Forget stored password** to remove it immediately. A changed host key always opens **SSH Host Identity Changed**, showing both trusted and received fingerprints with no replacement action; it blocks reconnection even when a password is remembered.
 
@@ -191,32 +215,52 @@ With the option off, an Obsidian restart returns the profile to **Authentication
 
 With **Private Key** selected, use **Browse…** to choose an existing key or select **Generate SSH Key**. For the recommended unattended setup, leave both passphrase fields blank before generation. A nonblank generation passphrase encrypts the key: it remains session-only and must be entered again after restart, so it is not unattended.
 
-### Screenshot 11 — Generate SSH Key completed
-![Generate SSH Key completed](docs/images/user-guide/11-generate-ssh-key.png)
+### Generate SSH Key completed
+<div align="center">
+
+![Generate SSH Key completed|546](docs/images/user-guide/11-generate-ssh-key.png)
+
+</div>
 
 **Generate SSH Key** has completed successfully: the dialog confirms an Ed25519 SSH key is ready, shows a safe public SHA-256 fingerprint, and provides **Close**. Select **Close** to return to the SSH host form.
 
-### Screenshot 12 — Remote Docker via SSH private-key selection
-![Remote Docker via SSH private-key selection](docs/images/user-guide/12-ssh-private-key-selection.png)
+### Remote Docker via SSH private-key selection
+<div align="center">
+
+![Remote Docker via SSH private-key selection|850](docs/images/user-guide/12-ssh-private-key-selection.png)
+
+</div>
 
 The host form now shows the validated selected key and public fingerprint. Docker Connector saves only the key path, never key contents, and derives its public identity. When a sibling `<private-key>.pub` exists, its type and base64 identity must match; a mismatched `.pub` blocks installation, while a missing `.pub` is derived in memory without modifying the private key. Select **Install Public Key**, enter the remote account's current session-only SSH password, complete first-host verification if needed, test the selected private key, save the host, then restart Obsidian to confirm it reconnects online.
 
 Never expose private-key contents, public-key contents, entered passphrases, identifying filesystem paths, or other secrets.
 
-### Screenshot 13 — SSH key generation complete
-![SSH key generation complete](docs/images/user-guide/13-ssh-key-generation-complete.png)
+### SSH key generation complete
+<div align="center">
+
+![SSH key generation complete|846](docs/images/user-guide/13-ssh-key-generation-complete.png)
+
+</div>
 
 The completed dialog confirms the Ed25519 key is ready, shows its public SHA-256 fingerprint, and provides **Close** to return to the SSH host form.
 
-### Screenshot 14 — Install Public Key
-![Install Public Key](docs/images/user-guide/14-install-public-key.png)
+### Install Public Key
+<div align="center">
+
+![Install Public Key|548](docs/images/user-guide/14-install-public-key.png)
+
+</div>
 
 The **Install Public Key** dialog shows the selected key's public SHA-256 fingerprint. Docker Connector appends only that public key to the remote account's `~/.ssh/authorized_keys` when it is not already present; existing entries are preserved.
 
 **Current SSH Password** is the remote account's existing password, needed only for this session-only installation and never saved. The screenshot intentionally leaves it empty. The private key, its passphrase, and its contents are never transferred to the remote host. After entering the remote account password, select **Install public key**.
 
-### Screenshot 15 — Private-key Test Connection success
-![Private-key Test Connection success](docs/images/user-guide/15-private-key-test-success.png)
+### Private-key Test Connection success
+<div align="center">
+
+![Private-key Test Connection success|848](docs/images/user-guide/15-private-key-test-success.png)
+
+</div>
 
 After public-key installation, select **Test Connection** to verify host-key verification, private-key authentication, and Docker `GET /_ping` and `GET /version` all succeed.
 
@@ -224,8 +268,12 @@ The profile can save the private-key file path, not a copy of the key material. 
 
 ### 8.4 Remote Docker API (Mutual TLS)
 
-### Screenshot 16 — Remote Docker API (Mutual TLS) form
-![Remote Docker API Mutual TLS form](docs/images/user-guide/16-remote-docker-api-mtls.png)
+### Remote Docker API (Mutual TLS) form
+<div align="center">
+
+![Remote Docker API Mutual TLS form|880](docs/images/user-guide/16-remote-docker-api-mtls.png)
+
+</div>
 
 **Remote Docker API (Mutual TLS)** is for a Docker Engine HTTPS endpoint that has deliberately been configured for mutual TLS. Unlike SSH, the Docker API endpoint is directly reachable on the network. Both sides authenticate:
 
@@ -258,15 +306,23 @@ A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. 
 
 For mutual TLS, a successful test loads the TLS files, confirms the certificate/key pair, opens the TLS connection, verifies the server certificate and Server Name, then completes Docker `GET /_ping` and `GET /version`. If the Server Name is wrong, correct it before saving; the Docker API checks do not run after an identity failure.
 
-### Screenshot 17 — Successful local Test Connection diagnostics
-![Successful local Docker Test Connection diagnostics](docs/images/user-guide/17-local-test-success.png)
+### Successful local Test Connection diagnostics
+<div align="center">
+
+![Successful local Docker Test Connection diagnostics|764](docs/images/user-guide/17-local-test-success.png)
+
+</div>
 
 ## 10. Managing saved connections
 
 Open **Connections** to manage every saved profile. The page begins with summary cards for **Configured hosts**, **Online**, and **Needs sign-in**; Needs sign-in counts only profiles in **Authentication Required**. For example, three configured profiles may show one Online and two Needs sign-in without changing either healthy profile’s state. It then provides **Add Docker Host** and a card for every profile. Each card uses one uniform structure: purple Docker host identity, textual connection method, transport-relevant safe endpoint details, inventory, runtime details, actions, and management row. Only the safe profile data and status vary by connection method.
 
-### Screenshot 18 — Docker connections overview
-![Docker connections overview](docs/images/user-guide/18-connections-overview.png)
+### Docker connections overview
+<div align="center">
+
+![Docker connections overview|880](docs/images/user-guide/18-connections-overview.png)
+
+</div>
 
 The summary cards count saved profiles, currently connected profiles, and profiles whose session-only credentials must be supplied again. **Add Docker Host** opens the profile workflow. Each card shows current status, a safe endpoint, inventory and runtime details where available, **Open dashboard**, **Edit**, **Delete**, and a compact profile-scoped **Container management** control.
 
@@ -276,8 +332,12 @@ Status is information, not an action. The current states are **Unknown**, **Conn
 
 **Open dashboard** selects that Docker environment and opens its operational dashboard. Its **Overview** tab is the host-level operational summary for the selected environment. Where available, it presents connection health, Docker version and host information, resource counts, refresh information, and attention items that deserve review. Attention items can identify a host connection problem, an unhealthy container, a restarting or dead container, a non-zero container exit, or an available public release where that information is supported by the view. Overview is not a metrics-history system: it shows the latest safe dashboard snapshot for the selected environment.
 
-### Screenshot 19 — Authentication Required / Reconnect
-![Authentication Required profile with Reconnect action](docs/images/user-guide/19-authentication-required-reconnect.png)
+### Authentication Required / Reconnect
+<div align="center">
+
+![Authentication Required profile with Reconnect action|430](docs/images/user-guide/19-authentication-required-reconnect.png)
+
+</div>
 
 **Authentication Required** means Docker Connector needs a runtime-only credential before the profile can reconnect. This screenshot shows an SSH password profile. The same state can occur for an SSH profile using an encrypted private key when its session-only key passphrase is no longer available after restart.
 
@@ -287,8 +347,12 @@ Status is information, not an action. The current states are **Unknown**, **Conn
 
 Deleting a connection removes only Docker Connector’s saved profile, runtime credentials, cached session data, and associated transport state. It does **not** stop or remove containers; delete images, volumes, or networks; remove Docker Contexts; delete SSH keys or TLS files; change Docker sockets; or change a remote server configuration. The confirmation dialog repeats this boundary before removal.
 
-### Screenshot 20 — Delete connection confirmation
-![Delete connection confirmation](docs/images/user-guide/20-delete-connection.png)
+### Delete connection confirmation
+<div align="center">
+
+![Delete connection confirmation|880](docs/images/user-guide/20-delete-connection.png)
+
+</div>
 
 ## 11. Switching environments
 
@@ -296,20 +360,32 @@ Use **Current Environment** to choose which saved host supplies dashboard data. 
 
 If the selected profile is deleted, Docker Connector chooses a safe remaining profile where possible, preferring an Online profile. If no profiles remain, the dashboard returns to its no-host state.
 
-### Screenshot 21 — Current Environment selector
-![Current Environment selector](docs/images/user-guide/21-current-environment.png)
+### Current Environment selector
+<div align="center">
+
+![Current Environment selector|880](docs/images/user-guide/21-current-environment.png)
+
+</div>
 
 ## 12. Applications
 
 Applications groups Docker Compose-managed containers into projects. Docker Connector uses Docker’s Compose metadata—especially `com.docker.compose.project` and `com.docker.compose.service`—rather than guessing project membership from names, paths, networks, or image references.
 
-### Screenshot 22 — Applications list
-![Applications list](docs/images/user-guide/22-applications-list.png)
+### Applications list
+<div align="center">
+
+![Applications list|880](docs/images/user-guide/22-applications-list.png)
+
+</div>
 
 Application cards show a project’s services, container counts, running and stopped counts, available-update count where known, and associated networks, volumes, and images. The list supports searching, status and update filtering, sorting, and an inspector. The inspector exposes project details, services, containers, and images; selecting a listed container opens that container in **Containers**.
 
-### Screenshot 23 — Application detail inspector
-![Application detail inspector](docs/images/user-guide/23-application-inspector.png)
+### Application detail inspector
+<div align="center">
+
+![Application detail inspector|880](docs/images/user-guide/23-application-inspector.png)
+
+</div>
 
 The inspector organizes project information into sections such as Overview, Services, Containers, Images, Networks, and storage information where available. Sections can be expanded as needed rather than displaying every relationship at once. Selecting a listed container opens that container in **Containers**.
 
@@ -321,22 +397,34 @@ Applications is read-only at the project level. Docker Connector does not run `d
 
 The **Containers** tab is the main container inventory. It has summary cards for **Containers**, **Running**, **Stopped**, and **Updates Available**.
 
-### Screenshot 24 — Containers view
-![Containers inventory with no active filters](docs/images/user-guide/24-containers-view.png)
+### Containers view
+<div align="center">
+
+![Containers inventory with no active filters|880](docs/images/user-guide/24-containers-view.png)
+
+</div>
 
 With no filter applied the count shows the full inventory, and the summary cards report the totals for the selected environment. The example above shows sixteen containers across **All Docker hosts**, all of them running.
 
 Use the toolbar to search by container information and filter by State, Health, and Network. Sort and density controls make it practical to work with larger inventories. Each container card identifies the container, image, short ID, state, and health, together with its status, Docker host, networks, published ports, and creation time at Comfortable density. Selecting a card's short ID copies the full container ID to the clipboard without opening the container or changing the Docker host.
 
-### Screenshot 25 — Updates Available filter
-![Updates Available filter applied in Containers](docs/images/user-guide/25-updates-filter.png)
+### Updates Available filter
+<div align="center">
+
+![Updates Available filter applied in Containers|880](docs/images/user-guide/25-updates-filter.png)
+
+</div>
 
 Selecting the **Updates Available** card applies an additive filter to the container list. The applied filter appears as an **Updates available** chip in the **Active filters** row, alongside **Clear all**, and the result count above the summary cards reports how many of the total containers currently match.
 
 In the example above the filter is applied while every checked container is current, so the count shows `0 of 16 containers` and the list shows the **Everything is up to date** empty state with **Show all containers**. When containers do have a newer image available, the same filtered list shows only those containers instead. Use **Show all containers**, the chip's remove control, or **Clear all** to return to the complete inventory.
 
-### Screenshot 26 — Compact density
-![Containers inventory at Compact density](docs/images/user-guide/26-compact-density.png)
+### Compact density
+<div align="center">
+
+![Containers inventory at Compact density|880](docs/images/user-guide/26-compact-density.png)
+
+</div>
 
 Compact density keeps each container's name, state, health, image, and short ID, and omits the Docker host, network, published-port, and creation-time lines that Comfortable adds. The pane above is the same width as screenshot 24, where nine containers were visible; at Compact all sixteen fit.
 
@@ -350,8 +438,12 @@ A container that has just started often shows **Running** and **Starting** toget
 
 Expect it to persist for a time after the container has actually become healthy. Docker Connector reads health from the last snapshot it took of that host: it refreshes immediately after a lifecycle action — the moment a container is least likely to be healthy yet — and then again on the automatic interval, five minutes apart by default. The badge settles at whichever refresh first sees Docker reporting the container as healthy. Use the dashboard refresh control if you would rather not wait for the next scheduled one.
 
-### Screenshot 27 — State and health badges
-![A container card reporting Running state and Starting health](docs/images/user-guide/27-container-health-badges.png)
+### State and health badges
+<div align="center">
+
+![A container card reporting Running state and Starting health|354](docs/images/user-guide/27-container-health-badges.png)
+
+</div>
 
 Every card carries its state badge first and its health badge second. The container above reports **Running** for its state and **Starting** for its health: it is up, and its first health check has not passed yet. Reading the two badges as a single status is what makes this look like a stuck action rather than the ordinary sequence it is.
 
@@ -363,8 +455,12 @@ Select a container to open its read-only inspector. The inspector provides **Act
 
 The inspector lets you refresh details and copy the full container ID. It does not provide an interactive shell, file browser, log terminal, or arbitrary Docker API console.
 
-### Screenshot 28 — Container detail inspector
-![Container detail inspector for a selected container](docs/images/user-guide/28-container-inspector.png)
+### Container detail inspector
+<div align="center">
+
+![Container detail inspector for a selected container|880](docs/images/user-guide/28-container-inspector.png)
+
+</div>
 
 The inspector opens beside the list, and the container it describes stays highlighted in the inventory. Its header repeats the container name, full image reference, and state, with controls to copy the container ID, refresh the details, and close the panel.
 
@@ -380,8 +476,12 @@ The **Images** tab is a read-only image inventory. Summary cards cover Images, I
 
 Select an image for an inspector with overview data, repository tags and digests, safe labels, and visible container references. Docker Connector does not delete images or expose arbitrary pull controls from this view.
 
-### Screenshot 29 — Images view
-![Images inventory with an image inspector open](docs/images/user-guide/29-images-view.png)
+### Images view
+<div align="center">
+
+![Images inventory with an image inspector open|880](docs/images/user-guide/29-images-view.png)
+
+</div>
 
 Each image card shows its repository and tag, short ID, size, and how many containers use it, with a badge of **In use**, **Unused**, or **Dangling**. The count above the summary cards can be lower than the **Images** total, as it is above: untagged images are kept out of the list until you choose the **Dangling** filter.
 
@@ -395,8 +495,12 @@ The **Volumes** tab lists Docker named volumes and their driver, scope, mountpoi
 
 The volume inspector shows overview information, options, safe labels, and containers using the volume where Docker makes that relationship visible. Docker Connector does not delete volumes.
 
-### Screenshot 30 — Volumes view
-![Volumes inventory with a volume inspector open](docs/images/user-guide/30-volumes-view.png)
+### Volumes view
+<div align="center">
+
+![Volumes inventory with a volume inspector open|880](docs/images/user-guide/30-volumes-view.png)
+
+</div>
 
 Each volume card shows its name, an **In Use** or **Unused** badge, a shortened mount path, driver, scope, and the number of containers mounting it. The summary cards count the volumes, how many are mounted, how many have no current mounts, and how many distinct storage drivers are present.
 
@@ -410,8 +514,12 @@ The **Networks** tab lists Docker network definitions. It distinguishes built-in
 
 Selecting a network shows driver, scope, internal and attachable settings, IPv6 status, gateways, and attached containers. When a subnet is available it is shown in the list. Docker Connector does not create, change, or delete networks.
 
-### Screenshot 31 — Networks view
-![Networks inventory with a user-defined network inspected](docs/images/user-guide/31-networks-view.png)
+### Networks view
+<div align="center">
+
+![Networks inventory with a user-defined network inspected|880](docs/images/user-guide/31-networks-view.png)
+
+</div>
 
 Each network card carries a **Built-in** or **User defined** badge, its subnet where one exists, driver, scope, and the number of attached containers. Docker creates `bridge`, `host`, and `none` on every daemon, so an **All Docker hosts** inventory lists those names once per daemon; the last line of each card names the connection whose inventory it came from, which is what tells the repeats apart.
 
@@ -427,8 +535,12 @@ Automatic checks run on a 24-hour stale interval for eligible standalone contain
 
 Choose **Check now** in the container inspector to perform a one-off check. The Docker daemon may pull or resolve image data to check the image ID, but Check now does not change the running container’s state.
 
-### Screenshot 32 — Image is current
-![Image update area reporting that the image is current](docs/images/user-guide/32-image-current.png)
+### Image is current
+<div align="center">
+
+![Image update area reporting that the image is current|508](docs/images/user-guide/32-image-current.png)
+
+</div>
 
 The **Image update** area sits inside **Actions** and appears only while Container management is enabled for the connection, which is why the panel above also shows lifecycle controls.
 
@@ -451,29 +563,45 @@ Authorization is valid only while the profile remains continuously verified as *
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
-### Screenshot 33 — Container management switch on a Connections card
-![A Connections card with Container management set to Read-only](docs/images/user-guide/33-management-card-read-only.png)
+### Container management switch on a Connections card
+<div align="center">
+
+![A Connections card with Container management set to Read-only|395](docs/images/user-guide/33-management-card-read-only.png)
+
+</div>
 
 Every saved connection carries its own **Container management** switch at the bottom of its Connections card. It reads **Read-only** by default and after every Obsidian restart, and it is the only control that authorizes lifecycle and update actions for that host.
 
 The switch is available only while that connection is **Online**; the card above also shows the host's inventory counts, Docker Engine details, and the endpoint the connection uses, so you can confirm you are enabling the host you intended.
 
-### Screenshot 34 — Container management disabled
-![A container inspector with the read-only Actions message](docs/images/user-guide/34-management-disabled.png)
+### Container management disabled
+<div align="center">
+
+![A container inspector with the read-only Actions message|508](docs/images/user-guide/34-management-disabled.png)
+
+</div>
 
 This is what a container's **Actions** section shows while its connection is read-only: a statement of the current mode and where to change it, in place of the Start, Shut down, Stop, Restart, and Update controls. The **Image update** area is absent for the same reason, since update checking belongs to Actions.
 
 Nothing else is withheld. Overview, State, and the remaining sections stay fully readable, because read-only restricts what Docker Connector may change, not what it may show you. The **Docker host** row names the connection whose switch governs this container — useful when several connections reach the same Docker host.
 
-### Screenshot 35 — Enabling asks for confirmation
-![Confirmation dialog shown when enabling Container management](docs/images/user-guide/35-management-confirmation.png)
+### Enabling asks for confirmation
+<div align="center">
+
+![Confirmation dialog shown when enabling Container management|245](docs/images/user-guide/35-management-confirmation.png)
+
+</div>
 
 Turning the switch on asks for confirmation first, and the prompt names the connection you are about to authorize. It states exactly what is being granted — Start, Stop, Shut down, Restart, and standalone Update for that Docker connection — and that the authorization lasts only for the current Obsidian session, ending if the connection is lost or Obsidian restarts.
 
 Choosing **Cancel** leaves the connection read-only and the switch returns to its previous position. Read the connection name before accepting: authorization applies to that profile alone, and the actions it permits change the Docker host.
 
-### Screenshot 36 — Per-profile Container management enabled
-![A Connections card with Container management enabled](docs/images/user-guide/36-management-enabled.png)
+### Per-profile Container management enabled
+<div align="center">
+
+![A Connections card with Container management enabled|398](docs/images/user-guide/36-management-enabled.png)
+
+</div>
 
 After accepting, the switch reads **Enabled** for that profile. Only this connection is authorized: every other saved connection stays **Read-only** until it is enabled on its own card.
 
@@ -486,8 +614,12 @@ The authorization is session-only and is never written to disk. It ends when Obs
 - **Stop** uses the normal stop action with a 10-second wait.
 - **Restart** uses Docker’s restart action with a 10-second wait.
 
-### Screenshot 37 — Container management enabled
-![Actions and Image update for a running container with management enabled](docs/images/user-guide/37-running-actions.png)
+### Container management enabled
+<div align="center">
+
+![Actions and Image update for a running container with management enabled|501](docs/images/user-guide/37-running-actions.png)
+
+</div>
 
 This is the same inspector as screenshot 33 with only the switch changed. **Actions** now reads **Container management enabled** and offers the controls that suit the container's current state: a running container gets **Shut down**, **Stop**, and **Restart**, and no **Start**, because it is already running.
 
@@ -495,15 +627,23 @@ The **Image update** area appears with it. Until a check has run it reports **Up
 
 Docker Connector asks for confirmation before lifecycle actions and coordinates a refresh after an accepted action. These controls never appear as a bulk-action interface.
 
-### Screenshot 38 — Lifecycle action confirmation
-![Confirmation prompt shown before stopping a container](docs/images/user-guide/38-action-confirmation.png)
+### Lifecycle action confirmation
+<div align="center">
+
+![Confirmation prompt shown before stopping a container|245](docs/images/user-guide/38-action-confirmation.png)
+
+</div>
 
 Start, Shut down, Stop, and Restart each ask before anything is sent, and the prompt names the container, the image it runs, and the Docker host it belongs to. Check those three lines before accepting: they are what distinguishes the container you meant from a similarly named one on another host.
 
 **Cancel** sends nothing at all. **OK** sends exactly one typed action for that one container, after which Docker Connector refreshes the host and reports the outcome. There is no bulk action, and no way to apply a lifecycle action to several containers at once.
 
-### Screenshot 39 — Stopped container Start control
-![A stopped container's inspector offering only Start](docs/images/user-guide/39-stopped-start.png)
+### Stopped container Start control
+<div align="center">
+
+![A stopped container's inspector offering only Start|495](docs/images/user-guide/39-stopped-start.png)
+
+</div>
 
 A stopped container offers **Start** alone. Shut down, Stop, and Restart are absent rather than disabled, because they apply only to a running container — the controls follow the container's current state.
 
@@ -511,8 +651,12 @@ A stopped container offers **Start** alone. Shut down, Stop, and Restart are abs
 
 **Image update** remains available while the container is stopped. An image can be checked in either state, and an eligible stopped container can still be updated.
 
-### Screenshot 40 — Start confirmation
-![Confirmation prompt shown before starting a container](docs/images/user-guide/40-start-confirmation.png)
+### Start confirmation
+<div align="center">
+
+![Confirmation prompt shown before starting a container|245](docs/images/user-guide/40-start-confirmation.png)
+
+</div>
 
 Starting a container is confirmed like every other action. The prompt's first line names the action — **Start container?**, **Stop container?**, **Restart container?**, or **Shut down container gracefully?** — and the three lines beneath it identify the container, its image, and the Docker host, exactly as they do for a stop.
 
@@ -608,8 +752,12 @@ Docker Connector Settings provide:
 
 Container management is intentionally not a Setting. It is controlled only by the per-profile Connections-card switches and never persists across a restart or reload.
 
-### Screenshot 41 — Settings page
-![The Docker Connector settings tab](docs/images/user-guide/41-settings.png)
+### Settings page
+<div align="center">
+
+![The Docker Connector settings tab|880](docs/images/user-guide/41-settings.png)
+
+</div>
 
 The tab appears in the Settings sidebar under **Community plugins**, as shown on the left above. The gear control in the Docker Connector header opens it directly. Note that **Browse** under Community plugins is not the way here: that list installs plugins from the public catalogue rather than showing an installed plugin's settings.
 
@@ -776,52 +924,3 @@ Disable or remove Docker Connector through Obsidian’s Community Plugins settin
 When reporting a problem, include the connection method, safe error code or diagnostic stage, Docker Engine version, operating system, and the steps that reproduce the issue. Do not include passwords, passphrases, private keys, certificate contents, complete inspect output, or environment-variable values.
 
 For implementation and security details, see [[Docker Connector - Security Review]], [[Docker Connector - Testing]], [[Docker Connector - Docker Context]], and the repository README.
-
-
-# Appendix A — Screenshot production checklist
-
-This is an index and capture checklist; the full numbered screenshots and placeholders appear inline with the features they illustrate. Before committing screenshots, verify they do not expose passwords, passphrases, private keys, certificate contents, authentication tokens, registry credentials, container environment secrets, or sensitive internal host information not intended for publication.
-
-| # | Filename | Section | Required capture |
-| --- | --- | --- | --- |
-| 01 | `01-empty-connections.png` | First launch | Empty state |
-| 02 | `02-dashboard-overview.png` | Interface | Main dashboard |
-| 03 | `03-add-docker-host.png` | Add | Host dialog |
-| 04 | `04-connection-type-selector.png` | Add | Connection method selector |
-| 05 | `05-local-docker-socket.png` | Local | Endpoint |
-| 06 | `06-docker-cli-detected.png` | Context | CLI and context discovery |
-| 07 | `07-ssh-password.png` | SSH | Password |
-| 08 | `08-verify-ssh-host.png` | SSH | First host-key verification |
-| 09 | `09-ssh-connection-success.png` | SSH | Trusted retry diagnostics |
-| 10 | `10-remember-ssh-password.png` | SSH | Optional local password storage |
-| 11 | `11-generate-ssh-key.png` | SSH | Generation dialog |
-| 12 | `12-ssh-private-key-selection.png` | SSH | Selected key and fingerprint |
-| 13 | `13-ssh-key-generation-complete.png` | SSH | Verified key-pair success |
-| 14 | `14-install-public-key.png` | SSH | Public-key installation |
-| 15 | `15-private-key-test-success.png` | SSH | Private-key test success |
-| 16 | `16-mutual-tls-form.png` | Mutual TLS | Form |
-| 17 | `17-local-test-success.png` | Testing | Local test success |
-| 18 | `18-connections-overview.png` | Connections | Profiles and actions |
-| 19 | `19-authentication-required-reconnect.png` | Connections | Reconnect |
-| 20 | `20-delete-connection.png` | Connections | Confirmation |
-| 21 | `21-current-environment.png` | Interface | Selector |
-| 22 | `22-applications-list.png` | Applications | List |
-| 23 | `23-application-inspector.png` | Applications | Detail |
-| 24 | `24-containers-view.png` | Containers | List |
-| 25 | `25-updates-filter.png` | Containers | Filter |
-| 26 | `26-compact-density.png` | Containers | Compact density |
-| 27 | `27-container-health-badges.png` | Containers | State and health badges |
-| 28 | `28-container-inspector.png` | Container detail | Detail |
-| 29 | `29-images-view.png` | Images | Inventory |
-| 30 | `30-volumes-view.png` | Volumes | Inventory |
-| 31 | `31-networks-view.png` | Networks | Inventory |
-| 32 | `32-image-current.png` | Image updates | Current |
-| 33 | `33-management-card-read-only.png` | Container management | Connections-card switch |
-| 34 | `34-management-disabled.png` | Container management | Read-only |
-| 35 | `35-management-confirmation.png` | Container management | Enable confirmation |
-| 36 | `36-management-enabled.png` | Container management | Per-profile enabled |
-| 37 | `37-running-actions.png` | Container management | Enabled actions |
-| 38 | `38-action-confirmation.png` | Container management | Action confirmation |
-| 39 | `39-stopped-start.png` | Container management | Start |
-| 40 | `40-start-confirmation.png` | Container management | Start confirmation |
-| 41 | `41-settings.png` | Settings | Full page |

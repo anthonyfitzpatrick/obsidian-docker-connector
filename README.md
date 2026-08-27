@@ -21,7 +21,7 @@ Docker Connector supports desktop Obsidian on macOS, Windows, and Linux with Loc
 
 ## Screenshots
 
-Release screenshots will be added as the UI is finalized. The full [User Guide](User%20Guide.md) contains a screenshot-production checklist and precise capture instructions; no placeholder image links are used here.
+The [User Guide](User%20Guide.md) is illustrated throughout, from first launch and each connection method to the dashboard views, container management, and settings.
 
 ## Connection methods
 
@@ -115,7 +115,7 @@ An available image is not automatically eligible for a standalone update. Docker
 
 ## Documentation
 
-- [Docker Connector User Guide](User%20Guide.md) — complete end-user manual, troubleshooting, FAQ, and screenshot checklist.
+- [Docker Connector User Guide](User%20Guide.md) — complete illustrated end-user manual, troubleshooting, and FAQ.
 - [Connections View](docs/Docker%20Connector%20-%20Connections%20View.md) — saved connection actions and status.
 - [Docker Context](docs/Docker%20Connector%20-%20Docker%20Context.md) — Context discovery, lifecycle, and secure routing.
 - [Docker Compose Awareness](docs/Docker%20Connector%20-%20Docker%20Compose%20Awareness.md) — how Applications grouping works.

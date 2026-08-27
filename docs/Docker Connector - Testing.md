@@ -34,4 +34,4 @@ npm run build
 git diff --check
 ```
 
-See [[Docker Connector - Release Checklist]] for release gates and [[User Guide]] for the screenshot capture plan.
+See [[Docker Connector - Release Checklist]] for release gates and [[User Guide]] for the illustrated end-user manual.
