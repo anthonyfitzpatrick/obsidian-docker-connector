@@ -385,20 +385,13 @@ The **Volumes** tab lists Docker named volumes and their driver, scope, mountpoi
 The volume inspector shows overview information, options, safe labels, and containers using the volume where Docker makes that relationship visible. Docker Connector does not delete volumes.
 
 ### Screenshot 29 — Volumes view
-> **Screenshot placeholder 29**
->
-> **Capture:** Named-volume inventory and inspector.
->
-> **How to capture this screenshot:**
-> 1. Select a test environment with at least one named Docker volume.
-> 2. Open **Volumes** and wait for inventory to load.
-> 3. Select a non-sensitive named volume.
-> 4. Ensure the list shows driver/scope/use information and the inspector shows safe volume details/attached containers.
-> 5. Avoid publishing host mount paths that reveal sensitive directory structure.
-> 6. Capture the populated Volumes view and inspector.
+![Volumes inventory with a volume inspector open](docs/images/user-guide/29-volumes-view.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/29-volumes-view.png`
+Each volume card shows its name, an **In Use** or **Unused** badge, a shortened mount path, driver, scope, and the number of containers mounting it. The summary cards count the volumes, how many are mounted, how many have no current mounts, and how many distinct storage drivers are present.
+
+Usage comes from named-volume mounts only. A container that reaches the same data through a bind mount does not make the volume **In Use**, because Docker does not report a bind mount as a named volume.
+
+Selecting a volume opens the inspector with its driver, scope, mountpoint, creation time, options, labels, and the containers mounting it; selecting one of those containers opens it in **Containers**. Volumes are read-only here: Docker Connector never deletes or prunes a volume, and it does not browse the data inside one.
 
 ## 17. Networks
 
