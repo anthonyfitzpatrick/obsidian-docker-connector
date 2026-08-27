@@ -1,4 +1,5 @@
 import type { DockerConnectionProfile } from "../models/DockerConnectionProfile";
+import { hasControlCharacter, hasNonAsciiCharacter } from "./text";
 
 /** Canonical profile normalisation used before persistence and connection attempts. */
 export function normalizeProfile(profile: DockerConnectionProfile): DockerConnectionProfile {
@@ -23,16 +24,16 @@ export function normalizeProfile(profile: DockerConnectionProfile): DockerConnec
 }
 
 export function validateProfile(profile: DockerConnectionProfile): void {
-  const unsafe = (value: string) => /[\x00-\x1F\x7F]/.test(value);
+  const unsafe = hasControlCharacter;
   if (!profile.name) throw new Error("Friendly name is required.");
-  if (profile.connectionType === "docker-tls") { if (!profile.host || /[\x00-\x1F\x7F]|:\/\/|[/?#@]/.test(profile.host)) throw new Error("DOCKER_TLS_HOST_INVALID"); if (!Number.isInteger(profile.port) || profile.port < 1 || profile.port > 65535) throw new Error("DOCKER_TLS_PORT_INVALID"); if (!profile.serverName || /[\x00-\x1F\x7F]|:\/\/|[/?#@]/.test(profile.serverName)) throw new Error("DOCKER_TLS_SERVER_NAME_INVALID"); if (!profile.caCertificatePath || !profile.clientCertificatePath || !profile.clientKeyPath) throw new Error("DOCKER_TLS_PROFILE_INVALID"); return; }
-  if (profile.connectionType === "docker-context") { if (!profile.contextName || /[\x00-\x1F\x7F]/.test(profile.contextName)) throw new Error("DOCKER_CONTEXT_NAME_REQUIRED"); if (["tcp-insecure", "unknown"].includes(profile.contextSnapshot.endpointType) || !profile.contextSnapshot.supported) throw new Error("DOCKER_CONTEXT_UNSUPPORTED"); return; }
+  if (profile.connectionType === "docker-tls") { if (!profile.host || hasControlCharacter(profile.host) || /:\/\/|[/?#@]/.test(profile.host)) throw new Error("DOCKER_TLS_HOST_INVALID"); if (!Number.isInteger(profile.port) || profile.port < 1 || profile.port > 65535) throw new Error("DOCKER_TLS_PORT_INVALID"); if (!profile.serverName || hasControlCharacter(profile.serverName) || /:\/\/|[/?#@]/.test(profile.serverName)) throw new Error("DOCKER_TLS_SERVER_NAME_INVALID"); if (!profile.caCertificatePath || !profile.clientCertificatePath || !profile.clientKeyPath) throw new Error("DOCKER_TLS_PROFILE_INVALID"); return; }
+  if (profile.connectionType === "docker-context") { if (!profile.contextName || hasControlCharacter(profile.contextName)) throw new Error("DOCKER_CONTEXT_NAME_REQUIRED"); if (["tcp-insecure", "unknown"].includes(profile.contextSnapshot.endpointType) || !profile.contextSnapshot.supported) throw new Error("DOCKER_CONTEXT_UNSUPPORTED"); return; }
   if (profile.connectionType === "local") { if (profile.localEndpoint.type === "unix-socket" && !profile.localEndpoint.socketPath) throw new Error("Local Docker socket is required."); if (profile.localEndpoint.type === "windows-named-pipe" && !profile.localEndpoint.pipePath) throw new Error("Local Docker pipe is required."); return; }
   if (!profile.sshHost) throw new Error("SSH host is required.");
   if (unsafe(profile.sshHost) || unsafe(profile.sshUsername) || unsafe(profile.remoteSocketPath)) throw new Error("Connection fields cannot contain control characters.");
-  if (/:\/\//.test(profile.sshHost) || (/^[^\[]*:\d+$/.test(profile.sshHost))) throw new Error("SSH host must not include a URL scheme or port.");
+  if (/:\/\//.test(profile.sshHost) || /^[^[]*:\d+$/.test(profile.sshHost)) throw new Error("SSH host must not include a URL scheme or port.");
   const host = profile.sshHost.startsWith("[") && profile.sshHost.endsWith("]") ? profile.sshHost.slice(1, -1) : profile.sshHost;
-  if (!isIpLiteral(host) && (!/^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(host) || /[^\x00-\x7F]/.test(host))) throw new Error("SSH host must be a valid IPv4, IPv6, or DNS hostname.");
+  if (!isIpLiteral(host) && (!/^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(host) || hasNonAsciiCharacter(host))) throw new Error("SSH host must be a valid IPv4, IPv6, or DNS hostname.");
   if (!Number.isInteger(profile.sshPort) || profile.sshPort < 1 || profile.sshPort > 65535) throw new Error("SSH port must be an integer from 1 to 65535.");
   if (!profile.sshUsername) throw new Error("SSH username is required.");
   if (profile.authentication.type === "private-key" && !profile.authentication.privateKeyPath) throw new Error("Private key file is required.");

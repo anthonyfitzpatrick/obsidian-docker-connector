@@ -1,4 +1,4 @@
-import { Notice, setIcon } from "obsidian";
+import { setIcon } from "obsidian";
 import type DockerConnectorPlugin from "../main";
 import type { DockerConnectionProfile, DockerHostSnapshot } from "../models/DockerConnectionProfile";
 import { dockerResourceKey, selectedInventorySnapshots } from "../models/DockerHostSnapshotSelection";
@@ -76,7 +76,6 @@ export class VolumesTab {
     const profile = volume && profiles.find((item) => item.id === volume.item.hostProfileId);
     if (!volume || !profile) return;
     const summary = volume.item;
-    const snapshot = volume.snapshot;
     const panel = root.createEl("aside", { cls: "dc-volume-detail-panel docker-connector__volumes-detail", attr: { "aria-label": `Details for ${summary.name}` } });
     const header = panel.createDiv({ cls: "dc-image-detail-header" }); header.createEl("h2", { text: summary.name });
     const close = header.createEl("button", { attr: { "aria-label": "Close volume details" } }); setIcon(close, "x"); close.onclick = () => { this.state.selected = null; this.state.detail = { status: "closed" }; this.rerender(); };
@@ -94,6 +93,6 @@ export class VolumesTab {
   private select(root: HTMLElement, label: string, value: string, options: Array<[string, string]>, change: (value: string) => void): void { const control = root.createEl("label", { cls: "dc-container-select" }); control.createSpan({ text: label }); const select = control.createEl("select", { attr: { "aria-label": `${label} volume control` } }); options.forEach(([optionValue, text]) => select.createEl("option", { value: optionValue, text })); select.value = value; select.onchange = () => change(select.value); }
 }
 
-function badge(text: string, kind: string): HTMLElement { const element = document.createElement("span"); element.addClass("dc-container-badge", `is-${kind}`); element.setText(text); return element; }
+function badge(text: string, kind: string): HTMLElement { const element = createSpan(); element.addClass("dc-container-badge", `is-${kind}`); element.setText(text); return element; }
 function truncate(value?: string): string { if (!value) return "No mountpoint"; return value.length > 36 ? `…${value.slice(-35)}` : value; }
 function section(root: HTMLElement, title: string, rows: Array<[string, string | undefined]>): void { const section = root.createEl("section", { cls: "dc-image-detail-section" }); section.createEl("h3", { text: title }); rows.filter(([, value]) => Boolean(value)).forEach(([label, value]) => { const row = section.createDiv({ cls: "dc-container-detail-row" }); row.createSpan({ text: label }); row.createSpan({ text: value! }); }); }

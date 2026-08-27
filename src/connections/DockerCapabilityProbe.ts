@@ -21,8 +21,8 @@ export class DockerCapabilityProbe {
 async function runProbeCommand(client: Client, configuredSocketPath: string): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
     let stdout = ""; let stderr = ""; let settled = false;
-    const finish = (error?: Error) => { if (settled) return; settled = true; clearTimeout(timer); if (error) reject(error); else resolve({ stdout, stderr }); };
-    const timer = setTimeout(() => finish(new DockerConnectionError("DOCKER_CAPABILITY_CHECK_FAILED", "Docker capability probe timed out.")), PROBE_TIMEOUT_MS);
+    const finish = (error?: Error) => { if (settled) return; settled = true; window.clearTimeout(timer); if (error) reject(error); else resolve({ stdout, stderr }); };
+    const timer = window.setTimeout(() => finish(new DockerConnectionError("DOCKER_CAPABILITY_CHECK_FAILED", "Docker capability probe timed out.")), PROBE_TIMEOUT_MS);
     client.exec(buildProbeCommand(configuredSocketPath), (error, channel) => {
       if (error || !channel) { finish(new DockerConnectionError("DOCKER_CAPABILITY_CHECK_FAILED", "Docker capability probe could not start.")); return; }
       bindStream(channel, (chunk) => { stdout = appendBounded(stdout, chunk); });
@@ -93,4 +93,4 @@ function bindStream(stream: ClientChannel | Readable | undefined, append: (chunk
 function appendBounded(existing: string, chunk: string): string { return `${existing}${chunk}`.slice(-STREAM_LIMIT); }
 export function buildProbeCommand(configuredSocketPath: string): string { const socket = shellQuote(configuredSocketPath); return `printf '__IDENTITY_USERNAME__\\n'; id -un; printf '__IDENTITY_UID__\\n'; id -u; printf '__IDENTITY_PRIMARY_GID__\\n'; id -g; printf '__IDENTITY_ALL_GIDS__\\n'; id -G; printf '__IDENTITY_GROUP_NAMES__\\n'; id -Gn; printf '__DOCKER_PATH__\\n'; command -v docker || true; printf '__DOCKER_CONTEXT__\\n'; docker context show 2>&1 || true; printf '__DOCKER_CONTEXT_INSPECT__\\n'; docker context inspect 2>&1 || true; printf '__DOCKER_HOST__\\n'; printf '%s\\n' "\${DOCKER_HOST:-}"; printf '__DOCKER_SOCKET_STAT__\\n'; stat -c '%u %g %a %F' -- ${socket} 2>&1 || true; printf '__DOCKER_ROOTLESS_SOCKET__\\n'; if [ -n "\${XDG_RUNTIME_DIR:-}" ]; then stat -c '%u %g %a %F' -- "$XDG_RUNTIME_DIR/docker.sock" 2>&1 || true; fi; printf '__DOCKER_SOCKET_GROUP__\\n'; getent group "$(stat -c '%g' -- ${socket} 2>/dev/null)" 2>&1 || true; printf '__DOCKER_VERSION__\\n'; docker version --format '{{json .Server}}' 2>&1; probe_status=$?; printf '__DOCKER_VERSION_EXIT__\\n'; printf '%s\\n' "$probe_status"`; }
 /** Closes the quote, emits a literal apostrophe, reopens it: the only POSIX-safe form. */
-function shellQuote(value: string): string { return `'${value.replace(/'/g, "'\"'\"'")}'`; }
+function shellQuote(value: string): string { return `'${value.replace(/'/g, `'"'"'`)}'`; }

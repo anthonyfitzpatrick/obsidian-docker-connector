@@ -9,7 +9,12 @@ export interface PlatformCapabilities {
 
 export type ObsidianPlatform = { isDesktop?: boolean; isMobile?: boolean };
 
-export function detectPlatformCapabilities(platform: ObsidianPlatform = (globalThis as { Platform?: ObsidianPlatform }).Platform ?? { isDesktop: true }): PlatformCapabilities {
+/** Obsidian publishes its Platform helper on the renderer window; tests pass one in directly. */
+function obsidianPlatform(): ObsidianPlatform | undefined {
+  return typeof window === "undefined" ? undefined : (window as Window & { Platform?: ObsidianPlatform }).Platform;
+}
+
+export function detectPlatformCapabilities(platform: ObsidianPlatform = obsidianPlatform() ?? { isDesktop: true }): PlatformCapabilities {
   return { isDesktop: platform.isDesktop === true };
 }
 

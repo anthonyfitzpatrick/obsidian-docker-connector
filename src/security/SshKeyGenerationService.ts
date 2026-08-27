@@ -104,8 +104,8 @@ function runSshKeygen(path: string, passphrase?: string): Promise<void> {
     const arguments_ = ["-q", "-t", "ed25519", "-f", path, "-C", "docker-connector", ...(passphrase === undefined ? ["-N", ""] : [])];
     const child = spawn("ssh-keygen", arguments_, { shell: false, stdio: ["pipe", "ignore", "pipe"] });
     let stderr = ""; let settled = false;
-    const finish = (error?: Error) => { if (settled) return; settled = true; clearTimeout(timer); if (error) reject(error); else resolve(); };
-    const timer = setTimeout(() => { child.kill(); finish(new Error("SSH key generation timed out.")); }, KEYGEN_TIMEOUT_MS);
+    const finish = (error?: Error) => { if (settled) return; settled = true; window.clearTimeout(timer); if (error) reject(error); else resolve(); };
+    const timer = window.setTimeout(() => { child.kill(); finish(new Error("SSH key generation timed out.")); }, KEYGEN_TIMEOUT_MS);
     child.stderr?.on("data", (chunk: Buffer) => { stderr = `${stderr}${chunk.toString()}`.slice(-OUTPUT_LIMIT); });
     child.once("error", () => finish(new Error("Could not start ssh-keygen.")));
     child.once("close", (code) => finish(code === 0 ? undefined : new Error(stderr.includes("already exists") ? "The selected SSH key path already exists." : "ssh-keygen could not create an SSH key.")));

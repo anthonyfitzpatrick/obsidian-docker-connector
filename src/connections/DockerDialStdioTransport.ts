@@ -12,7 +12,7 @@ const STDERR_LIMIT = 16 * 1024;
 export class DockerDialStdioTransport {
   private channel?: ClientChannel;
   private buffer = "";
-  private pending?: { resolve: (response: DockerHttpResponse) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> };
+  private pending?: { resolve: (response: DockerHttpResponse) => void; reject: (error: Error) => void; timer: number };
   private queue: Array<() => void> = [];
   private closed = false;
   private stderr = "";
@@ -29,7 +29,7 @@ export class DockerDialStdioTransport {
     if (this.closed || !this.channel) throw new DockerConnectionError("DOCKER_DIAL_STDIO_CLOSED", "Docker dial-stdio is no longer running.");
     return new Promise((resolve, reject) => {
       const run = () => {
-        const timer = setTimeout(() => this.finishPending(new DockerConnectionError(path === "/_ping" ? "DOCKER_PING_FAILED" : "DOCKER_HTTP_FAILED", `Docker ${path} did not respond within ${timeoutMs / 1000} seconds.`)), timeoutMs);
+        const timer = window.setTimeout(() => this.finishPending(new DockerConnectionError(path === "/_ping" ? "DOCKER_PING_FAILED" : "DOCKER_HTTP_FAILED", `Docker ${path} did not respond within ${timeoutMs / 1000} seconds.`)), timeoutMs);
         this.pending = { resolve, reject, timer };
         this.channel?.write(`${method} ${path} HTTP/1.1\r\nHost: docker\r\nConnection: keep-alive\r\n${body ? `Content-Type: application/json\r\nContent-Length: ${Buffer.byteLength(body)}\r\n` : ""}\r\n${body ?? ""}`);
         this.consumeResponse();
@@ -74,7 +74,7 @@ export class DockerDialStdioTransport {
     this.buffer = this.buffer.slice(parsed.consumed);
     const pending = this.pending;
     this.pending = undefined;
-    clearTimeout(pending.timer);
+    window.clearTimeout(pending.timer);
     pending.resolve(parsed.response);
     this.queue.shift()?.();
   }
@@ -83,7 +83,7 @@ export class DockerDialStdioTransport {
     const pending = this.pending;
     this.pending = undefined;
     if (!pending) return;
-    clearTimeout(pending.timer);
+    window.clearTimeout(pending.timer);
     pending.reject(error);
   }
 

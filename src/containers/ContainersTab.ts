@@ -1299,7 +1299,7 @@ export class ContainersTab {
 }
 
 function badge(status: string, label: string): HTMLElement {
-  const element = document.createElement("span");
+  const element = createSpan();
   element.addClass("dc-container-badge", `is-${status}`);
   element.setText(label);
   return element;

@@ -5,7 +5,7 @@ import { homedir } from "node:os";
 import { normalize, resolve } from "node:path";
 import * as net from "node:net";
 import { DockerConnectionError } from "../connections/DockerTransport";
-import type { DockerTlsProfile, DockerTlsProfileSnapshot } from "../models/DockerConnectionProfile";
+import type { DockerTlsProfile } from "../models/DockerConnectionProfile";
 
 /**
  * Non-secret certificate facts safe to retain in a profile. PEM contents and

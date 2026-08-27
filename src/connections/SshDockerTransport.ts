@@ -10,6 +10,7 @@ import { DockerDialStdioTransport } from "./DockerDialStdioTransport";
 import { DockerCapabilityProbe } from "./DockerCapabilityProbe";
 import type { DockerCapability } from "./DockerCapabilityProbe";
 import { loadPrivateKeyFile } from "../security/PrivateKeyFile";
+import { hasControlCharacter, hasNonAsciiCharacter } from "../utils/text";
 
 export interface RuntimeSshCredentials { password?: string; privateKeyPassphrase?: string; }
 export type CredentialProvider = () => RuntimeSshCredentials;
@@ -64,13 +65,13 @@ export class SshDockerTransport implements DockerTransport {
       let settled = false;
       let hostKeyError: Error | undefined;
       let keyboardInteractiveUsed = false;
-      let tcpTimer: ReturnType<typeof setTimeout> | undefined;
-      let handshakeTimer: ReturnType<typeof setTimeout> | undefined;
-      let authenticationTimer: ReturnType<typeof setTimeout> | undefined;
+      let tcpTimer: number | undefined;
+      let handshakeTimer: number | undefined;
+      let authenticationTimer: number | undefined;
       const cleanupAttempt = () => {
-        if (tcpTimer) clearTimeout(tcpTimer);
-        if (handshakeTimer) clearTimeout(handshakeTimer);
-        if (authenticationTimer) clearTimeout(authenticationTimer);
+        if (tcpTimer) window.clearTimeout(tcpTimer);
+        if (handshakeTimer) window.clearTimeout(handshakeTimer);
+        if (authenticationTimer) window.clearTimeout(authenticationTimer);
         signal?.removeEventListener("abort", onAbort);
       };
       const settle = (error?: Error) => {
@@ -91,18 +92,18 @@ export class SshDockerTransport implements DockerTransport {
       const onAbort = () => settle(new DockerConnectionError("SSH_CONNECTION_CANCELLED", "The SSH connection attempt was cancelled."));
 
       diagnostics?.set("tcp", "running", "Opening the SSH client connection.");
-      tcpTimer = setTimeout(() => settle(new DockerConnectionError("SSH_CONNECTION_TIMEOUT", `The SSH server did not open a TCP connection within ${TCP_TIMEOUT_MS / 1000} seconds.`)), TCP_TIMEOUT_MS);
+      tcpTimer = window.setTimeout(() => settle(new DockerConnectionError("SSH_CONNECTION_TIMEOUT", `The SSH server did not open a TCP connection within ${TCP_TIMEOUT_MS / 1000} seconds.`)), TCP_TIMEOUT_MS);
       client.once("connect", () => {
-        if (tcpTimer) clearTimeout(tcpTimer);
+        if (tcpTimer) window.clearTimeout(tcpTimer);
         diagnostics?.set("tcp", "success", `${target.host}:${target.port}`);
         diagnostics?.set("handshake", "running");
-        handshakeTimer = setTimeout(() => settle(new DockerConnectionError("SSH_HANDSHAKE_TIMEOUT", "SSH protocol handshake did not complete within 20 seconds.")), HANDSHAKE_TIMEOUT_MS);
+        handshakeTimer = window.setTimeout(() => settle(new DockerConnectionError("SSH_HANDSHAKE_TIMEOUT", "SSH protocol handshake did not complete within 20 seconds.")), HANDSHAKE_TIMEOUT_MS);
       });
       client.once("handshake", () => {
-        if (handshakeTimer) clearTimeout(handshakeTimer);
+        if (handshakeTimer) window.clearTimeout(handshakeTimer);
         diagnostics?.set("handshake", "success");
         diagnostics?.set("auth", "running", "Attempting password authentication.");
-        authenticationTimer = setTimeout(() => settle(new DockerConnectionError("SSH_AUTHENTICATION_FAILED", "SSH authentication did not complete within 30 seconds.")), AUTH_TIMEOUT_MS);
+        authenticationTimer = window.setTimeout(() => settle(new DockerConnectionError("SSH_AUTHENTICATION_FAILED", "SSH authentication did not complete within 30 seconds.")), AUTH_TIMEOUT_MS);
       });
       client.once("ready", () => {
         diagnostics?.set("auth", "success");
@@ -242,7 +243,7 @@ export class SshDockerTransport implements DockerTransport {
     const diagnostics = new ConnectionDiagnostics();
     const controller = new AbortController();
     this.activeTests.add(controller);
-    const overallTimer = setTimeout(() => controller.abort(), OVERALL_TIMEOUT_MS);
+    const overallTimer = window.setTimeout(() => controller.abort(), OVERALL_TIMEOUT_MS);
     try {
       diagnostics.set("input", "running");
       const target = normalizeSshTarget(this.profile);
@@ -259,7 +260,7 @@ export class SshDockerTransport implements DockerTransport {
       const message = error instanceof HostKeyTrustRequiredError ? "Verify and explicitly trust this SSH host fingerprint before continuing." : safeMessage(error);
       return diagnostics.failure(code, message, error instanceof DockerConnectionError ? error.details : undefined, error instanceof HostKeyTrustRequiredError ? error.fingerprint : error instanceof HostKeyMismatchError ? error.receivedFingerprint : undefined);
     } finally {
-      clearTimeout(overallTimer);
+      window.clearTimeout(overallTimer);
       this.activeTests.delete(controller);
       await this.disconnect();
     }
@@ -278,12 +279,12 @@ export class SshDockerTransport implements DockerTransport {
 export function normalizeSshTarget(profile: SshDockerProfile): SshTarget {
   const clean = (value: string) => value.trim().replace(/[\r\n]+/g, "");
   const host = clean(profile.sshHost); const user = clean(profile.sshUsername); const socket = clean(profile.remoteSocketPath);
-  if (!host || !user || !socket || /[\x00-\x1F\x7F]/.test(host + user + socket) || /['"`$\\]/.test(socket) || /:\/\//.test(host) || (/^[^\[]*:\d+$/.test(host)) || !socket.startsWith("/")) throw new DockerConnectionError("PROFILE_INVALID", "SSH host, username, and remote Docker socket path are invalid.");
+  if (!host || !user || !socket || hasControlCharacter(host + user + socket) || /['"`$\\]/.test(socket) || /:\/\//.test(host) || /^[^[]*:\d+$/.test(host) || !socket.startsWith("/")) throw new DockerConnectionError("PROFILE_INVALID", "SSH host, username, and remote Docker socket path are invalid.");
   const port = Number(profile.sshPort);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new DockerConnectionError("SSH_PORT_INVALID", "SSH port must be an integer from 1 to 65535.");
   const unbracketed = host.startsWith("[") && host.endsWith("]") ? host.slice(1, -1) : host;
   const ip = net.isIP(unbracketed);
-  if (!ip && (!/^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(unbracketed) || /[^\x00-\x7F]/.test(unbracketed))) throw new DockerConnectionError("SSH_HOST_INVALID", "SSH host must be a valid IPv4, IPv6, or DNS name without a URL scheme or embedded port.");
+  if (!ip && (!/^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(unbracketed) || hasNonAsciiCharacter(unbracketed))) throw new DockerConnectionError("SSH_HOST_INVALID", "SSH host must be a valid IPv4, IPv6, or DNS name without a URL scheme or embedded port.");
   return { host: unbracketed, port, requiresDns: !ip };
 }
 
@@ -304,4 +305,8 @@ function mapSshError(error: Error & NodeJS.ErrnoException, keyboardInteractiveUs
   return new DockerConnectionError("SSH_HANDSHAKE_FAILED", "SSH protocol handshake failed.");
 }
 function safeMessage(error: unknown): string { return error instanceof DockerConnectionError ? error.message : error instanceof Error ? "SSH connection failed. Open diagnostics for the failing stage." : "SSH connection failed."; }
-function promiseTimeout<T>(promise: Promise<T>, timeout: number, error: Error): Promise<T> { return new Promise((resolve, reject) => { const timer = setTimeout(() => reject(error), timeout); promise.then((value) => { clearTimeout(timer); resolve(value); }, (reason) => { clearTimeout(timer); reject(reason); }); }); }
+function promiseTimeout<T>(promise: Promise<T>, timeout: number, error: Error): Promise<T> {
+  let timer: number | undefined;
+  const expiry = new Promise<never>((_resolve, reject) => { timer = window.setTimeout(() => reject(error), timeout); });
+  return Promise.race([promise, expiry]).finally(() => window.clearTimeout(timer));
+}

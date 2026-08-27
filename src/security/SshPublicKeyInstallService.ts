@@ -72,8 +72,8 @@ export class SshPublicKeyInstallService {
     return new Promise((resolve, reject) => {
       let hostKeyError: Error | undefined;
       let settled = false;
-      const finish = (error?: Error) => { if (settled) return; settled = true; clearTimeout(timer); if (error) reject(error); else resolve(); };
-      const timer = setTimeout(() => finish(new DockerConnectionError("SSH_CONNECTION_TIMEOUT", "SSH public-key installation timed out while connecting.")), this.timeouts.connectMs);
+      const finish = (error?: Error) => { if (settled) return; settled = true; window.clearTimeout(timer); if (error) reject(error); else resolve(); };
+      const timer = window.setTimeout(() => finish(new DockerConnectionError("SSH_CONNECTION_TIMEOUT", "SSH public-key installation timed out while connecting.")), this.timeouts.connectMs);
       client.once("ready", () => finish());
       client.once("error", (error) => finish(hostKeyError ?? installationConnectionError(error)));
       client.once("close", () => finish(new DockerConnectionError("SSH_CONNECTION_FAILED", "SSH connection closed before authentication completed.")));
@@ -127,8 +127,8 @@ export class SshPublicKeyInstallService {
   private operation<T>(stage: SshPublicKeyInstallStage, start: (done: (error: Error | undefined, value?: T) => void) => void): Promise<T> {
     return new Promise((resolve, reject) => {
       let settled = false;
-      const finish = (error: Error | undefined, value?: T) => { if (settled) return; settled = true; clearTimeout(timer); if (error) reject(error); else resolve(value as T); };
-      const timer = setTimeout(() => finish(new DockerConnectionError("SSH_PUBLIC_KEY_INSTALL_TIMEOUT", `Public-key installation timed out while ${stageMessage(stage).toLowerCase()}.`)), this.timeouts.operationMs);
+      const finish = (error: Error | undefined, value?: T) => { if (settled) return; settled = true; window.clearTimeout(timer); if (error) reject(error); else resolve(value as T); };
+      const timer = window.setTimeout(() => finish(new DockerConnectionError("SSH_PUBLIC_KEY_INSTALL_TIMEOUT", `Public-key installation timed out while ${stageMessage(stage).toLowerCase()}.`)), this.timeouts.operationMs);
       try { start(finish); } catch { finish(new DockerConnectionError("SSH_PUBLIC_KEY_INSTALL_FAILED", "Could not update ~/.ssh/authorized_keys.")); }
     });
   }
