@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1 — 2026-08-27
+
+- Styled the floating modal from its stylesheet class rather than assigning element styles directly, satisfying Obsidian's `no-static-styles-assignment` review rule. Measured geometry now goes through `setCssStyles`.
+
 ## 1.1.0 — 2026-08-27
 
 - Added an About and support footer to the settings tab: the plugin mark, its version from the loaded manifest, the authors, and links for reporting a bug, requesting a feature, the author's site, wolf359.app, wolf359.press, and Buy me a coffee.
