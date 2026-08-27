@@ -353,21 +353,15 @@ Select a container to open its read-only inspector. The inspector provides **Act
 The inspector lets you refresh details and copy the full container ID. It does not provide an interactive shell, file browser, log terminal, or arbitrary Docker API console.
 
 ### Screenshot 27 — Container detail inspector
-> **Screenshot placeholder 27**
->
-> **Capture:** The read-only inspector sections.
->
-> **How to capture this screenshot:**
-> 1. Open **Containers** and select a safe test container.
-> 2. Allow the detail inspector to populate.
-> 3. Ensure **Actions**, **Overview**, **State**, **Configuration**, **Networking**, **Storage**, **Metadata**, and **Safe diagnostics** are visible as much as the layout permits; collapsed headings are sufficient for the lower sections.
-> 4. Use a test container whose metadata does not contain sensitive environment information.
-> 5. Capture the inspector and the selected container card; do not expand anything that would expose secrets.
->
-> The **Image update** area is part of the Actions section and appears only while Container management is enabled for that connection, so a read-only inspector cannot show it. Screenshots 31 and 32 cover it.
+![Container detail inspector for a selected container](docs/images/user-guide/27-container-inspector.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/27-container-inspector.png`
+The inspector opens beside the list, and the container it describes stays highlighted in the inventory. Its header repeats the container name, full image reference, and state, with controls to copy the container ID, refresh the details, and close the panel.
+
+**Actions** comes first. While the connection is read-only it states that fact and points at the Connections card that enables Container management for that host, rather than showing lifecycle controls. **Overview** and **State** are expanded; **Configuration**, **Networking**, **Storage**, **Metadata**, and **Safe diagnostics** are collapsed until you open them.
+
+Metadata lists environment variable *names* only. Docker Connector never displays the values, so opening that section cannot reveal a secret held in a container's environment.
+
+The **Image update** area is part of the Actions section and appears only while Container management is enabled for that connection, which is why it is absent above. Screenshots 31 and 32 cover it.
 
 ## 15. Images
 
