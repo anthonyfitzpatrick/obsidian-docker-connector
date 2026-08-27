@@ -164,7 +164,7 @@ export class ContainersTab {
           },
         },
         {
-          label: "Updates Available",
+          label: "Updates available",
           value: availableCount,
           detail: availableCount
             ? "Containers needing updates"

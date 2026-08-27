@@ -5,7 +5,7 @@ describe("Updates Available container summary card", () => {
   it("counts only available update statuses and toggles only the update filter", async () => {
     const source = await readFile("src/containers/ContainersTab.ts", "utf8");
     expect(source).toMatch(/containerImageUpdateStatus\(\s*container\.hostProfileId,\s*container\.id,?\s*\)\?\.state === "available"/);
-    expect(source).toMatch(/label: "Updates Available"/);
+    expect(source).toMatch(/label: "Updates available"/);
     expect(source).toMatch(/detail:\s*availableCount\s*\?\s*"Containers needing updates"\s*:\s*"Everything is up to date\."/);
     expect(source).toMatch(/this\.state\.updatesOnly = !this\.state\.updatesOnly/);
   });

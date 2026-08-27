@@ -62,6 +62,7 @@ When a newer image is confirmed and a standalone container is eligible, **Update
 - Insecure plain Docker TCP is blocked.
 - Delete connection removes only Docker Connector’s profile, runtime credentials, cache, and transport state. It never deletes Docker resources, Docker Contexts, sockets, SSH keys, TLS certificate files, or remote-server configuration.
 - Docker Connector includes no telemetry or analytics service.
+- Network activity is limited to the Docker hosts you configure and to anonymous, read-only version lookups against the registry named in an image reference — Docker Hub when the reference is unqualified. Those lookups populate the Overview's advisory update notices and send no credentials, vault content, or identifying data. The separate per-container update check resolves image metadata through your own Docker daemon rather than from Obsidian, and runs only while Container management is enabled.
 
 For details, read the [Security Review](docs/Docker%20Connector%20-%20Security%20Review.md).
 

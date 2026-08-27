@@ -14,7 +14,7 @@ function declaration(selector: string): string {
 
 describe("Containers card layout", () => {
   it("retains the four operational summary cards and all existing controls", () => {
-    for (const value of ['label: "Containers"', 'label: "Running"', 'label: "Stopped"', 'label: "Updates Available"', '"Search containers…"', '"State"', '"Health"', '"Network"', '"Sort"', '"Comfortable"', '"Compact"', '"Refresh selected Docker host"']) expect(tab).toContain(value);
+    for (const value of ['label: "Containers"', 'label: "Running"', 'label: "Stopped"', 'label: "Updates available"', '"Search containers…"', '"State"', '"Health"', '"Network"', '"Sort"', '"Comfortable"', '"Compact"', '"Refresh selected Docker host"']) expect(tab).toContain(value);
   });
 
   it("uses an Applications-style card grid with separate normal-flow container content", () => {

@@ -9,7 +9,7 @@ describe("resizable large dialog layout", () => {
     ]);
 
     expect(dashboard).toMatch(/class DockerHostModal extends Modal/);
-    expect(dashboard).toMatch(/editingProfile \? "Edit Docker Host" : "Add Docker Host"/);
+    expect(dashboard).toMatch(/editingProfile \? "Edit Docker Host" : "Add Docker host"/);
     expect(dashboard).toMatch(/modalEl\.addClass\("dc-resizable-modal"\)/);
     expect(dashboard).toMatch(/FloatingModalController/);
     expect(dashboard).toMatch(/dc-floating-modal__header/);

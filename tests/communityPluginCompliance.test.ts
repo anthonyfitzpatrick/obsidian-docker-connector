@@ -70,6 +70,10 @@ describe("Obsidian Community Plugin release guard", () => {
     const [main, dashboard, styles] = await Promise.all([source("src/main.ts"), source("src/views/DockerDashboardView.ts"), source("styles.css")]);
     expect(main).toMatch(/containerImageUpdates\.clearAll\(\)/);
     expect(main).toMatch(/connectionFactory\.disconnectAll\(\)/);
+    // Obsidian types onunload as synchronous and never awaits it, so authority
+    // must be revoked before it returns rather than after an await.
+    expect(main).toMatch(/^  onunload\(\): void \{/m);
+    expect(main).not.toMatch(/async onunload/);
     // Obsidian restores its own leaves; a plugin that detaches them on unload
     // destroys the user's layout on every update.
     expect(main).not.toMatch(/detachLeavesOfType/);

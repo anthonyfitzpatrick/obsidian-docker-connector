@@ -62,7 +62,7 @@ export class VolumesTab {
     const identity = header.createDiv({ cls: "docker-connector__volume-card-identity" });
     const icon = identity.createDiv({ cls: "docker-connector__volume-card-icon" }); setIcon(icon, "database");
     identity.createEl("strong", { text: volume.name, attr: { title: volume.name } });
-    header.appendChild(badge(volume.inUse ? "In Use" : "Unused", volume.inUse ? "in-use" : "unused"));
+    header.appendChild(badge(volume.inUse ? "In use" : "Unused", volume.inUse ? "in-use" : "unused"));
     card.createSpan({ text: `Mount · ${truncate(volume.mountpoint)}`, cls: "docker-connector__volume-card-secondary docker-connector__muted", attr: { title: volume.mountpoint ?? "No mountpoint" } });
     const metadata = card.createDiv({ cls: "docker-connector__volume-card-metadata" });
     metadata.createSpan({ text: `Driver · ${volume.driver}` });

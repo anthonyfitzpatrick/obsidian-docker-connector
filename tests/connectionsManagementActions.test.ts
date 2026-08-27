@@ -8,7 +8,7 @@ const css = readFileSync(resolve(process.cwd(), "styles.css"), "utf8");
 describe("Connections management actions", () => {
   it("exposes the canonical Add Docker Host workflow and safe empty state", () => {
     expect(view).toContain('text: "Docker connections"');
-    expect(view).toContain('text: "Add Docker Host"');
+    expect(view).toContain('text: "Add Docker host"');
     expect(view).toContain('new DockerHostModal(this.plugin, () => this.render()).open()');
     expect(view).toContain('"No Docker connections configured"');
   });

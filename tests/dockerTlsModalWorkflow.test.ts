@@ -5,9 +5,9 @@ const modal = readFileSync(new URL("../src/views/DockerDashboardView.ts", import
 
 describe("Docker mutual-TLS modal workflow", () => {
   it("keeps the three certificate selections independently mapped", () => {
-    expect(modal).toContain('["CA Certificate", "tlsCaPath", "Choose CA certificate"');
-    expect(modal).toContain('["Client Certificate", "tlsCertPath", "Choose client certificate"');
-    expect(modal).toContain('["Client Private Key", "tlsKeyPath", "Choose client private key"');
+    expect(modal).toContain('["CA certificate", "tlsCaPath", "Choose CA certificate"');
+    expect(modal).toContain('["Client certificate", "tlsCertPath", "Choose client certificate"');
+    expect(modal).toContain('["Client private key", "tlsKeyPath", "Choose client private key"');
     expect(modal).toContain('this[field] = path; await this.revalidateTls();');
     expect(modal).toContain('caCertificatePath: this.tlsCaPath, clientCertificatePath: this.tlsCertPath, clientKeyPath: this.tlsKeyPath');
   });

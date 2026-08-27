@@ -13,7 +13,7 @@ export class SshHostKeyTrustModal extends Modal {
   constructor(app: Modal["app"], private readonly options: SshHostKeyTrustModalOptions) { super(app); }
 
   onOpen(): void {
-    this.contentEl.createEl("h2", { text: "Verify SSH Host" });
+    this.contentEl.createEl("h2", { text: "Verify SSH host" });
     this.contentEl.createEl("p", { text: "This is the first time Docker Connector has connected to this SSH host." });
     new Setting(this.contentEl).setName("Host").setDesc(`${this.options.host}:${this.options.port}`);
     new Setting(this.contentEl).setName("Host key fingerprint").setDesc(this.options.fingerprint);
@@ -21,7 +21,7 @@ export class SshHostKeyTrustModal extends Modal {
     const footer = this.contentEl.createDiv({ cls: "dc-host-modal__footer" });
     const cancel = footer.createEl("button", { text: "Cancel" });
     cancel.onclick = () => { this.options.onCancel(); this.close(); };
-    const trust = footer.createEl("button", { text: "Trust and Continue", cls: "mod-cta" });
+    const trust = footer.createEl("button", { text: "Trust and continue", cls: "mod-cta" });
     trust.onclick = () => { this.options.onTrust(); this.close(); };
     cancel.focus();
   }
@@ -39,7 +39,7 @@ export class SshHostKeyMismatchModal extends Modal {
   constructor(app: Modal["app"], private readonly options: SshHostKeyMismatchModalOptions) { super(app); }
 
   onOpen(): void {
-    this.contentEl.createEl("h2", { text: "SSH Host Identity Changed" });
+    this.contentEl.createEl("h2", { text: "SSH host identity changed" });
     this.contentEl.createEl("p", { text: "Docker Connector received a different SSH host key than the one trusted for this connection." });
     new Setting(this.contentEl).setName("Host").setDesc(`${this.options.host}:${this.options.port}`);
     new Setting(this.contentEl).setName("Trusted fingerprint").setDesc(this.options.trustedFingerprint);

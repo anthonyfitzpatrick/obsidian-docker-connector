@@ -42,13 +42,13 @@ describe("connection card management and SSH privacy", () => {
     const endpoint = view.slice(endpointStart, view.indexOf('const inventory = card.createDiv', endpointStart));
     expect(endpoint).toContain("this.connectionCardEndpointDetails(profile)");
     expect(endpoint).not.toContain('"Password"');
-    expect(endpoint).not.toContain("Private Key File");
+    expect(endpoint).not.toContain("Private key file");
     expect(endpoint).not.toContain("Passphrase");
     const adapter = view.slice(view.indexOf("private connectionCardEndpointDetails"), view.indexOf("private addEditAction"));
     expect(adapter).toContain("return [connectionSummary(profile)]");
     expect(view).toContain("this.username = editingProfile.sshUsername");
     expect(view).toContain("sshUsername: clean(this.username)");
-    expect(view).toContain('setName(this.privateKeyPath ? "Selected Private Key File" : "Private Key File")');
-    expect(view).toContain('setName(tls ? "Client Key Passphrase" : privateKey ? "Private-Key Passphrase" : "SSH Password")');
+    expect(view).toContain('setName(this.privateKeyPath ? "Selected private key file" : "Private key file")');
+    expect(view).toContain('setName(tls ? "Client Key Passphrase" : privateKey ? "Private-key passphrase" : "SSH Password")');
   });
 });

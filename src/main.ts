@@ -100,15 +100,22 @@ export default class DockerConnectorPlugin extends Plugin {
   }
 
   /**
-   * Stops new work before dismantling transports. Active update transactions get
-   * a bounded chance to follow their normal cancellation/rollback path; cleanup
-   * then clears credentials and caches even if a transport has become unhealthy.
+   * Stops new work immediately, then dismantles transports.
+   *
+   * Obsidian declares onunload as synchronous and does not await it, so
+   * everything that revokes authority happens before returning. Active update
+   * transactions still get their bounded chance to follow the normal
+   * cancellation/rollback path, and the caches and transports they depend on
+   * are released only once that settles.
    */
-  async onunload(): Promise<void> {
+  onunload(): void {
     this.unloading = true;
     this.managementAuthorization.clear();
     if (this.refreshTimer) window.clearInterval(this.refreshTimer);
-    await this.containerActions.recoverActiveUpdates();
+    void this.containerActions.recoverActiveUpdates().catch(() => undefined).finally(() => this.releaseRuntimeState());
+  }
+
+  private releaseRuntimeState(): void {
     this.containerActions.clear();
     this.containerImageUpdates.clearAll();
     this.containerDetailService.clear();
@@ -116,7 +123,7 @@ export default class DockerConnectorPlugin extends Plugin {
     this.volumeDetailService.clear();
     this.publicImageReleases.clear();
     this.contextLifecycle.clear();
-    await this.connectionFactory.disconnectAll();
+    void this.connectionFactory.disconnectAll().catch(() => undefined);
   }
   async loadSettings(): Promise<void> {
     const persisted = await this.loadData() as (Partial<DockerConnectorSettings> & { hosts?: unknown[]; reportFolder?: unknown }) | null;

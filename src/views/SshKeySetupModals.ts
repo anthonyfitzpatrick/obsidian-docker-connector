@@ -29,7 +29,7 @@ export class SshKeyGenerationModal extends Modal {
   private render(): void {
     this.contentEl.empty();
     const state = this.workflow.presentation;
-    this.contentEl.createEl("h2", { text: "Generate SSH Key" });
+    this.contentEl.createEl("h2", { text: "Generate SSH key" });
     this.contentEl.createEl("p", { text: "Creates a new Ed25519 key under ~/.ssh without overwriting existing files. A passphrase is optional and remains in memory only." });
     const busy = this.workflow.isBusy;
     if (state.state !== "success") {
@@ -70,11 +70,11 @@ export class SshPublicKeyInstallModal extends Modal {
   private render(): void {
     this.contentEl.empty();
     const state = this.workflow.presentation;
-    this.contentEl.createEl("h2", { text: "Install Public Key" });
+    this.contentEl.createEl("h2", { text: "Install public key" });
     this.contentEl.createEl("p", { text: `Append the selected public key (${this.fingerprint}) to ${this.profile.sshHost}'s ~/.ssh/authorized_keys if it is not already present. Existing entries are preserved.` });
     this.contentEl.createEl("p", { text: "This uses the current SSH password only for this installation. It does not save the password, passphrase, or private-key contents." });
     const busy = state.state === "installing" || state.state === "awaiting-host-trust";
-    new Setting(this.contentEl).setName("Current SSH Password").addText((text) => { text.inputEl.type = "password"; text.inputEl.autocomplete = "current-password"; text.setValue(this.workflow.credential); text.setDisabled(busy || state.state === "installed" || state.state === "already-installed"); text.onChange((value) => this.workflow.setPassword(value)); });
+    new Setting(this.contentEl).setName("Current SSH password").addText((text) => { text.inputEl.type = "password"; text.inputEl.autocomplete = "current-password"; text.setValue(this.workflow.credential); text.setDisabled(busy || state.state === "installed" || state.state === "already-installed"); text.onChange((value) => this.workflow.setPassword(value)); });
     if (state.message) this.contentEl.createDiv({ text: `${state.state === "installed" || state.state === "already-installed" ? "✓ " : ""}${state.message}`, cls: `dc-host-modal__key-status is-${state.state === "failed" ? "error" : state.state === "installed" || state.state === "already-installed" ? "success" : "warning"}`, attr: { role: "status", "aria-live": "polite" } });
     const footer = new Setting(this.contentEl).addButton((button) => button.setButtonText(state.state === "installed" || state.state === "already-installed" ? "Close" : "Cancel").onClick(() => this.close()));
     if (state.state !== "installed" && state.state !== "already-installed") footer.addButton((button) => button.setButtonText(state.state === "installing" ? "Installing…" : state.state === "failed" ? "Retry" : "Install public key").setWarning().setDisabled(busy).onClick(() => void this.install()));

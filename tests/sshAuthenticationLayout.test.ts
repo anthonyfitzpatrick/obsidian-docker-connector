@@ -15,7 +15,7 @@ describe("SSH Authentication field layout", () => {
     expect(modal).toContain('addOption("password", "Password")');
     expect(modal).toContain('addOption("private-key", "Private Key")');
     expect(modal).toContain('if (this.authentication === "password") this.passwordField(details); else this.privateKeyFields(details);');
-    expect(modal).toContain('setName("Private-Key Passphrase")');
+    expect(modal).toContain('setName("Private-key passphrase")');
   });
 
   it("offers password persistence only as an explicit, scoped SSH password opt-in", () => {
@@ -27,7 +27,7 @@ describe("SSH Authentication field layout", () => {
   });
 
   it("offers desktop-only key generation and strict public-key installation", () => {
-    expect(modal).toContain('setButtonText("Generate SSH Key")');
+    expect(modal).toContain('setButtonText("Generate SSH key")');
     expect(modal).toContain('setButtonText("Install public key")');
     expect(modal).toContain("resolvePublicKeyForPrivateKey(this.privateKeyPath, this.privateKeyPassphrase || undefined)");
     expect(modal).toContain("this.resolvedPublicKey = undefined");
@@ -53,7 +53,7 @@ describe("SSH Authentication field layout", () => {
     expect(setup).toContain("workflow.setPassword(value)");
     expect(setup).toContain("this.workflow.clear();");
     expect(setup).toContain("this.profile, password, this.publicKey");
-    expect(setup).toContain('"Install Public Key"');
+    expect(setup).toContain('"Install public key"');
     expect(workflow).toContain('this.current = { state: "installing"');
     expect(workflow).not.toContain("trim()");
   });
@@ -61,7 +61,7 @@ describe("SSH Authentication field layout", () => {
   it("keeps generation progress and the completed selected key modal-local until Close", () => {
     const setup = readFileSync(new URL("../src/views/SshKeySetupModals.ts", import.meta.url), "utf8");
     const workflow = readFileSync(new URL("../src/security/SshKeyGenerationWorkflow.ts", import.meta.url), "utf8");
-    expect(setup).toContain('text: "Generate SSH Key"');
+    expect(setup).toContain('text: "Generate SSH key"');
     expect(setup).toContain("this.workflow.isBusy");
     expect(setup).toContain('state.state === "failed" ? "Retry"');
     expect(setup).toContain("this.workflow.takeCompleted()");
