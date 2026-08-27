@@ -16,7 +16,7 @@ Mark each item **PASS**, **FAIL**, or **NOT YET VERIFIED** with the environment 
 | Docker Context | Discover; local and SSH routing; missing/changed Context; no active-context change | NOT YET VERIFIED |
 | SSH password | Positive reconnect and rejected password | NOT YET VERIFIED |
 | SSH private key | Unencrypted/encrypted key, passphrase, host-key trust/mismatch | NOT YET VERIFIED |
-| Mutual TLS | Valid chain and client auth; invalid Server Name, IP SAN, DNS SAN, CA, and key pair | NOT YET VERIFIED |
+| Mutual TLS | Valid chain and client auth; invalid Server name, IP SAN, DNS SAN, CA, and key pair | NOT YET VERIFIED |
 | Connections | Add, Edit, Reconnect, Retry, status, delete/current/final profile | NOT YET VERIFIED |
 | Views | Overview, Applications, Containers, Images, Volumes, Networks, Connections | NOT YET VERIFIED |
 | Update checks | Current, available, Check now, coalescing, 24-hour stale interval | NOT YET VERIFIED |

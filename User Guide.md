@@ -61,7 +61,7 @@ For a manual release installation, the plugin directory needs only `main.js`, `m
 
 ## 5. First launch
 
-On first launch there are no saved Docker connections. Open **Connections** and choose **Add Docker Host**. After testing and saving a host, choose it as the Current Environment to populate the dashboard.
+On first launch there are no saved Docker connections. Open **Connections** and choose **Add Docker host**. After testing and saving a host, choose it as the Current Environment to populate the dashboard.
 
 ### Empty Docker connections state
 <div align="center">
@@ -86,19 +86,19 @@ The primary navigation contains **Overview**, **Applications**, **Containers**, 
 ## 7. Adding a Docker host
 
 1. Open **Connections**.
-2. Select **Add Docker Host**.
-3. Provide a **Friendly Name**. Description and Category are optional organization fields.
-4. Select a **Connection Type**.
+2. Select **Add Docker host**.
+3. Provide a **Friendly name**. Description and Category are optional organization fields.
+4. Select a **Connection type**.
 5. Complete only the fields for that method.
-6. Choose **Test Connection** and review the transport-specific diagnostics.
-7. Choose **Save Host**.
+6. Choose **Test connection** and review the transport-specific diagnostics.
+7. Choose **Save host**.
 
 On desktop, drag the dialog by its title bar or resize it from its lower-right edge. On touch and narrow layouts, it remains viewport-safe without draggable controls.
 
-### Add Docker Host dialog
+### Add Docker host dialog
 <div align="center">
 
-![Add Docker Host dialog|738](docs/images/user-guide/03-add-docker-host.png)
+![Add Docker host dialog|738](docs/images/user-guide/03-add-docker-host.png)
 
 </div>
 
@@ -106,10 +106,10 @@ Testing before saving is strongly recommended. A successful test proves the sele
 
 ## 8. Connection methods
 
-### Connection Type selector
+### Connection type selector
 <div align="center">
 
-![Connection Type selector|693](docs/images/user-guide/04-connection-type-selector.png)
+![Connection type selector|693](docs/images/user-guide/04-connection-type-selector.png)
 
 </div>
 
@@ -119,7 +119,7 @@ Testing before saving is strongly recommended. A successful test proves the sele
 
 On macOS, Docker Desktop commonly uses a user socket such as `~/.docker/run/docker.sock`; `/var/run/docker.sock` may be a compatibility symlink. Docker Connector resolves and validates supported socket symlinks rather than replacing them. No SSH credentials, TLS files, or Docker TCP listener are involved.
 
-The **Docker Endpoint** field can show the detected local Unix socket or Windows named pipe. If Docker Desktop is stopped, the endpoint is missing, the symlink is broken, or your account cannot open it, Test Connection explains that local endpoint problem.
+The **Docker endpoint** field can show the detected local Unix socket or Windows named pipe. If Docker Desktop is stopped, the endpoint is missing, the symlink is broken, or your account cannot open it, Test connection explains that local endpoint problem.
 
 ### Local Docker Socket configuration
 <div align="center">
@@ -160,9 +160,9 @@ Configure:
 
 - **SSH Host** and **SSH Port**;
 - **SSH Username**;
-- **SSH Authentication**: Password or Private Key;
-- **Remote Docker Socket**; and
-- **Host Key Fingerprint** when host identity verification is required by the connection workflow.
+- **SSH authentication**: Password or Private Key;
+- **Remote Docker socket**; and
+- **Host key fingerprint** when host identity verification is required by the connection workflow.
 
 The remote account must be able to access the configured Docker socket without interactive `sudo`.
 
@@ -181,17 +181,17 @@ For a password profile only, **Remember password on this device** is an optional
 
 #### Host-key verification
 
-The **Host Key Fingerprint** identifies the remote SSH server. Docker Connector does not use `known_hosts`, auto-trust a first key, or silently replace a saved key.
+The **Host key fingerprint** identifies the remote SSH server. Docker Connector does not use `known_hosts`, auto-trust a first key, or silently replace a saved key.
 
-1. Select **Test Connection**. An unknown server key opens **Verify SSH Host**, which shows the configured host and port and the received SHA-256 fingerprint.
+1. Select **Test connection**. An unknown server key opens **Verify SSH host**, which shows the configured host and port and the received SHA-256 fingerprint.
 2. Independently verify the fingerprint with the server administrator or a trusted out-of-band source. Select **Cancel** to leave the draft untrusted, or **Trust and Continue** to trust that received key only in the unsaved form.
 3. **Trust and Continue** performs exactly one automatic retest with the same session-only credential. A successful SSH test shows the completed SSH handshake, host-key verification, SSH authentication, Docker `GET /_ping`, and Docker `GET /version` diagnostics. Authentication stages not selected for the profile are marked **SKIPPED**.
-4. Select **Save Host** only after that successful retest. Saving persists the verified host-key fingerprint metadata, never a password or private-key passphrase.
+4. Select **Save host** only after that successful retest. Saving persists the verified host-key fingerprint metadata, never a password or private-key passphrase.
 
-### Verify SSH Host
+### Verify SSH host
 <div align="center">
 
-![Verify SSH Host dialog|542](docs/images/user-guide/08-verify-ssh-host.png)
+![Verify SSH host dialog|542](docs/images/user-guide/08-verify-ssh-host.png)
 
 </div>
 
@@ -213,16 +213,16 @@ With the option off, an Obsidian restart returns the profile to **Authentication
 
 #### Private-key authentication
 
-With **Private Key** selected, use **Browse…** to choose an existing key or select **Generate SSH Key**. For the recommended unattended setup, leave both passphrase fields blank before generation. A nonblank generation passphrase encrypts the key: it remains session-only and must be entered again after restart, so it is not unattended.
+With **Private Key** selected, use **Browse…** to choose an existing key or select **Generate SSH key**. For the recommended unattended setup, leave both passphrase fields blank before generation. A nonblank generation passphrase encrypts the key: it remains session-only and must be entered again after restart, so it is not unattended.
 
-### Generate SSH Key completed
+### Generate SSH key completed
 <div align="center">
 
-![Generate SSH Key completed|546](docs/images/user-guide/11-generate-ssh-key.png)
+![Generate SSH key completed|546](docs/images/user-guide/11-generate-ssh-key.png)
 
 </div>
 
-**Generate SSH Key** has completed successfully: the dialog confirms an Ed25519 SSH key is ready, shows a safe public SHA-256 fingerprint, and provides **Close**. Select **Close** to return to the SSH host form.
+**Generate SSH key** has completed successfully: the dialog confirms an Ed25519 SSH key is ready, shows a safe public SHA-256 fingerprint, and provides **Close**. Select **Close** to return to the SSH host form.
 
 ### Remote Docker via SSH private-key selection
 <div align="center">
@@ -231,7 +231,7 @@ With **Private Key** selected, use **Browse…** to choose an existing key or se
 
 </div>
 
-The host form now shows the validated selected key and public fingerprint. Docker Connector saves only the key path, never key contents, and derives its public identity. When a sibling `<private-key>.pub` exists, its type and base64 identity must match; a mismatched `.pub` blocks installation, while a missing `.pub` is derived in memory without modifying the private key. Select **Install Public Key**, enter the remote account's current session-only SSH password, complete first-host verification if needed, test the selected private key, save the host, then restart Obsidian to confirm it reconnects online.
+The host form now shows the validated selected key and public fingerprint. Docker Connector saves only the key path, never key contents, and derives its public identity. When a sibling `<private-key>.pub` exists, its type and base64 identity must match; a mismatched `.pub` blocks installation, while a missing `.pub` is derived in memory without modifying the private key. Select **Install public key**, enter the remote account's current session-only SSH password, complete first-host verification if needed, test the selected private key, save the host, then restart Obsidian to confirm it reconnects online.
 
 Never expose private-key contents, public-key contents, entered passphrases, identifying filesystem paths, or other secrets.
 
@@ -244,25 +244,25 @@ Never expose private-key contents, public-key contents, entered passphrases, ide
 
 The completed dialog confirms the Ed25519 key is ready, shows its public SHA-256 fingerprint, and provides **Close** to return to the SSH host form.
 
-### Install Public Key
+### Install public key
 <div align="center">
 
-![Install Public Key|548](docs/images/user-guide/14-install-public-key.png)
+![Install public key|548](docs/images/user-guide/14-install-public-key.png)
 
 </div>
 
-The **Install Public Key** dialog shows the selected key's public SHA-256 fingerprint. Docker Connector appends only that public key to the remote account's `~/.ssh/authorized_keys` when it is not already present; existing entries are preserved.
+The **Install public key** dialog shows the selected key's public SHA-256 fingerprint. Docker Connector appends only that public key to the remote account's `~/.ssh/authorized_keys` when it is not already present; existing entries are preserved.
 
-**Current SSH Password** is the remote account's existing password, needed only for this session-only installation and never saved. The screenshot intentionally leaves it empty. The private key, its passphrase, and its contents are never transferred to the remote host. After entering the remote account password, select **Install public key**.
+**Current SSH password** is the remote account's existing password, needed only for this session-only installation and never saved. The screenshot intentionally leaves it empty. The private key, its passphrase, and its contents are never transferred to the remote host. After entering the remote account password, select **Install public key**.
 
-### Private-key Test Connection success
+### Private-key test connection success
 <div align="center">
 
-![Private-key Test Connection success|848](docs/images/user-guide/15-private-key-test-success.png)
+![Private-key Test connection success|848](docs/images/user-guide/15-private-key-test-success.png)
 
 </div>
 
-After public-key installation, select **Test Connection** to verify host-key verification, private-key authentication, and Docker `GET /_ping` and `GET /version` all succeed.
+After public-key installation, select **Test connection** to verify host-key verification, private-key authentication, and Docker `GET /_ping` and `GET /version` all succeed.
 
 The profile can save the private-key file path, not a copy of the key material. An encrypted key’s passphrase remains in memory only for the current session; an unencrypted key simply has no passphrase to enter. Remembered SSH passwords never apply to private-key passphrases or public-key installation.
 
@@ -277,7 +277,7 @@ The profile can save the private-key file path, not a copy of the key material. 
 
 **Remote Docker API (Mutual TLS)** is for a Docker Engine HTTPS endpoint that has deliberately been configured for mutual TLS. Unlike SSH, the Docker API endpoint is directly reachable on the network. Both sides authenticate:
 
-- Docker Connector verifies the Docker server certificate against the selected CA and Server Name.
+- Docker Connector verifies the Docker server certificate against the selected CA and Server name.
 - Docker Engine verifies Docker Connector’s client certificate and private key.
 
 Configure these fields:
@@ -285,37 +285,37 @@ Configure these fields:
 | Field | Purpose |
 | --- | --- |
 | Docker Host | Network address of the Docker Engine endpoint. |
-| Docker API Port | HTTPS port exposed by the secured Docker Engine endpoint. |
-| Server Name | Certificate identity Docker Connector must verify. |
-| CA Certificate | Certificate authority used to verify the Docker server certificate. |
-| Client Certificate | Certificate presented to Docker Engine to authenticate Docker Connector. |
-| Client Private Key | Private key associated with the client certificate. |
-| Client-Key Passphrase | Optional passphrase for that private key; session-only. |
+| Docker API port | HTTPS port exposed by the secured Docker Engine endpoint. |
+| Server name | Certificate identity Docker Connector must verify. |
+| CA certificate | Certificate authority used to verify the Docker server certificate. |
+| Client certificate | Certificate presented to Docker Engine to authenticate Docker Connector. |
+| Client private key | Private key associated with the client certificate. |
+| Client-key passphrase | Optional passphrase for that private key; session-only. |
 
-Server verification cannot be disabled. If the Server Name is an IP address, the server certificate must contain that IP in an **IP SAN**. If it is a DNS name, the certificate must contain the matching **DNS SAN**. A certificate common name alone is not a reliable substitute for a matching SAN.
+Server verification cannot be disabled. If the Server name is an IP address, the server certificate must contain that IP in an **IP SAN**. If it is a DNS name, the certificate must contain the matching **DNS SAN**. A certificate common name alone is not a reliable substitute for a matching SAN.
 
 Selected certificate and key paths may be saved as profile metadata; certificate contents and client-key passphrases are not persisted in settings.
 
-Docker Connector validates the selected CA, client certificate, and client private key locally before connecting. The client certificate and private key must form a matching pair; use **Test Connection** only after that validation succeeds.
+Docker Connector validates the selected CA, client certificate, and client private key locally before connecting. The client certificate and private key must form a matching pair; use **Test connection** only after that validation succeeds.
 
 ## 9. Testing a connection
 
-**Test Connection** validates a draft before it is saved or after it is edited. The diagnostics are deliberately transport-specific, so not every method shows the same stages. Typical stages include profile validation, Docker Context discovery, local endpoint validation, loading TLS files, opening a connection, server-certificate verification, server-name verification, Docker `GET /_ping`, Docker `GET /version`, and response parsing.
+**Test connection** validates a draft before it is saved or after it is edited. The diagnostics are deliberately transport-specific, so not every method shows the same stages. Typical stages include profile validation, Docker Context discovery, local endpoint validation, loading TLS files, opening a connection, server-certificate verification, server-name verification, Docker `GET /_ping`, Docker `GET /version`, and response parsing.
 
 A completed stage is marked **SUCCESS**. An authoritative failure is **ERROR**. Stages that could not start after a failure are shown as **SKIPPED** or **NOT RUN**, rather than being presented as successful. For example, a mutual-TLS hostname mismatch stops before Docker API requests are used.
 
-For mutual TLS, a successful test loads the TLS files, confirms the certificate/key pair, opens the TLS connection, verifies the server certificate and Server Name, then completes Docker `GET /_ping` and `GET /version`. If the Server Name is wrong, correct it before saving; the Docker API checks do not run after an identity failure.
+For mutual TLS, a successful test loads the TLS files, confirms the certificate/key pair, opens the TLS connection, verifies the server certificate and Server name, then completes Docker `GET /_ping` and `GET /version`. If the Server name is wrong, correct it before saving; the Docker API checks do not run after an identity failure.
 
-### Successful local Test Connection diagnostics
+### Successful local test connection diagnostics
 <div align="center">
 
-![Successful local Docker Test Connection diagnostics|764](docs/images/user-guide/17-local-test-success.png)
+![Successful local Docker Test connection diagnostics|764](docs/images/user-guide/17-local-test-success.png)
 
 </div>
 
 ## 10. Managing saved connections
 
-Open **Connections** to manage every saved profile. The page begins with summary cards for **Configured hosts**, **Online**, and **Needs sign-in**; Needs sign-in counts only profiles in **Authentication Required**. For example, three configured profiles may show one Online and two Needs sign-in without changing either healthy profile’s state. It then provides **Add Docker Host** and a card for every profile. Each card uses one uniform structure: purple Docker host identity, textual connection method, transport-relevant safe endpoint details, inventory, runtime details, actions, and management row. Only the safe profile data and status vary by connection method.
+Open **Connections** to manage every saved profile. The page begins with summary cards for **Configured hosts**, **Online**, and **Needs sign-in**; Needs sign-in counts only profiles in **Authentication Required**. For example, three configured profiles may show one Online and two Needs sign-in without changing either healthy profile’s state. It then provides **Add Docker host** and a card for every profile. Each card uses one uniform structure: purple Docker host identity, textual connection method, transport-relevant safe endpoint details, inventory, runtime details, actions, and management row. Only the safe profile data and status vary by connection method.
 
 ### Docker connections overview
 <div align="center">
@@ -324,7 +324,7 @@ Open **Connections** to manage every saved profile. The page begins with summary
 
 </div>
 
-The summary cards count saved profiles, currently connected profiles, and profiles whose session-only credentials must be supplied again. **Add Docker Host** opens the profile workflow. Each card shows current status, a safe endpoint, inventory and runtime details where available, **Open dashboard**, **Edit**, **Delete**, and a compact profile-scoped **Container management** control.
+The summary cards count saved profiles, currently connected profiles, and profiles whose session-only credentials must be supplied again. **Add Docker host** opens the profile workflow. Each card shows current status, a safe endpoint, inventory and runtime details where available, **Open dashboard**, **Edit**, **Delete**, and a compact profile-scoped **Container management** control.
 
 **Edit** opens the same profile workflow without changing the profile’s stable identity. **Reconnect** appears when session-only credentials need to be entered again or an Offline or Degraded connection can be retried; it is not always visible and need not appear in this image. **Delete connection** opens a confirmation dialog.
 
@@ -395,7 +395,7 @@ Applications is read-only at the project level. Docker Connector does not run `d
 
 ## 13. Containers
 
-The **Containers** tab is the main container inventory. It has summary cards for **Containers**, **Running**, **Stopped**, and **Updates Available**.
+The **Containers** tab is the main container inventory. It has summary cards for **Containers**, **Running**, **Stopped**, and **Updates available**.
 
 ### Containers view
 <div align="center">
@@ -408,14 +408,14 @@ With no filter applied the count shows the full inventory, and the summary cards
 
 Use the toolbar to search by container information and filter by State, Health, and Network. Sort and density controls make it practical to work with larger inventories. Each container card identifies the container, image, short ID, state, and health, together with its status, Docker host, networks, published ports, and creation time at Comfortable density. Selecting a card's short ID copies the full container ID to the clipboard without opening the container or changing the Docker host.
 
-### Updates Available filter
+### Updates available filter
 <div align="center">
 
-![Updates Available filter applied in Containers|880](docs/images/user-guide/25-updates-filter.png)
+![Updates available filter applied in Containers|880](docs/images/user-guide/25-updates-filter.png)
 
 </div>
 
-Selecting the **Updates Available** card applies an additive filter to the container list. The applied filter appears as an **Updates available** chip in the **Active filters** row, alongside **Clear all**, and the result count above the summary cards reports how many of the total containers currently match.
+Selecting the **Updates available** card applies an additive filter to the container list. The applied filter appears as an **Updates available** chip in the **Active filters** row, alongside **Clear all**, and the result count above the summary cards reports how many of the total containers currently match.
 
 In the example above the filter is applied while every checked container is current, so the count shows `0 of 16 containers` and the list shows the **Everything is up to date** empty state with **Show all containers**. When containers do have a newer image available, the same filtered list shows only those containers instead. Use **Show all containers**, the chip's remove control, or **Clear all** to return to the complete inventory.
 
@@ -826,7 +826,7 @@ The named Context may have been removed or its endpoint configuration may have c
 
 ### Mutual TLS failure
 
-Check the selected CA, client certificate, matching client private key, optional passphrase, and Server Name. `DOCKER_TLS_HOSTNAME_MISMATCH` means the expected Server Name does not match a valid certificate identity. An IP address must appear in an IP SAN; a hostname must appear in a DNS SAN. Do not disable certificate verification to work around this error.
+Check the selected CA, client certificate, matching client private key, optional passphrase, and Server name. `DOCKER_TLS_HOSTNAME_MISMATCH` means the expected Server name does not match a valid certificate identity. An IP address must appear in an IP SAN; a hostname must appear in a DNS SAN. Do not disable certificate verification to work around this error.
 
 ### Client certificate rejected
 
@@ -834,7 +834,7 @@ The Docker Engine may require a certificate signed by a different CA, a client c
 
 ### Remote user lacks Docker access or the socket path is wrong
 
-For **Remote Docker via SSH**, first confirm the remote account can use Docker in a normal terminal session. A safe starting point is `docker version` and `docker ps -a` after logging in as that account. Check the configured Remote Docker Socket against the host’s Docker configuration. Do not use an interactive `sudo` workaround: Docker Connector cannot answer an interactive privilege prompt, and changing socket permissions broadly is not a safe substitute for correct host access control.
+For **Remote Docker via SSH**, first confirm the remote account can use Docker in a normal terminal session. A safe starting point is `docker version` and `docker ps -a` after logging in as that account. Check the configured Remote Docker socket against the host’s Docker configuration. Do not use an interactive `sudo` workaround: Docker Connector cannot answer an interactive privilege prompt, and changing socket permissions broadly is not a safe substitute for correct host access control.
 
 ### Update check failed, update is unavailable, or the image is already current
 

@@ -57,7 +57,7 @@ When a newer image is confirmed and a standalone container is eligible, **Update
 - Docker access remains privileged; use least-privileged access where possible.
 - SSH passwords, SSH private-key passphrases, and TLS client-key passphrases are session-only by default. Only an explicit per-profile SSH password opt-in stores a password separately in unencrypted local plugin data; it is never a profile field. Passive cards hide SSH usernames, authentication labels, credential paths, and secrets.
 - Selected key and certificate paths can be saved; their file contents are not copied into settings.
-- Mutual TLS requires server-certificate and Server Name verification. There is no insecure verification bypass.
+- Mutual TLS requires server-certificate and Server name verification. There is no insecure verification bypass.
 - Docker Contexts are discovered and used without `docker context use`, create, update, remove, import, or export commands.
 - Insecure plain Docker TCP is blocked.
 - Delete connection removes only Docker Connector’s profile, runtime credentials, cache, and transport state. It never deletes Docker resources, Docker Contexts, sockets, SSH keys, TLS certificate files, or remote-server configuration.
@@ -98,11 +98,11 @@ Do not install source files, test fixtures, or `node_modules` for normal use.
 ## Quick start
 
 1. Open **Docker Connector → Connections**.
-2. Select **Add Docker Host**.
-3. Enter a Friendly Name and choose a connection method.
+2. Select **Add Docker host**.
+3. Enter a Friendly name and choose a connection method.
 4. Complete its method-specific fields.
-5. Choose **Test Connection** and review diagnostics.
-6. Choose **Save Host**.
+5. Choose **Test connection** and review diagnostics.
+6. Choose **Save host**.
 7. Select the profile as the **Current Environment**.
 8. Browse the dashboard, which remains read-only until Container management is enabled.
 

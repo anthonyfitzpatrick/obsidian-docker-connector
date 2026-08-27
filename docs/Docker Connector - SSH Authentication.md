@@ -2,7 +2,7 @@
 tags: [docker-connector, ssh, authentication]
 ---
 
-# SSH authentication
+# SSH Authentication
 
 Docker Connector supports password and [[Docker Connector - Private Key Authentication|private-key-file]] authentication. Passwords and key passphrases are session-only by default; profile settings contain no secret material. SSH Agent and SSH config support are not implemented.
 
@@ -10,4 +10,4 @@ For a password profile only, **Remember password on this device** is an explicit
 
 Desktop private-key setup can generate an Ed25519 key through the local OpenSSH `ssh-keygen` tool and install only its public line through a separate trusted password session. The installation password and any private-key passphrase remain session-only. Neither is eligible for remembered-password storage, and unknown or mismatched host keys block installation.
 
-An unknown host key opens **Verify SSH Host** with the received SHA-256 fingerprint. **Cancel** leaves the draft untrusted; **Trust and Continue** permits one retry and the fingerprint is saved only after that retry succeeds. A changed key shows both trusted and received fingerprints and offers no replacement action. Docker Connector neither treats `known_hosts` as authority nor auto-accepts or bypasses host verification.
+An unknown host key opens **Verify SSH host** with the received SHA-256 fingerprint. **Cancel** leaves the draft untrusted; **Trust and Continue** permits one retry and the fingerprint is saved only after that retry succeeds. A changed key shows both trusted and received fingerprints and offers no replacement action. Docker Connector neither treats `known_hosts` as authority nor auto-accepts or bypasses host verification.

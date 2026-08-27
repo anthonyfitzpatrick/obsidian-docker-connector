@@ -4,7 +4,7 @@ title: Docker Connector - Connections View
 
 # Connections View
 
-The **Connections** tab is the saved-profile management surface. Its heading is **Docker connections** and the page-level **Add Docker Host** action opens the canonical Add Docker Host dialog.
+The **Connections** tab is the saved-profile management surface. Its heading is **Docker connections** and the page-level **Add Docker host** action opens the canonical Add Docker host dialog.
 
 Each saved connection card uses one canonical display name: **Local Docker Socket**, **Docker Context**, **Remote Docker via SSH**, or **Remote Docker API (Mutual TLS)**. Every profile uses the same decorative purple Docker host identity, header, endpoint slot, four-cell inventory, runtime details, action row, and management row. The shared card receives only transport-relevant safe details and status from its profile. SSH cards show only `host:port` in passive metadata: they do not expose the SSH username, password/private-key mode, or credential paths.
 

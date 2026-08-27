@@ -10,6 +10,6 @@ Statuses are transient and scoped by profile ID plus full container ID: not chec
 
 The detail panel shows one Image update status at a time. **Check now** forces a check for that container only; it does not alter the 24-hour schedule or change container state. The Update action is shown only when the container is eligible *and* the status is **available**. A current image hides Update so the same container cannot be recreated repeatedly without a newer resolved image. Errors provide a safe retry action, while unsupported containers show their safe reason.
 
-[[Docker Connector - Containers View]] surfaces the same transient state as an **Updates Available** dashboard count and filter. Only `available` contributes to that count; checking, current, error, and unsupported statuses do not.
+[[Docker Connector - Containers View]] surfaces the same transient state as an **Updates available** dashboard count and filter. Only `available` contributes to that count; checking, current, error, and unsupported statuses do not.
 
 A successful recreate moves the status to the trusted replacement container ID and marks it current without a further pull. No automatic installation or unattended update is provided.
