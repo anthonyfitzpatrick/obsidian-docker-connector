@@ -1,0 +1,70 @@
+name: Bug report
+description: Report a reproducible problem with Docker Connector.
+title: "[Bug report]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please remove any private note content, host names, credentials, certificate contents, or container environment values.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the unexpected behaviour and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Give the smallest reliable sequence of steps.
+      placeholder: |
+        1. …
+        2. …
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: connection-method
+    attributes:
+      label: Connection method
+      options: [Local Docker Socket, Docker Context, Remote Docker via SSH, Remote Docker API (Mutual TLS), Not connection specific]
+    validations:
+      required: true
+  - type: input
+    id: error-code
+    attributes:
+      label: Safe error code or diagnostic stage
+      description: The code shown in diagnostics, such as SSH_HOST_KEY_MISMATCH or DOCKER_SOCKET_PERMISSION_DENIED. Do not paste credentials.
+      placeholder: e.g. DOCKER_DAEMON_UNAVAILABLE
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Docker Connector version
+      placeholder: e.g. 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: obsidian-version
+    attributes:
+      label: Obsidian version
+      placeholder: e.g. 1.13.7
+    validations:
+      required: true
+  - type: input
+    id: docker-version
+    attributes:
+      label: Docker Engine version
+      placeholder: e.g. 26.1.5
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options: [macOS, Windows, Linux, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add screenshots, console errors, or relevant configuration details, with secrets removed.
