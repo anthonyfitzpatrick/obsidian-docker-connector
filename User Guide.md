@@ -329,22 +329,11 @@ Selecting the **Updates Available** card applies an additive filter to the conta
 In the example above the filter is applied while every checked container is current, so the count shows `0 of 16 containers` and the list shows the **Everything is up to date** empty state with **Show all containers**. When containers do have a newer image available, the same filtered list shows only those containers instead. Use **Show all containers**, the chip's remove control, or **Clear all** to return to the complete inventory.
 
 ### Screenshot 25 — Containers view
-> **Screenshot placeholder 25**
->
-> **Capture:** Summary cards and populated container rows.
->
-> **How to capture this screenshot:**
-> 1. Select an Online test environment with several containers.
-> 2. Open **Containers** and clear all active filters.
-> 3. Wait for the inventory to finish loading.
-> 4. Ensure the summary cards and several populated container rows are visible.
-> 5. If possible include both running and stopped test containers, but do not change production container state merely for this screenshot.
-> 6. Capture the main Containers list at a normal readable density.
+![Containers inventory with no active filters](docs/images/user-guide/25-containers-view.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/25-containers-view.png`
+With no filter applied the count shows the full inventory, and the summary cards report the totals for the selected environment. The example above shows sixteen containers across **All Docker hosts**, all of them running.
 
-Use the toolbar to search by container information and filter by State, Health, and Network. Sort and density controls make it practical to work with larger inventories. Each row identifies the container, image, short ID, state, health, and relevant update state. Copy controls copy a full ID without changing the Docker host.
+Use the toolbar to search by container information and filter by State, Health, and Network. Sort and density controls make it practical to work with larger inventories. Each container card identifies the container, image, short ID, state, and health, together with its status, Docker host, networks, published ports, and creation time at Comfortable density. Selecting a card's short ID copies the full container ID to the clipboard without opening the container or changing the Docker host.
 
 ### Screenshot 26 — Container filters and search
 > **Screenshot placeholder 26**
