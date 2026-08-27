@@ -19,7 +19,7 @@ const nodeRequire = createRequire(import.meta.url);
 async function bundledModule(source: string): Promise<{ path: string; dispose: () => Promise<void> }> {
   const directory = await mkdtemp(join(tmpdir(), "docker-connector-bundle-"));
   const path = join(directory, "module.cjs");
-  await esbuild.build({ stdin: { contents: source, resolveDir: process.cwd(), loader: "ts" }, outfile: path, bundle: true, platform: "node", format: "cjs", target: "es2022", external: ["obsidian", "electron", "cpu-features"] });
+  await esbuild.build({ stdin: { contents: source, resolveDir: process.cwd(), loader: "ts" }, outfile: path, bundle: true, platform: "node", format: "cjs", target: "es2022", external: ["obsidian", "electron", "cpu-features", "*.node"] });
   return { path, dispose: () => rm(directory, { recursive: true, force: true }) };
 }
 

@@ -12,7 +12,10 @@ await esbuild.build({
   entryPoints: { main: "src/main.ts" },
   bundle: true,
   platform: "node",
-  external: ["obsidian", "electron", "cpu-features", "@codemirror/autocomplete", "@codemirror/collab", "@codemirror/commands", "@codemirror/language", "@codemirror/lint", "@codemirror/search", "@codemirror/state", "@codemirror/view", "@lezer/common", "@lezer/highlight", "@lezer/lr"],
+  // "*.node" keeps ssh2's optional native binding a runtime require, so the
+  // bundle is identical whether or not the build host compiled it. ssh2
+  // already falls back to its pure JavaScript crypto when it is absent.
+  external: ["obsidian", "electron", "cpu-features", "*.node", "@codemirror/autocomplete", "@codemirror/collab", "@codemirror/commands", "@codemirror/language", "@codemirror/lint", "@codemirror/search", "@codemirror/state", "@codemirror/view", "@lezer/common", "@lezer/highlight", "@lezer/lr"],
   format: "cjs",
   target: "es2022",
   logLevel: "info",
