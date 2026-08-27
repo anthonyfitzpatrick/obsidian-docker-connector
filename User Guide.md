@@ -475,8 +475,17 @@ The authorization is session-only and is never written to disk. It ends when Obs
 - **Stop** uses the normal stop action with a 10-second wait.
 - **Restart** uses Docker’s restart action with a 10-second wait.
 
-### Screenshot 36 — Stopped container Start control
-> **Screenshot placeholder 36**
+### Screenshot 36 — Container management enabled
+![Actions and Image update for a running container with management enabled](docs/images/user-guide/36-running-actions.png)
+
+This is the same inspector as screenshot 33 with only the switch changed. **Actions** now reads **Container management enabled** and offers the controls that suit the container's current state: a running container gets **Shut down**, **Stop**, and **Restart**, and no **Start**, because it is already running.
+
+The **Image update** area appears with it. Until a check has run it reports **Update status not checked**, and **Check now** performs one on demand. An **Update** action joins it only once a check confirms a newer image and the container is eligible for the standalone update workflow.
+
+Docker Connector asks for confirmation before lifecycle actions and coordinates a refresh after an accepted action. These controls never appear as a bulk-action interface.
+
+### Screenshot 37 — Stopped container Start control
+> **Screenshot placeholder 37**
 >
 > **Capture:** Start action for a stopped standalone container.
 >
@@ -489,25 +498,7 @@ The authorization is session-only and is never written to disk. It ends when Obs
 > 6. After capturing, return the test container to its desired normal state.
 
 >
-> **Suggested filename:** `docs/images/user-guide/36-stopped-start.png`
-
-Docker Connector asks for confirmation before lifecycle actions and coordinates a refresh after an accepted action. These controls never appear as a bulk-action interface.
-
-### Screenshot 37 — Running container lifecycle controls
-> **Screenshot placeholder 37**
->
-> **Capture:** Shut down, Stop, Restart, and Update eligibility where applicable.
->
-> **How to capture this screenshot:**
-> 1. Enable **Container management** only if you are working against an approved test container/environment.
-> 2. Select a **running standalone test container** such as the disposable test container on `192.168.1.2`.
-> 3. Open its inspector and locate **Actions**.
-> 4. Ensure **Shut down**, **Stop**, and **Restart** are visible; **Update** may also appear only if that container is eligible and has an available image.
-> 5. Do not click any lifecycle control for the screenshot.
-> 6. Capture the Actions section and container identity clearly enough to show it is a test target.
-
->
-> **Suggested filename:** `docs/images/user-guide/37-running-actions.png`
+> **Suggested filename:** `docs/images/user-guide/37-stopped-start.png`
 
 ### Update
 
@@ -825,8 +816,8 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 33 | `33-management-disabled.png` | Container management | Read-only |
 | 34 | `34-management-confirmation.png` | Container management | Enable confirmation |
 | 35 | `35-management-enabled.png` | Container management | Per-profile enabled |
-| 36 | `36-stopped-start.png` | Container management | Start |
-| 37 | `37-running-actions.png` | Container management | Running actions |
+| 36 | `36-running-actions.png` | Container management | Enabled actions |
+| 37 | `37-stopped-start.png` | Container management | Start |
 | 38 | `38-update-preview.png` | Update | Preview |
 | 39 | `39-update-progress.png` | Update | Progress |
 | 40 | `40-update-success.png` | Update | Result |
