@@ -49,6 +49,6 @@ describe("connection card management and SSH privacy", () => {
     expect(view).toContain("this.username = editingProfile.sshUsername");
     expect(view).toContain("sshUsername: clean(this.username)");
     expect(view).toContain('setName(this.privateKeyPath ? "Selected private key file" : "Private key file")');
-    expect(view).toContain('setName(tls ? "Client Key Passphrase" : privateKey ? "Private-key passphrase" : "SSH Password")');
+    expect(view).toContain('setName(tls ? "Client key passphrase" : privateKey ? "Private-key passphrase" : "SSH password")');
   });
 });

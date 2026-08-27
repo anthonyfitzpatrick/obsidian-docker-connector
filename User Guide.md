@@ -168,7 +168,7 @@ The remote account must be able to access the configured Docker socket without i
 
 #### Password authentication
 
-With **Password** selected, enter the SSH password during connection or reconnection. Docker Connector keeps that password in memory only for the current Obsidian session by default. It is not stored in the saved profile, so a profile can show **Authentication Required** after Obsidian restarts. Choose **Reconnect** to provide it again.
+With **Password** selected, enter the SSH password during connection or reconnection. Docker Connector keeps that password in memory only for the current Obsidian session by default. It is not stored in the saved profile, so a profile can show **Authentication required** after Obsidian restarts. Choose **Reconnect** to provide it again.
 
 For a password profile only, **Remember password on this device** is an optional, off-by-default choice. It stores the password separately in local plugin data so Docker Connector can reconnect after Obsidian restarts. Obsidian does not provide this plugin a supported keychain or guaranteed encryption, so use it only on a trusted device, prefer SSH keys where possible, and use **Forget stored password** to remove it immediately. It never applies to private-key passphrases, TLS passphrases, keys, or certificates. Host-key verification is still mandatory: a changed host key blocks reconnection even when a password is remembered.
 
@@ -195,12 +195,16 @@ The **Host key fingerprint** identifies the remote SSH server. Docker Connector 
 
 </div>
 
+This is step 1 above. The dialog names the host and port it reached and shows the fingerprint that server presented. Compare it with the fingerprint you obtained independently before choosing **Trust and continue**; **Cancel** leaves the draft untrusted and saves nothing.
+
 ### SSH connection success diagnostics
 <div align="center">
 
 ![SSH connection success diagnostics|880](docs/images/user-guide/09-ssh-connection-success.png)
 
 </div>
+
+This is the retest from step 3. Each stage is listed in the order it ran, so a failure shows you exactly how far the connection reached: the SSH handshake, host-key verification, authentication, the Docker capability check, then `GET /_ping` and `GET /version`. Only after this succeeds does **Save host** persist the fingerprint.
 
 ### Remember SSH password option
 <div align="center">
@@ -209,7 +213,7 @@ The **Host key fingerprint** identifies the remote SSH server. Docker Connector 
 
 </div>
 
-With the option off, an Obsidian restart returns the profile to **Authentication Required** and **Reconnect** asks for the password again. With the option explicitly on, Docker Connector rehydrates the stored password only for that profile and only when the saved host-key fingerprint still matches. Use **Forget stored password** to remove it immediately. A changed host key always opens **SSH Host Identity Changed**, showing both trusted and received fingerprints with no replacement action; it blocks reconnection even when a password is remembered.
+With the option off, an Obsidian restart returns the profile to **Authentication required** and **Reconnect** asks for the password again. With the option explicitly on, Docker Connector rehydrates the stored password only for that profile and only when the saved host-key fingerprint still matches. Use **Forget stored password** to remove it immediately. A changed host key always opens **SSH Host Identity Changed**, showing both trusted and received fingerprints with no replacement action; it blocks reconnection even when a password is remembered.
 
 #### Private-key authentication
 
@@ -233,16 +237,16 @@ With **Private Key** selected, use **Browse…** to choose an existing key or se
 
 The host form now shows the validated selected key and public fingerprint. Docker Connector saves only the key path, never key contents, and derives its public identity. When a sibling `<private-key>.pub` exists, its type and base64 identity must match; a mismatched `.pub` blocks installation, while a missing `.pub` is derived in memory without modifying the private key. Select **Install public key**, enter the remote account's current session-only SSH password, complete first-host verification if needed, test the selected private key, save the host, then restart Obsidian to confirm it reconnects online.
 
-Never expose private-key contents, public-key contents, entered passphrases, identifying filesystem paths, or other secrets.
+Docker Connector never displays private-key contents, public-key contents, or an entered passphrase anywhere in this workflow. Only paths and public fingerprints appear, which is what makes these views safe to share when asking for help.
 
-### SSH key generation complete
+### Authentication details after key generation
 <div align="center">
 
-![SSH key generation complete|846](docs/images/user-guide/13-ssh-key-generation-complete.png)
+![Authentication details for a generated SSH key|846](docs/images/user-guide/13-ssh-key-generation-complete.png)
 
 </div>
 
-The completed dialog confirms the Ed25519 key is ready, shows its public SHA-256 fingerprint, and provides **Close** to return to the SSH host form.
+A closer view of the same form's **Authentication details**, where the generated key now sits. The selected key file is shown by path, with a validation line confirming it is a usable Ed25519 key and repeating its public fingerprint. **Private-key passphrase** stays empty for an unencrypted key, and **Install public key** is the next step for a host that does not yet trust this key.
 
 ### Install public key
 <div align="center">
@@ -258,7 +262,7 @@ The **Install public key** dialog shows the selected key's public SHA-256 finger
 ### Private-key test connection success
 <div align="center">
 
-![Private-key Test connection success|848](docs/images/user-guide/15-private-key-test-success.png)
+![Private-key test connection success|848](docs/images/user-guide/15-private-key-test-success.png)
 
 </div>
 
@@ -309,13 +313,13 @@ For mutual TLS, a successful test loads the TLS files, confirms the certificate/
 ### Successful local test connection diagnostics
 <div align="center">
 
-![Successful local Docker Test connection diagnostics|764](docs/images/user-guide/17-local-test-success.png)
+![Successful local Docker test connection diagnostics|764](docs/images/user-guide/17-local-test-success.png)
 
 </div>
 
 ## 10. Managing saved connections
 
-Open **Connections** to manage every saved profile. The page begins with summary cards for **Configured hosts**, **Online**, and **Needs sign-in**; Needs sign-in counts only profiles in **Authentication Required**. For example, three configured profiles may show one Online and two Needs sign-in without changing either healthy profile’s state. It then provides **Add Docker host** and a card for every profile. Each card uses one uniform structure: purple Docker host identity, textual connection method, transport-relevant safe endpoint details, inventory, runtime details, actions, and management row. Only the safe profile data and status vary by connection method.
+Open **Connections** to manage every saved profile. The page begins with summary cards for **Configured hosts**, **Online**, and **Needs sign-in**; Needs sign-in counts only profiles in **Authentication required**. For example, three configured profiles may show one Online and two Needs sign-in without changing either healthy profile’s state. It then provides **Add Docker host** and a card for every profile. Each card uses one uniform structure: purple Docker host identity, textual connection method, transport-relevant safe endpoint details, inventory, runtime details, actions, and management row. Only the safe profile data and status vary by connection method.
 
 ### Docker connections overview
 <div align="center">
@@ -328,18 +332,18 @@ The summary cards count saved profiles, currently connected profiles, and profil
 
 **Edit** opens the same profile workflow without changing the profile’s stable identity. **Reconnect** appears when session-only credentials need to be entered again or an Offline or Degraded connection can be retried; it is not always visible and need not appear in this image. **Delete connection** opens a confirmation dialog.
 
-Status is information, not an action. The current states are **Unknown**, **Connecting**, **Online**, **Offline**, **Degraded**, and **Authentication Required**. Unknown means the profile has not yet been evaluated or is between registration and its first refresh; it should not remain permanent after a completed connection attempt. Authentication Required normally means a required runtime-only secret must be supplied again.
+Status is information, not an action. The current states are **Unknown**, **Connecting**, **Online**, **Offline**, **Degraded**, and **Authentication required**. Unknown means the profile has not yet been evaluated or is between registration and its first refresh; it should not remain permanent after a completed connection attempt. Authentication required normally means a required runtime-only secret must be supplied again.
 
 **Open dashboard** selects that Docker environment and opens its operational dashboard. Its **Overview** tab is the host-level operational summary for the selected environment. Where available, it presents connection health, Docker version and host information, resource counts, refresh information, and attention items that deserve review. Attention items can identify a host connection problem, an unhealthy container, a restarting or dead container, a non-zero container exit, or an available public release where that information is supported by the view. Overview is not a metrics-history system: it shows the latest safe dashboard snapshot for the selected environment.
 
-### Authentication Required / Reconnect
+### Authentication required and Reconnect
 <div align="center">
 
-![Authentication Required profile with Reconnect action|430](docs/images/user-guide/19-authentication-required-reconnect.png)
+![A profile awaiting authentication, with its Reconnect action|430](docs/images/user-guide/19-authentication-required-reconnect.png)
 
 </div>
 
-**Authentication Required** means Docker Connector needs a runtime-only credential before the profile can reconnect. This screenshot shows an SSH password profile. The same state can occur for an SSH profile using an encrypted private key when its session-only key passphrase is no longer available after restart.
+**Authentication required** means Docker Connector needs a runtime-only credential before the profile can reconnect. This screenshot shows an SSH password profile. The same state can occur for an SSH profile using an encrypted private key when its session-only key passphrase is no longer available after restart.
 
 **Reconnect** opens the appropriate credential workflow. Supply the required runtime credential through **Reconnect**, rather than displaying it on the passive connection card. Until authentication succeeds, Docker details may be unavailable, inventory counts may be empty, and **Container management** is unavailable because the connection is not Online.
 
@@ -360,10 +364,10 @@ Use **Current Environment** to choose which saved host supplies dashboard data. 
 
 If the selected profile is deleted, Docker Connector chooses a safe remaining profile where possible, preferring an Online profile. If no profiles remain, the dashboard returns to its no-host state.
 
-### Current Environment selector
+### Current environment selector
 <div align="center">
 
-![Current Environment selector|880](docs/images/user-guide/21-current-environment.png)
+![The Current environment selector|880](docs/images/user-guide/21-current-environment.png)
 
 </div>
 
@@ -426,7 +430,7 @@ In the example above the filter is applied while every checked container is curr
 
 </div>
 
-Compact density keeps each container's name, state, health, image, and short ID, and omits the Docker host, network, published-port, and creation-time lines that Comfortable adds. The pane above is the same width as screenshot 24, where nine containers were visible; at Compact all sixteen fit.
+Compact density keeps each container's name, state, health, image, and short ID, and omits the Docker host, network, published-port, and creation-time lines that Comfortable adds. The pane above is the same width as the unfiltered Containers view earlier in this chapter, where nine containers were visible; at Compact all sixteen fit.
 
 Density only changes how much of each container is summarized. It does not change which containers the filters return, and it does not affect the Docker host. The selected density is saved, so it is still applied the next time Docker Connector opens.
 
@@ -468,7 +472,7 @@ The inspector opens beside the list, and the container it describes stays highli
 
 Metadata lists environment variable *names* only. Docker Connector never displays the values, so opening that section cannot reveal a secret held in a container's environment.
 
-The **Image update** area is part of the Actions section and appears only while Container management is enabled for that connection, which is why it is absent above. Screenshot 31 covers it.
+The **Image update** area is part of the Actions section and appears only while Container management is enabled for that connection, which is why it is absent above. Chapter 18 shows it in place.
 
 ## 15. Images
 
@@ -502,7 +506,7 @@ The volume inspector shows overview information, options, safe labels, and conta
 
 </div>
 
-Each volume card shows its name, an **In Use** or **Unused** badge, a shortened mount path, driver, scope, and the number of containers mounting it. The summary cards count the volumes, how many are mounted, how many have no current mounts, and how many distinct storage drivers are present.
+Each volume card shows its name, an **In use** or **Unused** badge, a shortened mount path, driver, scope, and the number of containers mounting it. The summary cards count the volumes, how many are mounted, how many have no current mounts, and how many distinct storage drivers are present.
 
 Usage comes from named-volume mounts only. A container that reaches the same data through a bind mount does not make the volume **In Use**, because Docker does not report a bind mount as a named volume.
 
@@ -559,7 +563,7 @@ What to do next depends on the container. An eligible standalone container gains
 
 **Container management** is disabled by default, per connection, and session-only. Open **Connections** and use an **Online** host's **Container management** switch to enable it only for that profile when you trust it. Each profile is authorized independently. Enabling asks for confirmation because lifecycle and update actions change the Docker host.
 
-Authorization is valid only while the profile remains continuously verified as **Online**. It is immediately cleared if that profile becomes Offline, Degraded, Authentication Required, Unknown, Connecting, or unsupported; other authorized profiles are unaffected. A successful reconnect returns that profile to **Read-only**—it never restores authorization automatically. The backend also refuses a mutation unless the profile is still Online when the action runs.
+Authorization is valid only while the profile remains continuously verified as **Online**. It is immediately cleared if that profile becomes Offline, Degraded, Authentication required, Unknown, Connecting, or unsupported; other authorized profiles are unaffected. A successful reconnect returns that profile to **Read-only**—it never restores authorization automatically. The backend also refuses a mutation unless the profile is still Online when the action runs.
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
@@ -621,7 +625,7 @@ The authorization is session-only and is never written to disk. It ends when Obs
 
 </div>
 
-This is the same inspector as screenshot 33 with only the switch changed. **Actions** now reads **Container management enabled** and offers the controls that suit the container's current state: a running container gets **Shut down**, **Stop**, and **Restart**, and no **Start**, because it is already running.
+This is the same inspector shown earlier in read-only mode, with only the switch changed. **Actions** now reads **Container management enabled** and offers the controls that suit the container's current state: a running container gets **Shut down**, **Stop**, and **Restart**, and no **Start**, because it is already running.
 
 The **Image update** area appears with it. Until a check has run it reports **Update status not checked**, and **Check now** performs one on demand. An **Update** action joins it only once a check confirms a newer image and the container is eligible for the standalone update workflow.
 
@@ -850,7 +854,7 @@ Deletion is blocked while a container operation is active for that profile. Wait
 
 ### Connection stays Unknown
 
-Unknown means not yet evaluated. Use Reconnect or refresh the profile. A completed attempt should become Online, Offline, Degraded, or Authentication Required with a safe error. If it remains Unknown after a completed refresh, collect the diagnostics and report it as a problem.
+Unknown means not yet evaluated. Use Reconnect or refresh the profile. A completed attempt should become Online, Offline, Degraded, or Authentication required with a safe error. If it remains Unknown after a completed refresh, collect the diagnostics and report it as a problem.
 
 ### Update check or update unavailable
 

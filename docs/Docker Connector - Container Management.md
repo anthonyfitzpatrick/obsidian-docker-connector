@@ -8,7 +8,7 @@ tags: [docker-connector, container-management]
 
 Management authorization is never persisted. Enabling first asks for confirmation. The switch is unavailable for All Docker hosts and for any non-Online connection.
 
-Each Connections card carries its own switch for that profile's runtime authorization. Only an individual Online profile can be enabled; **All Docker hosts** and Offline, Degraded, Authentication Required, Unknown, Connecting, or unsupported profiles remain unavailable. If an enabled profile leaves Online, its authorization is cleared immediately and does not return on reconnect. The typed backend mutation gate also rechecks that the profile is still Online.
+Each Connections card carries its own switch for that profile's runtime authorization. Only an individual Online profile can be enabled; **All Docker hosts** and Offline, Degraded, Authentication required, Unknown, Connecting, or unsupported profiles remain unavailable. If an enabled profile leaves Online, its authorization is cleared immediately and does not return on reconnect. The typed backend mutation gate also rechecks that the profile is still Online.
 
 When enabled, the container detail panel shows state-appropriate actions and requires confirmation before Start, Stop, Shut down, or Restart. Shut down uses Docker's graceful stop endpoint with a 30 second wait; Stop uses 10 seconds. Every accepted action triggers a coordinated refresh.
 
