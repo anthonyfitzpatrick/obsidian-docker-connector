@@ -1,7 +1,7 @@
 {
   "id": "docker-connector",
   "name": "Docker Connector",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "minAppVersion": "1.7.0",
   "description": "A desktop Docker environment dashboard with secure local, Context, SSH, and mutual TLS connections.",
   "author": "Wolf 359 Press AB",
