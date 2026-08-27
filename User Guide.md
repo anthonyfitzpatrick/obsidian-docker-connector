@@ -417,20 +417,13 @@ Automatic checks run on a 24-hour stale interval for eligible standalone contain
 Choose **Check now** in the container inspector to perform a one-off check. The Docker daemon may pull or resolve image data to check the image ID, but Check now does not change the running container’s state.
 
 ### Screenshot 31 — Image is current
-> **Screenshot placeholder 31**
->
-> **Capture:** Image update area showing Image is current and Check now.
->
-> **How to capture this screenshot:**
-> 1. Use an eligible standalone test container whose configured image is already current.
-> 2. Enable Container management if update checking requires it.
-> 3. Open the container inspector and select **Check now**.
-> 4. Wait for the check to finish and display **Image is current**.
-> 5. Ensure **Check now/Check again** is visible and no Update action is offered for a current image.
-> 6. Capture the Image update area after the result stabilizes.
+![Image update area reporting that the image is current](docs/images/user-guide/31-image-current.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/31-image-current.png`
+The **Image update** area sits inside **Actions** and appears only while Container management is enabled for the connection, which is why the panel above also shows lifecycle controls.
+
+**Image is current** means the image ID resolved for the configured tag matches the one the container is running: **Current image** and **Available image** hold the same ID. **Image** repeats the configured reference that was checked, **Last checked** records the completed check, and **Next check** is 24 hours later — the point at which the result becomes stale and an automatic check may run again.
+
+No **Update** action is offered, because there is nothing newer to move to. **Check now** stays available for an immediate re-check.
 
 > [!note] Availability is not eligibility
 > **Update available** means a newer image is available. **Update eligibility** means Docker Connector can safely use its standalone update transaction. Compose-managed containers can have an available image but remain ineligible for the standalone Update action.
