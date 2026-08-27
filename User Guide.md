@@ -336,20 +336,11 @@ Selecting the **Updates Available** card applies an additive filter to the conta
 In the example above the filter is applied while every checked container is current, so the count shows `0 of 16 containers` and the list shows the **Everything is up to date** empty state with **Show all containers**. When containers do have a newer image available, the same filtered list shows only those containers instead. Use **Show all containers**, the chip's remove control, or **Clear all** to return to the complete inventory.
 
 ### Screenshot 26 — Compact density
-> **Screenshot placeholder 26**
->
-> **Capture:** The same container inventory at Compact density.
->
-> **How to capture this screenshot:**
-> 1. Open **Containers** on the populated test host used for screenshot 24, with no active filters.
-> 2. Keep the Obsidian pane at the width used for screenshot 24 so the two densities can be compared directly.
-> 3. Select **Compact** in the density control.
-> 4. Confirm the container cards no longer show the Docker host, network, published-port, and creation-time lines that Comfortable includes.
-> 5. Capture the toolbar and as many container cards as the pane fits, so the gain in visible containers is evident.
-> 6. Return the density control to **Comfortable** after capturing.
+![Containers inventory at Compact density](docs/images/user-guide/26-compact-density.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/26-compact-density.png`
+Compact density keeps each container's name, state, health, image, and short ID, and omits the Docker host, network, published-port, and creation-time lines that Comfortable adds. The pane above is the same width as screenshot 24, where nine containers were visible; at Compact all sixteen fit.
+
+Density only changes how much of each container is summarized. It does not change which containers the filters return, and it does not affect the Docker host. The selected density is saved, so it is still applied the next time Docker Connector opens.
 
 ### Container health
 
