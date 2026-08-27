@@ -27,6 +27,7 @@ import { connectionCapabilities } from "../connections/DockerConnectionCapabilit
 import { getContainerActionCapabilities } from "./ContainerActionCapabilities";
 import { getContainerUpdateEligibility } from "../services/ContainerUpdatePlan";
 import { ContainerUpdateDialog } from "./ContainerUpdateDialog";
+import { pluralize } from "../ui/pluralize";
 
 /** Interactive read-only container inventory. Documentation: [[Docker Connector - Containers View]]. */
 export class ContainersTab {
@@ -508,7 +509,7 @@ export class ContainersTab {
     });
     if (container.restartCount && container.restartCount > 0)
       metadata.createSpan({
-        text: `${container.restartCount} restarts`,
+        text: pluralize(container.restartCount, "restart"),
         cls: "docker-connector__container-card-restarts",
       });
     if (this.state.density === "comfortable") {

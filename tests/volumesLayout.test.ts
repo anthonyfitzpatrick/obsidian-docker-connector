@@ -8,7 +8,7 @@ const rule = (selector: string) => [...css.matchAll(new RegExp(`${selector.repla
 
 describe("Volumes resource layout", () => {
   it("retains dynamic inventory counts, host scope, and four operational summary cards", () => {
-    for (const value of ["results.length === all.length", "${results.length} of ${all.length} volumes", 'selectedHostId === "all" ? "All Docker hosts"', 'label: "Volumes"', 'label: "In use"', 'label: "No visible references"', 'label: "Drivers"']) expect(tab).toContain(value);
+    for (const value of ["results.length === all.length", '${results.length} of ${pluralize(all.length, "volume")}', 'selectedHostId === "all" ? "All Docker hosts"', 'label: "Volumes"', 'label: "In use"', 'label: "No visible references"', 'label: "Drivers"']) expect(tab).toContain(value);
   });
 
   it("retains labelled search and filter controls with the compact volume inventory", () => {

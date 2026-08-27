@@ -8,7 +8,7 @@ const rule = (selector: string) => [...css.matchAll(new RegExp(`${selector.repla
 
 describe("Networks resource layout", () => {
   it("retains dynamic counts, host scope, and four operational summary cards", () => {
-    for (const value of ["items.length === all.length", "${items.length} of ${all.length} networks", 'host === "all" ? "All Docker hosts"', 'label: "Networks"', 'label: "Built-in"', 'label: "User defined"', 'label: "Unused"']) expect(tab).toContain(value);
+    for (const value of ["items.length === all.length", '${items.length} of ${pluralize(all.length, "network")}', 'host === "all" ? "All Docker hosts"', 'label: "Networks"', 'label: "Built-in"', 'label: "User defined"', 'label: "Unused"']) expect(tab).toContain(value);
   });
 
   it("retains searchable labelled filters, including all existing network filters", () => {

@@ -3,6 +3,7 @@ import type DockerConnectorPlugin from "../main";
 import { dockerResourceKey, selectedInventorySnapshots } from "../models/DockerHostSnapshotSelection";
 import { renderMetricCards } from "../ui/MetricCards";
 import { selectNetworks, values } from "./NetworkSelectors";
+import { pluralize } from "../ui/pluralize";
 import type { NetworkFilter } from "./NetworkModels";
 
 /** Read-only Networks tab backed by the current `/networks` snapshot. */
@@ -24,7 +25,7 @@ export class NetworksTab {
     const header = root.createDiv({ cls: "dc-image-header docker-connector__networks-header" });
     const copy = header.createDiv();
     copy.createEl("h1", { text: "Networks" });
-    copy.createSpan({ text: items.length === all.length ? `${all.length} ${all.length === 1 ? "network" : "networks"}` : `${items.length} of ${all.length} networks`, cls: "dc-image-count", attr: { "aria-live": "polite" } });
+    copy.createSpan({ text: items.length === all.length ? pluralize(all.length, "network") : `${items.length} of ${pluralize(all.length, "network")}`, cls: "dc-image-count", attr: { "aria-live": "polite" } });
     copy.createSpan({ text: host === "all" ? "All Docker hosts" : this.plugin.settings.profiles.find((profile) => profile.id === host)?.name ?? "Selected host", cls: "docker-connector__muted" });
     renderMetricCards(root, [
       { label: "Networks", value: all.length, detail: "Docker network definitions", icon: "network", active: this.filter === "all", onClick: () => { this.filter = "all"; this.rerender(); } },

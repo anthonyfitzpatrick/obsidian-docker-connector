@@ -5,6 +5,7 @@ import { dockerResourceKey, selectedInventorySnapshots } from "../models/DockerH
 import { renderMetricCards } from "../ui/MetricCards";
 import { DEFAULT_IMAGES_VIEW_STATE, type DockerImageSummary, type ImageFilter, type ImageSort, type ImagesViewState } from "./ImageModels";
 import { selectImages, values } from "./ImageSelectors";
+import { pluralize } from "../ui/pluralize";
 
 /** Interactive read-only image inventory. Documentation: [[Docker Connector - Images View]]. */
 export class ImagesTab {
@@ -31,7 +32,7 @@ export class ImagesTab {
     const header = root.createDiv({ cls: "dc-image-header docker-connector__images-header" });
     const copy = header.createDiv();
     copy.createEl("h1", { text: "Images" });
-    copy.createSpan({ text: results.length === all.length ? `${all.length} ${all.length === 1 ? "image" : "images"}` : `${results.length} of ${all.length} images`, cls: "dc-image-count", attr: { "aria-live": "polite" } });
+    copy.createSpan({ text: results.length === all.length ? pluralize(all.length, "image") : `${results.length} of ${pluralize(all.length, "image")}`, cls: "dc-image-count", attr: { "aria-live": "polite" } });
     copy.createSpan({ text: selectedHostId === "all" ? "All Docker hosts" : profiles[0]?.name ?? "Selected host", cls: "docker-connector__muted" });
     renderMetricCards(root, [
       { label: "Images", value: all.length, detail: "Available image library", icon: "layers-3", active: this.state.filter === "all", onClick: () => { this.state.filter = "all"; this.rerender(); } },

@@ -5,6 +5,7 @@ import type { DockerHostSnapshot } from "../models/DockerConnectionProfile";
 import { renderMetricCards } from "../ui/MetricCards";
 import { DEFAULT_APPLICATION_FILTERS, type ApplicationFilters, type DockerApplicationSummary } from "./ApplicationModels";
 import { applicationContainer, buildDockerApplications, filterDockerApplications, sortDockerApplications } from "./ApplicationSelectors";
+import { pluralize } from "../ui/pluralize";
 
 /** Read-only Compose-label dashboard. Its DOM is deliberately structured into stable card sections for responsive layout. */
 export class ApplicationsTab {
@@ -69,7 +70,6 @@ export class ApplicationsTab {
   private select(root: HTMLElement, label: string, value: string, options: Array<[string, string]>, onChange: (value: string) => void): void { const control = root.createEl("label", { cls: "dc-container-select" }); control.createSpan({ text: label }); const select = control.createEl("select", { attr: { "aria-label": `Application ${label}` } }); options.forEach(([id, text]) => select.createEl("option", { value: id, text })); select.value = value; select.onchange = () => onChange(select.value); }
 }
 
-function pluralize(count: number, singular: string, plural = `${singular}s`): string { return `${count} ${count === 1 ? singular : plural}`; }
 function displayState(state: string): string { return state.replace(/(^|[-_\s])(\w)/g, (_match, prefix: string, character: string) => `${prefix}${character.toUpperCase()}`); }
 function displayHealth(health: string): string { return health === "none" ? "No health check" : displayState(health); }
 function formatTimestamp(value: string | undefined): string | undefined { if (!value) return undefined; const timestamp = Date.parse(value); if (Number.isNaN(timestamp)) return value; const seconds = Math.max(0, Math.round((Date.now() - timestamp) / 1000)); if (seconds < 60) return "Just now"; if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`; if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`; return new Date(timestamp).toLocaleString(); }

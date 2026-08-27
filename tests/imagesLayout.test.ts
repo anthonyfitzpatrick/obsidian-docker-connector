@@ -7,7 +7,7 @@ const css = readFileSync(resolve(process.cwd(), "styles.css"), "utf8");
 
 describe("Images resource layout", () => {
   it("retains dynamic inventory counts, host scope, and four operational summary cards", () => {
-    for (const value of ["results.length === all.length", "${results.length} of ${all.length} images", 'selectedHostId === "all" ? "All Docker hosts"', 'label: "Images"', 'label: "In use"', 'label: "Dangling"', 'label: "No visible references"']) expect(tab).toContain(value);
+    for (const value of ["results.length === all.length", '${results.length} of ${pluralize(all.length, "image")}', 'selectedHostId === "all" ? "All Docker hosts"', 'label: "Images"', 'label: "In use"', 'label: "Dangling"', 'label: "No visible references"']) expect(tab).toContain(value);
   });
 
   it("retains the searchable, labelled image controls and operational list", () => {

@@ -5,6 +5,7 @@ import { dockerResourceKey, selectedInventorySnapshots } from "../models/DockerH
 import { renderMetricCards } from "../ui/MetricCards";
 import { DEFAULT_VOLUMES_STATE, type DockerVolumeSummary, type VolumeFilter, type VolumesViewState } from "./VolumeModels";
 import { selectVolumes, values } from "./VolumeSelectors";
+import { pluralize } from "../ui/pluralize";
 
 /** Interactive read-only volume inventory. Documentation: [[Docker Connector - Volumes View]]. */
 export class VolumesTab {
@@ -23,7 +24,7 @@ export class VolumesTab {
     root.addClass("dc-volumes-tab");
     const header = root.createDiv({ cls: "dc-image-header docker-connector__volumes-header" });
     const copy = header.createDiv(); copy.createEl("h1", { text: "Volumes" });
-    copy.createSpan({ text: results.length === all.length ? `${all.length} volumes` : `${results.length} of ${all.length} volumes`, cls: "dc-image-count" });
+    copy.createSpan({ text: results.length === all.length ? pluralize(all.length, "volume") : `${results.length} of ${pluralize(all.length, "volume")}`, cls: "dc-image-count" });
     copy.createSpan({ text: selectedHostId === "all" ? "All Docker hosts" : profiles[0]?.name ?? "Selected host", cls: "docker-connector__muted" });
     renderMetricCards(root, [
       { label: "Volumes", value: all.length, detail: "Persistent data stores", icon: "database", active: this.state.filter === "all", onClick: () => { this.state.filter = "all"; this.rerender(); } },
@@ -65,7 +66,7 @@ export class VolumesTab {
     const metadata = card.createDiv({ cls: "docker-connector__volume-card-metadata" });
     metadata.createSpan({ text: `Driver · ${volume.driver}` });
     metadata.createSpan({ text: `Scope · ${volume.scope}` });
-    metadata.createSpan({ text: `${volume.containersUsingVolume} containers` });
+    metadata.createSpan({ text: pluralize(volume.containersUsingVolume, "container") });
   }
 
   private detail(root: HTMLElement, profiles: DockerConnectionProfile[], snapshots: DockerHostSnapshot[]): void {
