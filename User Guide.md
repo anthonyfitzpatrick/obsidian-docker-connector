@@ -344,7 +344,11 @@ Density only changes how much of each container is summarized. It does not chang
 
 ### Container health
 
-Docker state and Docker health are distinct. A container can be Running, Stopped/Exited, Restarting, or Dead. Health can be Healthy, Unhealthy, or **No health check**. No health check means the image or container configuration does not define Docker health checks; it does not mean Docker considers the container unhealthy.
+Docker state and Docker health are distinct. A container can be Running, Stopped/Exited, Restarting, or Dead. Health can be Healthy, Unhealthy, **Starting**, or **No health check**. No health check means the image or container configuration does not define Docker health checks; it does not mean Docker considers the container unhealthy.
+
+A container that has just started often shows **Running** and **Starting** together. Docker reports a health of starting until the container's first health check passes, and some images take a while to reach that point. The Starting badge is therefore normal after a start or restart, and it is not a warning about the action having failed.
+
+Expect it to persist for a time after the container has actually become healthy. Docker Connector reads health from the last snapshot it took of that host: it refreshes immediately after a lifecycle action — the moment a container is least likely to be healthy yet — and then again on the automatic interval, five minutes apart by default. The badge settles at whichever refresh first sees Docker reporting the container as healthy. Use the dashboard refresh control if you would rather not wait for the next scheduled one.
 
 ## 14. Container detail inspector
 
