@@ -322,20 +322,11 @@ Applications is read-only at the project level. Docker Connector does not run `d
 The **Containers** tab is the main container inventory. It has summary cards for **Containers**, **Running**, **Stopped**, and **Updates Available**. Selecting the Updates Available card filters the list; clear the active filter to return to the complete inventory.
 
 ### Screenshot 24 — Updates Available filter
-> **Screenshot placeholder 24**
->
-> **Capture:** Updates Available card or active filter state.
->
-> **How to capture this screenshot:**
-> 1. Ensure at least one safe test container currently has **Update available**.
-> 2. Open **Containers**.
-> 3. Click the **Updates Available** summary card so the list is filtered to containers requiring updates.
-> 4. Confirm the active filter state is visible and only matching containers remain.
-> 5. Capture the summary card/filter state plus the filtered results.
-> 6. Clear the filter after capturing.
+![Updates Available filter applied in Containers](docs/images/user-guide/24-updates-filter.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/24-updates-filter.png`
+Selecting the **Updates Available** card applies an additive filter to the container list. The applied filter appears as an **Updates available** chip in the **Active filters** row, alongside **Clear all**, and the result count above the summary cards reports how many of the total containers currently match.
+
+In the example above the filter is applied while every checked container is current, so the count shows `0 of 16 containers` and the list shows the **Everything is up to date** empty state with **Show all containers**. When containers do have a newer image available, the same filtered list shows only those containers instead. Use **Show all containers**, the chip's remove control, or **Clear all** to return to the complete inventory.
 
 ### Screenshot 25 — Containers view
 > **Screenshot placeholder 25**
