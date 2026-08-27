@@ -8,6 +8,15 @@ const profile: SshDockerProfile = { id: "wolf-359", name: "Wolf 359", enabled: t
 const privateKeyProfile: SshDockerProfile = { ...profile, id: "private-key", authentication: { type: "private-key", privateKeyPath: "/tmp/id_ed25519" } };
 
 describe("DockerInspectionService", () => {
+  it("counts image usage from the snapshot's containers rather than Docker's -1 placeholder", async () => {
+    const snapshot = await new DockerInspectionService({ create: () => usageTransport(profile) } as never).inspectHost(profile);
+    const used = snapshot.images.find((image) => image.repository === "repo/app");
+    const idle = snapshot.images.find((image) => image.repository === "repo/idle");
+    expect(used?.containersUsingImage).toBe(1);
+    expect(used?.referencingContainers.map((reference) => reference.name)).toEqual(["web"]);
+    expect(idle?.containersUsingImage).toBe(0);
+  });
+
   it("marks a saved host as authentication required when its runtime password is absent", async () => {
     const transport: DockerTransport = {
       profile,
@@ -133,6 +142,18 @@ function failingTransport(error: DockerConnectionError): DockerTransport {
     request: async () => { throw error; },
     testConnection: async () => ({ success: false, steps: [] })
   };
+}
+
+function usageTransport(host: SshDockerProfile): DockerTransport {
+  const responses: Record<string, unknown> = {
+    "/version": { Version: "1", ApiVersion: "1.0" },
+    "/info": { OperatingSystem: "Linux", Architecture: "x86_64", KernelVersion: "k", NCPU: 1, MemTotal: 1 },
+    "/containers/json?all=true": [{ Id: "c1", Names: ["/web"], Image: "repo/app:2", ImageID: "sha256:aaaa", State: "running", Status: "Up", Created: 1, Ports: [], Mounts: [] }],
+    "/images/json": [{ Id: "sha256:aaaa", RepoTags: ["repo/app:2"], Containers: -1, Size: 1 }, { Id: "sha256:bbbb", RepoTags: ["repo/idle:1"], Containers: -1, Size: 1 }],
+    "/volumes": { Volumes: [] },
+    "/networks": []
+  };
+  return { profile: host, connect: async () => undefined, disconnect: async () => undefined, isConnected: () => true, request: async (request) => responses[request.path] as never, testConnection: async () => ({ success: true, steps: [] }) };
 }
 
 function onlineTransport(host: SshDockerProfile): DockerTransport {

@@ -37,7 +37,7 @@ export class DockerInspectionService {
       return {
         hostId: host.id, daemonId: info.ID?.trim() || undefined, status: "online", refreshedAt,
         system: this.mapSystem(version, info),
-        containers: mappedContainers, images: images.map((image) => ImageMapper.summary(image, host.id)),
+        containers: mappedContainers, images: images.map((image) => ImageMapper.summary(image, host.id, mappedContainers)),
         volumes: (volumes.Volumes ?? []).map((volume) => VolumeMapper.summary(volume, host.id, mappedContainers)), networks: networks.map((network) => NetworkMapper.summary(network, host.id, mappedContainers))
       };
     } catch (error) {
