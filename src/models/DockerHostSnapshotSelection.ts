@@ -51,4 +51,3 @@ function compareSnapshots(candidate: DockerHostSnapshot, candidateIndex: number,
 function snapshotUsability(snapshot: DockerHostSnapshot): number {
   return snapshot.status === "online" ? snapshot.stale ? 1 : 2 : 0;
 }
-
