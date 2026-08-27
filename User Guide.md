@@ -335,20 +335,21 @@ Selecting the **Updates Available** card applies an additive filter to the conta
 
 In the example above the filter is applied while every checked container is current, so the count shows `0 of 16 containers` and the list shows the **Everything is up to date** empty state with **Show all containers**. When containers do have a newer image available, the same filtered list shows only those containers instead. Use **Show all containers**, the chip's remove control, or **Clear all** to return to the complete inventory.
 
-### Screenshot 26 — Container filters and search
+### Screenshot 26 — Compact density
 > **Screenshot placeholder 26**
 >
-> **Capture:** Search, State, Health, Network, Updates, sort, and density controls.
+> **Capture:** The same container inventory at Compact density.
 >
 > **How to capture this screenshot:**
-> 1. Open **Containers** on a populated test host.
-> 2. Ensure the toolbar is fully visible.
-> 3. If necessary widen the Obsidian pane so Search, State, Health, Network, Updates, Sort, and Density controls are not clipped.
-> 4. Leave filters at their neutral/default values unless an active filter makes the control clearer.
-> 5. Capture the toolbar and enough container rows beneath it to show the controls affect an actual inventory.
+> 1. Open **Containers** on the populated test host used for screenshot 24, with no active filters.
+> 2. Keep the Obsidian pane at the width used for screenshot 24 so the two densities can be compared directly.
+> 3. Select **Compact** in the density control.
+> 4. Confirm the container cards no longer show the Docker host, network, published-port, and creation-time lines that Comfortable includes.
+> 5. Capture the toolbar and as many container cards as the pane fits, so the gain in visible containers is evident.
+> 6. Return the density control to **Comfortable** after capturing.
 
 >
-> **Suggested filename:** `docs/images/user-guide/26-container-filters.png`
+> **Suggested filename:** `docs/images/user-guide/26-compact-density.png`
 
 ### Container health
 
@@ -870,7 +871,7 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 23 | `23-application-inspector.png` | Applications | Detail |
 | 24 | `24-containers-view.png` | Containers | List |
 | 25 | `25-updates-filter.png` | Containers | Filter |
-| 26 | `26-container-filters.png` | Containers | Controls |
+| 26 | `26-compact-density.png` | Containers | Compact density |
 | 27 | `27-container-inspector.png` | Container detail | Detail |
 | 28 | `28-images-view.png` | Images | Inventory |
 | 29 | `29-volumes-view.png` | Volumes | Inventory |
