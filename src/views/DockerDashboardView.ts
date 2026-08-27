@@ -22,6 +22,7 @@ import { desktopUi } from "../platform/DesktopUiAdapter";
 import { getDockerConnectionTypeDisplayName, getDockerConnectionTypePresentation } from "../connections/DockerConnectionTypePresentation";
 import { configuredServerConnection } from "./ConfiguredServerConnection";
 import { aggregateConnectionStatus, connectionStateSummary, profileConnectionStatus } from "../connections/ProfileConnectionState";
+import { confirmAction } from "../ui/ConfirmationModal";
 import { connectionCapabilities } from "../connections/DockerConnectionCapabilities";
 import { OVERVIEW_METRIC_ACCENTS, type OverviewMetricAccent } from "../overview/OverviewMetricAccents";
 
@@ -345,7 +346,29 @@ export class DockerDashboardView extends ItemView {
     button.onclick = (event) => { event.preventDefault(); event.stopPropagation(); void this.plugin.retryHost(profile); };
   }
 
-  private addCardManagementSwitch(actions: HTMLElement, profile: DockerConnectionProfile, status: HostConnectionStatus): void { const available = status === "online" && connectionCapabilities(profile).supportsContainerActions; const enabled = available && this.plugin.isProfileManagementEnabled(profile.id); const control = actions.createDiv({ cls: "dc-card-management-switch" }); control.createSpan({ text: "Container management" }); control.createEl("small", { text: available ? enabled ? "Enabled" : "Read-only" : "Unavailable" }); const input = control.createEl("input", { type: "checkbox", attr: { role: "switch", "aria-label": `Container management for ${profile.name}` } }); input.checked = enabled; input.disabled = !available; input.onchange = () => { if (input.checked && !globalThis.confirm(`Enable container management for ${profile.name}?\n\nThis allows Start, Stop, Shut down, Restart and standalone Update actions for this Docker connection during the current Obsidian session. Management turns off automatically if the connection is lost or Obsidian restarts.`)) { input.checked = false; return; } if (!this.plugin.setProfileManagementEnabled(profile.id, input.checked)) input.checked = false; void this.render(); }; }
+  private addCardManagementSwitch(actions: HTMLElement, profile: DockerConnectionProfile, status: HostConnectionStatus): void { const available = status === "online" && connectionCapabilities(profile).supportsContainerActions; const enabled = available && this.plugin.isProfileManagementEnabled(profile.id); const control = actions.createDiv({ cls: "dc-card-management-switch" }); control.createSpan({ text: "Container management" }); control.createEl("small", { text: available ? enabled ? "Enabled" : "Read-only" : "Unavailable" }); const input = control.createEl("input", { type: "checkbox", attr: { role: "switch", "aria-label": `Container management for ${profile.name}` } }); input.checked = enabled; input.disabled = !available; input.onchange = () => { void this.applyManagementSwitch(input, profile); }; }
+
+  /**
+   * Turning management on is a privilege grant, so it asks first. The switch is
+   * returned to its previous position while the question is open, then set from
+   * the answer: the modal is asynchronous but the change event is not.
+   */
+  private async applyManagementSwitch(input: HTMLInputElement, profile: DockerConnectionProfile): Promise<void> {
+    const requested = input.checked;
+    if (requested) {
+      input.checked = false;
+      const accepted = await confirmAction(this.app, {
+        title: "Enable container management",
+        message: "This allows Start, Stop, Shut down, Restart and standalone Update actions for this Docker connection during the current Obsidian session. Management turns off automatically if the connection is lost or Obsidian restarts.",
+        details: [{ label: "Docker host", value: profile.name }],
+        confirmText: "Enable management",
+      });
+      if (!accepted) return;
+      input.checked = true;
+    }
+    if (!this.plugin.setProfileManagementEnabled(profile.id, input.checked)) input.checked = false;
+    void this.render();
+  }
 
   private addDeleteAction(actions: HTMLElement, profile: DockerConnectionProfile): void {
     const button = actions.createEl("button", { cls: "docker-connector__icon-button mod-warning", attr: { "aria-label": `Delete connection ${profile.name}`, title: "Delete connection" } });

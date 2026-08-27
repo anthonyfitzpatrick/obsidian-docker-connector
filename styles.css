@@ -1682,3 +1682,30 @@ button.dc-metric-card:focus-visible,
 	.docker-connector-about-links { gap: 4px; }
 	.docker-connector-about-link { font-size: 0.78rem; padding-inline: 0.35rem; }
 }
+
+/* Confirmation modal shared by lifecycle actions and the management switch. */
+.dc-confirmation__message {
+  margin: 0 0 var(--size-4-3, 12px);
+  color: var(--text-normal);
+}
+
+.dc-confirmation__details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--size-2-1, 4px) var(--size-4-3, 12px);
+  margin: 0 0 var(--size-4-4, 16px);
+  padding: var(--size-4-2, 8px) var(--size-4-3, 12px);
+  border-radius: var(--radius-s, 4px);
+  background-color: var(--background-secondary);
+  font-size: var(--font-ui-small);
+}
+
+.dc-confirmation__details dt {
+  color: var(--text-muted);
+}
+
+.dc-confirmation__details dd {
+  margin: 0;
+  color: var(--text-normal);
+  overflow-wrap: anywhere;
+}

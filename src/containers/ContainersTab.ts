@@ -1,5 +1,6 @@
 import { Notice, setIcon } from "obsidian";
 import type DockerConnectorPlugin from "../main";
+import { confirmAction as confirmWithModal } from "../ui/ConfirmationModal";
 import type {
   DockerConnectionProfile,
   DockerHostSnapshot,
@@ -808,7 +809,8 @@ export class ContainersTab {
         "shutdown",
         () =>
           this.confirmAction(
-            "Shut down container gracefully?",
+            "Shut down container gracefully",
+            "Shut down",
             summary,
             profile,
             () => this.plugin.stopContainer(profile, summary.id, 30, true),
@@ -822,7 +824,7 @@ export class ContainersTab {
         "square",
         "stop",
         () =>
-          this.confirmAction("Stop container?", summary, profile, () =>
+          this.confirmAction("Stop container", "Stop", summary, profile, () =>
             this.plugin.stopContainer(profile, summary.id, 10),
           ),
         capabilities.canStop,
@@ -834,7 +836,7 @@ export class ContainersTab {
         "rotate-cw",
         "restart",
         () =>
-          this.confirmAction("Restart container?", summary, profile, () =>
+          this.confirmAction("Restart container", "Restart", summary, profile, () =>
             this.plugin.restartContainer(profile, summary.id, 10),
           ),
         capabilities.canRestart,
@@ -847,7 +849,7 @@ export class ContainersTab {
         "play",
         "start",
         () =>
-          this.confirmAction("Start container?", summary, profile, () =>
+          this.confirmAction("Start container", "Start", summary, profile, () =>
             this.plugin.startContainer(profile, summary.id),
           ),
         capabilities.canStart,
@@ -1092,16 +1094,23 @@ export class ContainersTab {
   }
   private async confirmAction(
     titleText: string,
+    confirmText: string,
     summary: DockerContainerSummary,
     profile: DockerConnectionProfile,
     action: () => Promise<void>,
   ): Promise<void> {
-    if (
-      !window.confirm(
-        `${titleText}\n\nContainer: ${summary.displayName}\nImage: ${displayImage(summary.image)}\nDocker host: ${profile.name}`,
-      )
-    )
-      return;
+    const accepted = await confirmWithModal(this.plugin.app, {
+      title: titleText,
+      message: "This sends one action to the live Docker daemon and takes effect immediately.",
+      details: [
+        { label: "Container", value: summary.displayName },
+        { label: "Image", value: displayImage(summary.image) },
+        { label: "Docker host", value: profile.name },
+      ],
+      confirmText,
+      destructive: confirmText !== "Start",
+    });
+    if (!accepted) return;
     try {
       const operation = action();
       this.rerender();

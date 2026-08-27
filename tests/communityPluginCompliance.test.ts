@@ -93,6 +93,25 @@ describe("Obsidian Community Plugin release guard", () => {
     expect(sources[0]).toContain("setCssStyles(");
   });
 
+  it("asks for confirmation through an Obsidian modal rather than a browser dialog", async () => {
+    // obsidianmd/no-confirm: the browser dialog blocks Obsidian's renderer and
+    // ignores the vault theme. Every prompt goes through ConfirmationModal.
+    const sources = await Promise.all(["src/containers/ContainersTab.ts", "src/views/DockerDashboardView.ts", "src/settings/settings.ts", "src/ui/ConfirmationModal.ts"].map(source));
+    for (const file of sources) expect(file).not.toMatch(/(?:window|globalThis)\.confirm\(|(?<![.\w])confirm\(`/);
+    const [containers, dashboard, , modal] = sources;
+    expect(modal).toMatch(/extends Modal/);
+    // Declining any other way than the accepting button must not grant the action.
+    expect(modal).toMatch(/private confirmed = false;/);
+    for (const file of [containers, dashboard]) expect(file).toContain("ConfirmationModal");
+  });
+
+  it("keeps plugin code off the ambient globalThis", async () => {
+    // obsidianmd/prefer-window: Obsidian pop-out windows each have their own
+    // window, and globalThis hides which one a lookup meant.
+    const sources = await Promise.all(["src/platform/PlatformCapabilities.ts", "src/services/DesktopFileDialog.ts", "src/views/DockerDashboardView.ts"].map(source));
+    for (const file of sources) expect(file).not.toMatch(/globalThis/);
+  });
+
   it("leaves the settings tab without a redundant title heading", async () => {
     // Obsidian labels the tab itself, so a plugin-name heading above a short
     // list of settings only repeats what the sidebar already says.
