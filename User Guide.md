@@ -609,19 +609,13 @@ Docker Connector Settings provide:
 Container management is intentionally not a Setting. It is controlled only by the per-profile Connections-card switches and never persists across a restart or reload.
 
 ### Screenshot 41 — Settings page
-> **Screenshot placeholder 41**
->
-> **Capture:** Automatic refresh, interval, and theme integration.
->
-> **How to capture this screenshot:**
-> 1. Open the plugin's own settings tab: select the gear control in the Docker Connector header, or open **Settings** and choose **Docker Connector** in the left sidebar beneath **Community plugins**. Searching **Browse** under Community plugins will not lead here — that list installs plugins from the public catalogue rather than showing an installed plugin's settings.
-> 2. Position the settings pane so **Automatic refresh**, **Refresh interval**, and **Theme integration** are all visible; scroll only as needed.
-> 3. Use normal/safe values and avoid showing unrelated vault/account settings.
-> 4. Do not look for or capture Container management here: it is not a Setting. Capture only the persistent refresh and theme controls.
-> 5. Capture the Docker Connector settings page at a width where labels, descriptions, and controls are readable.
+![The Docker Connector settings tab](docs/images/user-guide/41-settings.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/41-settings.png`
+The tab appears in the Settings sidebar under **Community plugins**, as shown on the left above. The gear control in the Docker Connector header opens it directly. Note that **Browse** under Community plugins is not the way here: that list installs plugins from the public catalogue rather than showing an installed plugin's settings.
+
+These three controls are the whole of what Docker Connector persists as preferences. **Automatic refresh** turns background refreshing on or off, **Refresh interval** sets the minutes between those refreshes, and **Theme integration** decides whether the dashboard draws from Obsidian's own theme variables.
+
+**Container management** is deliberately absent. It is session-only and scoped to a single connection, so it belongs on that connection's card rather than in a setting that would outlive the session. Connections themselves are managed in the dashboard, not here.
 
 ## 24. Security model and saved information
 
