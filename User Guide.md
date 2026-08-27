@@ -492,20 +492,13 @@ Start, Shut down, Stop, and Restart each ask before anything is sent, and the pr
 **Cancel** sends nothing at all. **OK** sends exactly one typed action for that one container, after which Docker Connector refreshes the host and reports the outcome. There is no bulk action, and no way to apply a lifecycle action to several containers at once.
 
 ### Screenshot 38 — Stopped container Start control
-> **Screenshot placeholder 38**
->
-> **Capture:** Start action for a stopped standalone container.
->
-> **How to capture this screenshot:**
-> 1. Use only an approved disposable standalone test container.
-> 2. Stop it using Docker outside the screenshot workflow or through a previously approved test action, then wait for Docker Connector to refresh to **Stopped/Exited**.
-> 3. Open its inspector.
-> 4. Ensure the **Start** action is visible and inappropriate running-only actions are absent/disabled according to the UI.
-> 5. Capture before starting it again.
-> 6. After capturing, return the test container to its desired normal state.
+![A stopped container's inspector offering only Start](docs/images/user-guide/38-stopped-start.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/38-stopped-start.png`
+A stopped container offers **Start** alone. Shut down, Stop, and Restart are absent rather than disabled, because they apply only to a running container — the controls follow the container's current state.
+
+**State** reports the container as Docker last recorded it: `exited` with its exit code, the time it last started, and the result of its final health check. That is why **Health** can still show a value for a container that is not running.
+
+**Image update** remains available while the container is stopped. An image can be checked in either state, and an eligible stopped container can still be updated.
 
 ### Update
 
