@@ -72,7 +72,7 @@ export class NetworksTab {
       close.onclick = () => { this.selected = null; this.rerender(); };
       [["Driver", selected.driver], ["Scope", selected.scope], ["Internal", String(selected.internal)], ["Attachable", String(selected.attachable)], ["IPv6", String(selected.enableIPv6)], ["Gateways", selected.gateways.join(", ")]].forEach(([label, value]) => { const row = panel.createDiv({ cls: "dc-container-detail-row" }); row.createSpan({ text: label }); row.createSpan({ text: value }); });
       panel.createEl("h3", { text: "Attached containers" });
-      selected.containers.forEach((container) => { const button = panel.createEl("button", { text: `${container.name} · ${container.ipv4 ?? "No IPv4"}` }); button.onclick = () => this.openContainer(container.id); });
+      selected.containers.length ? selected.containers.forEach((container) => { const button = panel.createEl("button", { text: `${container.name} · ${container.ipv4 ?? "No IPv4"}` }); button.onclick = () => this.openContainer(container.id); }) : panel.createDiv({ text: "No attached containers.", cls: "docker-connector__muted" });
     }
   }
 

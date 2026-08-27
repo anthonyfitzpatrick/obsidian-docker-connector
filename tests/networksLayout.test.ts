@@ -7,6 +7,11 @@ const css = readFileSync(resolve(process.cwd(), "styles.css"), "utf8");
 const rule = (selector: string) => [...css.matchAll(new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`, "g"))].at(-1)?.[1] ?? "";
 
 describe("Networks resource layout", () => {
+  it("states when a network has no attached containers, as Images and Volumes do", () => {
+    expect(tab).toContain("No attached containers.");
+    expect(tab).toContain("selected.containers.length ?");
+  });
+
   it("retains dynamic counts, host scope, and four operational summary cards", () => {
     for (const value of ["items.length === all.length", '${items.length} of ${pluralize(all.length, "network")}', 'host === "all" ? "All Docker hosts"', 'label: "Networks"', 'label: "Built-in"', 'label: "User defined"', 'label: "Unused"']) expect(tab).toContain(value);
   });
