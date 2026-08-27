@@ -65,11 +65,11 @@ export class SshDockerTransport implements DockerTransport {
       let settled = false;
       let hostKeyError: Error | undefined;
       let keyboardInteractiveUsed = false;
-      let tcpTimer: number | undefined;
+      const tcpTimer: { handle?: number } = {};
       let handshakeTimer: number | undefined;
       let authenticationTimer: number | undefined;
       const cleanupAttempt = () => {
-        if (tcpTimer) window.clearTimeout(tcpTimer);
+        if (tcpTimer.handle) window.clearTimeout(tcpTimer.handle);
         if (handshakeTimer) window.clearTimeout(handshakeTimer);
         if (authenticationTimer) window.clearTimeout(authenticationTimer);
         signal?.removeEventListener("abort", onAbort);
@@ -92,9 +92,9 @@ export class SshDockerTransport implements DockerTransport {
       const onAbort = () => settle(new DockerConnectionError("SSH_CONNECTION_CANCELLED", "The SSH connection attempt was cancelled."));
 
       diagnostics?.set("tcp", "running", "Opening the SSH client connection.");
-      tcpTimer = window.setTimeout(() => settle(new DockerConnectionError("SSH_CONNECTION_TIMEOUT", `The SSH server did not open a TCP connection within ${TCP_TIMEOUT_MS / 1000} seconds.`)), TCP_TIMEOUT_MS);
+      tcpTimer.handle = window.setTimeout(() => settle(new DockerConnectionError("SSH_CONNECTION_TIMEOUT", `The SSH server did not open a TCP connection within ${TCP_TIMEOUT_MS / 1000} seconds.`)), TCP_TIMEOUT_MS);
       client.once("connect", () => {
-        if (tcpTimer) window.clearTimeout(tcpTimer);
+        if (tcpTimer.handle) window.clearTimeout(tcpTimer.handle);
         diagnostics?.set("tcp", "success", `${target.host}:${target.port}`);
         diagnostics?.set("handshake", "running");
         handshakeTimer = window.setTimeout(() => settle(new DockerConnectionError("SSH_HANDSHAKE_TIMEOUT", "SSH protocol handshake did not complete within 20 seconds.")), HANDSHAKE_TIMEOUT_MS);

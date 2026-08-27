@@ -105,7 +105,8 @@ export class ImagesTab {
     section(panel, "Repository digests", details.repositoryDigests.map((digest) => ["Digest", digest]));
     section(panel, "Labels", Object.entries(details.labels));
     const used = panel.createEl("section", { cls: "dc-image-detail-section" }); used.createEl("h3", { text: "Containers using image" });
-    details.containersUsingImage.length ? details.containersUsingImage.forEach((container) => { const button = used.createEl("button", { text: `${container.name} · ${container.state ?? "Unknown"}` }); button.onclick = () => this.openContainer(container.id); }) : used.createDiv({ text: "No visible container references.", cls: "docker-connector__muted" });
+    if (details.containersUsingImage.length) details.containersUsingImage.forEach((container) => { const button = used.createEl("button", { text: `${container.name} · ${container.state ?? "Unknown"}` }); button.onclick = () => this.openContainer(container.id); });
+    else used.createDiv({ text: "No visible container references.", cls: "docker-connector__muted" });
   }
 
   private async open(image: DockerImageSummary, origin: HTMLElement): Promise<void> { this.state.selectedImageId = this.key(image); this.origin = origin; const profile = this.plugin.settings.profiles.find((item) => item.id === image.hostProfileId); const snapshot = this.plugin.snapshots.get(image.hostProfileId); if (profile && snapshot) await this.load(profile, snapshot, image); }

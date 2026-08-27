@@ -126,6 +126,16 @@ describe("Obsidian Community Plugin release guard", () => {
     for (const key of ["automaticRefresh", "refreshIntervalMinutes", "integrateWithTheme"]) expect(settings).toContain(`key: "${key}"`);
   });
 
+  it("ships the ESLint configuration the plugin check reads", async () => {
+    // Without a config in the repo, a type-aware checker resolves obsidian and
+    // node types to `error`, and every ordinary API call is then reported as
+    // an unsafe call, assignment, member access, argument or return.
+    const [config, manifest] = await Promise.all([source("eslint.config.mjs"), source("package.json")]);
+    expect(config).toContain("recommendedTypeChecked");
+    expect(config).toContain("projectService: true");
+    expect(manifest).toContain("eslint src");
+  });
+
   it("publishes releases with build provenance attestations", async () => {
     const workflow = await source(".github/workflows/release.yml");
     expect(workflow).toContain("actions/attest-build-provenance");

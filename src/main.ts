@@ -226,7 +226,7 @@ export default class DockerConnectorPlugin extends Plugin {
     let leaf: WorkspaceLeaf | null = workspace.getLeavesOfType(DOCKER_CONNECTOR_VIEW)[0];
     if (!leaf) leaf = workspace.getLeaf("tab");
     await leaf.setViewState({ type: DOCKER_CONNECTOR_VIEW, active: true });
-    workspace.revealLeaf(leaf);
+    void workspace.revealLeaf(leaf);
   }
   async testConnection(profile: DockerConnectionProfile, credential?: string) {
     const normalized = normalizeProfile(profile);

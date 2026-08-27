@@ -84,7 +84,8 @@ export class VolumesTab {
     section(panel, "Overview", [["Driver", details.driver], ["Scope", details.scope], ["Mountpoint", details.mountpoint], ["Created", details.createdAt]]);
     section(panel, "Options", Object.entries(details.options)); section(panel, "Labels", Object.entries(details.labels));
     const references = panel.createEl("section", { cls: "dc-image-detail-section" }); references.createEl("h3", { text: "Containers using volume" });
-    details.containersUsingVolume.length ? details.containersUsingVolume.forEach((container) => { const button = references.createEl("button", { text: `${container.name} · ${container.state ?? "Unknown"}` }); button.onclick = () => this.openContainer(container.id); }) : references.createDiv({ text: "No visible container references.", cls: "docker-connector__muted" });
+    if (details.containersUsingVolume.length) details.containersUsingVolume.forEach((container) => { const button = references.createEl("button", { text: `${container.name} · ${container.state ?? "Unknown"}` }); button.onclick = () => this.openContainer(container.id); });
+    else references.createDiv({ text: "No visible container references.", cls: "docker-connector__muted" });
   }
 
   private async open(volume: DockerVolumeSummary, _origin: HTMLElement): Promise<void> { this.state.selected = this.key(volume); const profile = this.plugin.settings.profiles.find((item) => item.id === volume.hostProfileId); const snapshot = this.plugin.snapshots.get(volume.hostProfileId); if (!profile || !snapshot) return; const key = dockerResourceKey(snapshot, volume.id); this.state.detail = { status: "loading", name: key }; this.rerender(); try { this.state.detail = { status: "ready", name: key, value: await this.plugin.inspectVolume(profile, snapshot, volume.name) }; } catch (error) { this.state.detail = { status: "error", name: key, message: error instanceof Error ? error.message : "Volume details could not be loaded." }; } this.rerender(); }

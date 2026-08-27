@@ -103,7 +103,7 @@ export class ContainersTab {
     hostLabel: string,
     all: DockerContainerSummary[],
     results: DockerContainerSummary[],
-    snapshots: DockerHostSnapshot[],
+    _snapshots: DockerHostSnapshot[],
   ): void {
     const header = root.createDiv({
       cls: "dc-container-header docker-connector__containers-header",

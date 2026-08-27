@@ -20,7 +20,7 @@ describe("Networks resource layout", () => {
 
   it("states when a network has no attached containers, as Images and Volumes do", () => {
     expect(tab).toContain("No attached containers.");
-    expect(tab).toContain("selected.containers.length ?");
+    expect(tab).toContain("if (selected.containers.length)");
   });
 
   it("retains dynamic counts, host scope, and four operational summary cards", () => {
