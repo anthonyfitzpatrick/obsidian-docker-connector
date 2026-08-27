@@ -89,8 +89,10 @@ describe("Obsidian Community Plugin release guard", () => {
     // Obsidian labels the tab itself, so a plugin-name heading above a short
     // list of settings only repeats what the sidebar already says.
     const settings = await source("src/settings/settings.ts");
-    expect(settings).not.toMatch(/createEl\("h[12]"/);
-    expect(settings).not.toContain('text: "Docker Connector"');
+    // No heading element at the head of the tab. The About footer names the
+    // plugin in its own block, which is not a settings heading.
+    expect(settings).not.toMatch(/createEl\("h[1-3]"/);
+    expect(settings).not.toMatch(/containerEl\.createEl\("h/);
     for (const setting of ["Automatic refresh", "Refresh interval", "Theme integration"]) expect(settings).toContain(setting);
   });
 
