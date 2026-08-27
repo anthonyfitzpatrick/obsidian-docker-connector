@@ -54,9 +54,8 @@ export class NetworksTab {
       const card = list.createEl("button", { cls: `docker-connector__network-card${isSelected ? " is-selected" : ""}`, attr: { "aria-label": network.name, "aria-pressed": String(isSelected) } });
       card.onclick = () => { this.selected = this.key(network); this.rerender(); };
       const header = card.createDiv({ cls: "docker-connector__network-card-header" });
-      const identity = header.createDiv({ cls: "docker-connector__network-card-identity" });
-      const icon = identity.createDiv({ cls: "docker-connector__network-card-icon" }); setIcon(icon, "network");
-      identity.createEl("strong", { text: network.name, attr: { title: network.name } });
+      const icon = header.createDiv({ cls: "docker-connector__network-card-icon" }); setIcon(icon, "network");
+      header.createEl("strong", { text: network.name, attr: { title: network.name } });
       header.createSpan({ text: network.builtIn ? "Built-in" : "User defined", cls: "dc-container-badge" });
       card.createSpan({ text: `Subnet · ${network.subnets.slice(0, 2).map((subnet) => subnet.subnet).filter(Boolean).join(", ") || "No subnet"}`, cls: "docker-connector__network-card-secondary docker-connector__muted" });
       const metadata = card.createDiv({ cls: "docker-connector__network-card-metadata" });

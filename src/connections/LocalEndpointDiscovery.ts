@@ -27,4 +27,4 @@ export async function discoverLocalDockerEndpoints(environment: NodeJS.ProcessEn
 export function displayLocalPath(path: string, home = homedir()): string { return path.startsWith(`${home}/`) ? `~/${path.slice(home.length + 1)}` : path; }
 function unique(endpoints: LocalDockerEndpoint[]): LocalDockerEndpoint[] { return endpoints.filter((endpoint, index, all) => all.findIndex((candidate) => JSON.stringify(candidate) === JSON.stringify(endpoint)) === index); }
 function localError(code: string, message: string): Error & { code: string } { return Object.assign(new Error(message), { code }); }
-function isLocalError(error: unknown): error is Error & { code: string } { return Boolean(error && typeof error === "object" && "code" in error && String((error as { code: unknown }).code).startsWith("LOCAL_")); }
+function isLocalError(error: unknown): error is Error & { code: string } { return Boolean(error && typeof error === "object" && "code" in error && String(error.code).startsWith("LOCAL_")); }

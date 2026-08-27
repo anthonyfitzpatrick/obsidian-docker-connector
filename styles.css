@@ -67,9 +67,8 @@
 .dc-update-dialog .modal-content > .dc-floating-modal__header { padding: 16px 16px 12px 22px; }
 .dc-update-dialog__body { flex: 1 1 auto; min-width: 0; min-height: 0; overflow-x: hidden; overflow-y: auto; padding: 0 22px 14px; }
 .dc-update-dialog-summary { display: grid; grid-template-columns: minmax(120px, .7fr) minmax(0, 1.3fr); gap: 5px 12px; margin: 10px 0; font-size: .86em; }
-.dc-update-dialog-summary > div { display: contents; }
-.dc-update-dialog-summary span:first-child { color: var(--dc-text-muted); }
-.dc-update-dialog-summary span:last-child { overflow-wrap: anywhere; }
+.dc-update-dialog-summary span:nth-child(odd) { color: var(--dc-text-muted); }
+.dc-update-dialog-summary span:nth-child(even) { overflow-wrap: anywhere; }
 .dc-update-dialog-warning, .dc-update-dialog-result { margin: 12px 0; padding: 10px; border: 1px solid var(--dc-border); border-radius: 8px; background: var(--dc-surface); }
 .dc-update-dialog-warning { border-color: color-mix(in srgb, var(--dc-warning) 45%, var(--dc-border)); }
 .dc-update-dialog-result.is-failed { border-color: color-mix(in srgb, var(--dc-danger) 45%, var(--dc-border)); }
@@ -93,7 +92,6 @@
 .dc-container-loading::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--dc-accent) 12%, transparent), transparent); animation: dc-shimmer 1.4s ease-in-out infinite; }
 @keyframes dc-fade-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes dc-shimmer { to { transform: translateX(100%); } }
-@media (prefers-reduced-motion: reduce) { .docker-connector *, .docker-connector *::before, .docker-connector *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
 .docker-connector__header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 18px; }
 .docker-connector__brand, .docker-connector__header-controls, .docker-connector__host-picker, .docker-connector__refresh-info { display: flex; align-items: center; gap: 9px; }
 .docker-connector__brand-icon, .docker-connector__summary-icon, .docker-connector__panel-icon { display: grid; place-items: center; flex: 0 0 auto; border-radius: 11px; background: var(--dc-accent-soft); color: var(--dc-accent); }
@@ -170,7 +168,7 @@
 .docker-connector__detail-grid strong { font-size: .84em; overflow-wrap: anywhere; }
 .docker-connector__diagnostics { margin-top: 8px; }
 .docker-connector__diagnostics > div { margin-top: 8px; font-size: .82em; }
-.container-running { background: var(--dc-success) !important; color: var(--dc-success); }.container-stopped, .container-created, .container-unknown { background: var(--dc-inactive) !important; color: var(--dc-inactive); }.container-paused, .container-restarting { background: var(--dc-warning) !important; color: var(--dc-warning); }.container-dead { background: var(--dc-danger) !important; color: var(--dc-danger); }
+.dc-container-state-dot.container-running { background: var(--dc-success); }.dc-container-state-dot.container-stopped, .dc-container-state-dot.container-created, .dc-container-state-dot.container-unknown { background: var(--dc-inactive); }.dc-container-state-dot.container-paused, .dc-container-state-dot.container-restarting { background: var(--dc-warning); }.dc-container-state-dot.container-dead { background: var(--dc-danger); }
 .docker-connector__attention-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 8px 0; border-bottom: 1px solid var(--dc-border); }.docker-connector__attention-item:last-child { border-bottom: 0; }.docker-connector__attention-item strong { font-size: .85em; }.docker-connector__attention-item button { font-size: .76em; }
 .docker-connector__attention-badge { display: inline-flex; align-items: center; gap: 6px; max-width: 176px; padding: 4px 8px; border-radius: 999px; font-size: .72em; font-weight: 680; line-height: 1.2; }.docker-connector__attention-badge.is-danger { background: color-mix(in srgb, var(--dc-danger) 16%, transparent); color: var(--dc-danger); }.docker-connector__attention-badge.is-warning { background: color-mix(in srgb, var(--dc-warning) 18%, transparent); color: var(--dc-warning); }.docker-connector__attention-badge.is-info { background: color-mix(in srgb, var(--dc-info) 16%, transparent); color: var(--dc-info); }
 .docker-connector__empty, .docker-connector__empty-inline { color: var(--dc-text-muted); }.docker-connector__empty { display: grid; justify-items: start; gap: 7px; padding: 16px 0 4px; text-align: left; }.docker-connector__empty > div { color: var(--dc-accent); }.docker-connector__empty h4 { margin: 0; color: var(--text-normal); }.docker-connector__empty span { font-size: .83em; }.docker-connector__empty button { margin-top: 4px; }.docker-connector__empty-inline { padding: 12px 0; font-size: .85em; }
@@ -193,9 +191,9 @@
 .dc-connection-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 12px; }
 .dc-connection-card { --dc-host-card-icon-size: 36px; --dc-host-card-icon-radius: 11px; --dc-host-card-icon-color: var(--dc-accent); --dc-host-card-icon-background: var(--dc-accent-soft); --dc-host-card-title-size: 1em; --dc-host-card-title-line-height: 1.25; --dc-host-card-meta-size: .8em; --dc-host-card-meta-line-height: 1.35; --dc-host-card-endpoint-size: .78em; --dc-host-card-label-size: .72em; --dc-host-card-metric-value-size: .98em; --dc-host-card-management-size: .66em; --dc-host-card-action-size: .79em; display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 15px; border: 1px solid var(--dc-border); border-radius: 13px; background: var(--dc-surface-raised); font-family: var(--font-interface); box-shadow: 0 2px 7px rgb(0 0 0 / .035); transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; }
 .dc-connection-card:hover { border-color: color-mix(in srgb, var(--dc-accent) 42%, var(--dc-border)); box-shadow: 0 8px 22px rgb(0 0 0 / .08); transform: translateY(-1px); }
-.dc-connection-card:has(.status-online) { border-left: 3px solid var(--dc-success); }
-.dc-connection-card:has(.status-authentication-required) { border-left: 3px solid var(--dc-warning); }
-.dc-connection-card:has(.status-offline) { border-left: 3px solid var(--dc-danger); }
+.dc-connection-card.status-online { border-left: 3px solid var(--dc-success); }
+.dc-connection-card.status-authentication-required { border-left: 3px solid var(--dc-warning); }
+.dc-connection-card.status-offline { border-left: 3px solid var(--dc-danger); }
 .dc-connection-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .dc-connection-identity { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .dc-connection-identity > div:last-child { min-width: 0; }
@@ -205,7 +203,7 @@
 .dc-host-card-endpoint > span:first-child { display: grid; place-items: center; color: var(--dc-accent); }
 .dc-connection-category { border-radius: 999px; padding: 3px 7px; background: var(--dc-accent-soft); color: var(--dc-accent); font-family: var(--font-interface); font-size: var(--dc-host-card-label-size); font-weight: 650; line-height: 1.2; }
 .dc-connection-inventory { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--dc-border); border-radius: 9px; background: var(--dc-surface); }
-.dc-connection-inventory > div { display: grid; grid-template-columns: auto 1fr; column-gap: 5px; align-items: center; min-width: 0; padding: 9px 7px; border-right: 1px solid var(--dc-border); }
+.dc-connection-inventory > div { display: grid; grid-template-columns: auto 1fr; gap: 0 5px; align-items: center; min-width: 0; padding: 9px 7px; border-right: 1px solid var(--dc-border); }
 .dc-connection-inventory > div:last-child { border-right: 0; }
 .dc-host-card-inventory svg { width: 14px; height: 14px; color: var(--dc-host-card-icon-color); }
 .dc-connection-inventory strong { color: var(--text-normal); font-family: var(--font-interface); font-size: var(--dc-host-card-metric-value-size); line-height: 1; }
@@ -1454,9 +1452,8 @@ button.dc-metric-card:focus-visible,
 /* Volume cards reserve icon, text, and badge tracks so every text line shares one left edge. */
 .dc-volumes-tab .docker-connector__volume-card { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-content: start; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; width: 100%; min-width: 0; min-height: 0; height: auto; padding: 11px 12px; border-radius: 11px; overflow: visible; text-align: left; }
 .dc-volumes-tab .docker-connector__volume-card-header { grid-column: 1 / -1; display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; min-width: 0; text-align: left; }
-.dc-volumes-tab .docker-connector__volume-card-identity { display: contents; }
 .dc-volumes-tab .docker-connector__volume-card-icon { grid-column: 1; align-self: start; display: grid; align-content: start; justify-content: start; width: 20px; height: 20px; padding: 2px; border-radius: 6px; background: var(--dc-accent-soft); color: var(--dc-accent); }
-.dc-volumes-tab .docker-connector__volume-card-identity strong { grid-column: 2; align-self: stretch; justify-self: stretch; min-width: 0; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.dc-volumes-tab .docker-connector__volume-card-header > strong { grid-column: 2; align-self: stretch; justify-self: stretch; min-width: 0; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
 .dc-volumes-tab .docker-connector__volume-card-header > .dc-container-badge { grid-column: 3; align-self: start; justify-self: start; }
 .dc-volumes-tab .docker-connector__volume-card-secondary, .dc-volumes-tab .docker-connector__volume-card-metadata { grid-column: 2; align-self: stretch; justify-self: stretch; width: 100%; min-width: 0; text-align: left; }
 .dc-volumes-tab .docker-connector__volume-card-secondary { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .76em; line-height: 1.35; }
@@ -1466,9 +1463,8 @@ button.dc-metric-card:focus-visible,
 /* Network cards use the same fixed icon and independent badge track. */
 .dc-networks-tab .docker-connector__network-card { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-content: start; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; width: 100%; min-width: 0; min-height: 0; height: auto; padding: 11px 12px; border-radius: 11px; overflow: visible; text-align: left; }
 .dc-networks-tab .docker-connector__network-card-header { grid-column: 1 / -1; display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; min-width: 0; text-align: left; }
-.dc-networks-tab .docker-connector__network-card-identity { display: contents; }
 .dc-networks-tab .docker-connector__network-card-icon { grid-column: 1; align-self: start; display: grid; align-content: start; justify-content: start; width: 20px; height: 20px; padding: 2px; border-radius: 6px; background: var(--dc-accent-soft); color: var(--dc-accent); }
-.dc-networks-tab .docker-connector__network-card-identity strong { grid-column: 2; align-self: stretch; justify-self: stretch; min-width: 0; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.dc-networks-tab .docker-connector__network-card-header > strong { grid-column: 2; align-self: stretch; justify-self: stretch; min-width: 0; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
 .dc-networks-tab .docker-connector__network-card-header > .dc-container-badge { grid-column: 3; align-self: start; justify-self: start; }
 .dc-networks-tab .docker-connector__network-card-secondary, .dc-networks-tab .docker-connector__network-card-metadata { grid-column: 2; align-self: stretch; justify-self: stretch; width: 100%; min-width: 0; text-align: left; }
 .dc-networks-tab .docker-connector__network-card-secondary { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .76em; line-height: 1.35; }
@@ -1509,9 +1505,8 @@ button.dc-metric-card:focus-visible,
 .dc-containers-tab .docker-connector__containers-layout.is-detail-open .docker-connector__containers-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .dc-containers-tab .docker-connector__container-card { display: grid; grid-template-columns: 20px minmax(0, 1fr); align-content: start; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; width: 100%; min-width: 0; height: auto; min-height: 0; overflow: visible; padding: 11px 12px; border-radius: 11px; text-align: left; }
 .dc-containers-tab .docker-connector__container-card-header { grid-column: 1 / -1; display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: start; justify-content: start; justify-items: stretch; gap: 7px; min-width: 0; text-align: left; }
-.dc-containers-tab .docker-connector__container-card-identity { display: contents; }
 .dc-containers-tab .docker-connector__container-card-name { grid-column: 2; align-self: stretch; justify-self: stretch; min-width: 0; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
-.dc-containers-tab .docker-connector__container-card-identity .dc-container-state-dot { grid-column: 1; align-self: start; width: 20px; height: 20px; border-radius: 6px; }
+.dc-containers-tab .docker-connector__container-card-header > .dc-container-state-dot { grid-column: 1; align-self: start; width: 20px; height: 20px; border-radius: 6px; }
 .dc-containers-tab .docker-connector__container-card-badges { grid-column: 3; display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: flex-start; justify-content: flex-start; gap: 4px; }
 .dc-containers-tab .docker-connector__container-card-secondary { grid-column: 2; align-self: stretch; justify-self: stretch; display: block; min-width: 0; color: var(--dc-text-muted); font-size: .76em; line-height: 1.35; overflow-wrap: anywhere; text-align: left; }
 .dc-containers-tab .docker-connector__container-card-id { grid-column: 2; align-self: stretch; justify-self: stretch; display: block; min-width: 0; color: var(--dc-text-muted); font-family: var(--font-monospace); font-size: .72em; line-height: 1.3; overflow-wrap: anywhere; text-align: left; }
@@ -1708,4 +1703,16 @@ button.dc-metric-card:focus-visible,
   margin: 0;
   color: var(--text-normal);
   overflow-wrap: anywhere;
+}
+
+/* Last in the file so the reduced-motion reset wins on source order alone. */
+@media (prefers-reduced-motion: reduce) {
+  .docker-connector *,
+  .docker-connector *::before,
+  .docker-connector *::after {
+    animation-duration: .01ms;
+    animation-iteration-count: 1;
+    scroll-behavior: auto;
+    transition-duration: .01ms;
+  }
 }

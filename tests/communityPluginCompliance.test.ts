@@ -93,6 +93,48 @@ describe("Obsidian Community Plugin release guard", () => {
     expect(sources[0]).toContain("setCssStyles(");
   });
 
+  it("keeps the stylesheet within the features Obsidian's CSS check accepts", async () => {
+    const styles = await source("styles.css");
+    // Override by specificity or source order, never by !important.
+    expect(styles).not.toMatch(/!\s*important/);
+    // :has invalidates broadly enough to cost frame time on large dashboards.
+    expect(styles).not.toContain(":has(");
+    // display: contents is only partially supported by the Obsidian versions
+    // the checker tests against; the card markup places children directly.
+    expect(styles).not.toContain("display: contents");
+    // The reduced-motion reset has to stay last for source order to carry it.
+    expect(styles.trimEnd().endsWith("}")).toBe(true);
+    expect(styles.lastIndexOf("prefers-reduced-motion")).toBeGreaterThan(styles.lastIndexOf(".dc-connection-card"));
+  });
+
+  it("imports desktop modules statically behind the capability gate", async () => {
+    // @typescript-eslint/no-require-imports: the plugin is desktop-only, so the
+    // gate is what keeps Node transports off an unsupported platform, not a
+    // deferred require.
+    const sources = await Promise.all(["src/platform/DesktopUiAdapter.ts", "src/connections/DockerConnectionFactory.ts"].map(source));
+    for (const file of sources) expect(file).not.toMatch(/(?<![.\w])require\(/);
+    expect(sources[0]).toContain("DESKTOP_UI_UNAVAILABLE");
+    expect(sources[1]).toContain("isProfileSupportedOnPlatform");
+  });
+
+  it("describes its settings once, for both rendering and settings search", async () => {
+    // Obsidian 1.13 indexes getSettingDefinitions(); display() renders the same
+    // array so the tab still works on the declared 1.7 minimum.
+    const settings = await source("src/settings/settings.ts");
+    expect(settings).toMatch(/getSettingDefinitions\(\)/);
+    expect(settings).toMatch(/CONTROL_DEFINITIONS/);
+    for (const key of ["automaticRefresh", "refreshIntervalMinutes", "integrateWithTheme"]) expect(settings).toContain(`key: "${key}"`);
+  });
+
+  it("publishes releases with build provenance attestations", async () => {
+    const workflow = await source(".github/workflows/release.yml");
+    expect(workflow).toContain("actions/attest-build-provenance");
+    for (const asset of ["main.js", "manifest.json", "styles.css"]) expect(workflow).toContain(asset);
+    // Attestation needs these two permissions; without them the step fails.
+    expect(workflow).toMatch(/id-token: write/);
+    expect(workflow).toMatch(/attestations: write/);
+  });
+
   it("asks for confirmation through an Obsidian modal rather than a browser dialog", async () => {
     // obsidianmd/no-confirm: the browser dialog blocks Obsidian's renderer and
     // ignores the vault theme. Every prompt goes through ConfirmationModal.

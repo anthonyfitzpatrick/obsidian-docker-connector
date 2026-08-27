@@ -66,6 +66,22 @@ When a newer image is confirmed and a standalone container is eligible, **Update
 
 For details, read the [Security Review](docs/Docker%20Connector%20-%20Security%20Review.md).
 
+### Capabilities this plugin uses
+
+Obsidian's plugin check reports the platform capabilities a plugin reaches for. Docker Connector uses four, and this is what each one is for:
+
+- **Filesystem access (Node `fs`).** Reads the SSH private key, `known_hosts`, and the TLS CA, certificate, and key files you select, plus the local Docker socket paths and Docker CLI config it probes during discovery. It writes only when you ask it to generate an SSH key pair. It never reads or writes vault files.
+- **Shell execution (Node `child_process`).** Runs the local `docker` CLI for Docker Context discovery and `docker system dial-stdio`, and runs one fixed capability probe over SSH. Arguments that come from a profile are POSIX-quoted, and profile fields are rejected up front if they contain quotes, backslashes, shell expansion characters, or control characters. There is no free-form command entry anywhere in the interface.
+- **Clipboard.** Write-only, and only when you press a copy button: the full container ID or image ID. The plugin never reads the clipboard.
+- **Dynamic code execution.** None in this plugin's own source. The single `new Function` in the release bundle is inside the vendored `ssh2` dependency, which uses it once as a fixed `new Function("return 2n ** 32n")` feature probe for BigInt support. No plugin, vault, or daemon data reaches it.
+
+Releases are built by [a GitHub Actions workflow](.github/workflows/release.yml) that publishes build provenance attestations for `main.js`, `manifest.json`, and `styles.css`, so you can verify a downloaded release was built from this repository:
+
+```sh
+gh attestation verify main.js --repo anthonyfitzpatrick/obsidian-docker-connector
+```
+
+
 ## Requirements
 
 | Requirement | Details |

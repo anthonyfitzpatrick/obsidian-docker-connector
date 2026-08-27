@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, setIcon } from "obsidian";
+import { App, PluginSettingTab, Setting, setIcon, type SettingDefinitionControl } from "obsidian";
 import type DockerConnectorPlugin from "../main";
 import type { DockerConnectionProfile } from "../models/DockerConnectionProfile";
 import type { ContainerDensity } from "../containers/ContainerModels";
@@ -19,33 +19,69 @@ export const DEFAULT_SETTINGS: DockerConnectorSettings = {
   containerDensity: "comfortable"
 };
 
+/** Keys of the settings this tab exposes as controls; profiles are managed in the dashboard. */
+type DockerConnectorControlKey = "automaticRefresh" | "refreshIntervalMinutes" | "integrateWithTheme";
+
+/**
+ * Each setting is described once. Obsidian 1.13 and later index these through
+ * getSettingDefinitions() so the settings appear in settings search, and
+ * display() renders from the same array, which keeps the tab working on the
+ * 1.7 minimum this plugin supports.
+ */
+const CONTROL_DEFINITIONS: SettingDefinitionControl<DockerConnectorControlKey>[] = [
+  { name: "Automatic refresh", desc: "Refresh configured hosts in the background.", control: { type: "toggle", key: "automaticRefresh" } },
+  { name: "Refresh interval", desc: "Minutes between background refreshes.", control: { type: "number", key: "refreshIntervalMinutes", min: 1, step: 1 } },
+  { name: "Theme integration", desc: "Use Obsidian's native theme variables.", control: { type: "toggle", key: "integrateWithTheme" } },
+];
+
 /** Settings UI and persistence boundary. Documentation: Docker Connector - Settings.md */
 export class DockerConnectorSettingTab extends PluginSettingTab {
   constructor(app: App, private readonly plugin: DockerConnectorPlugin) { super(app, plugin); }
+
+  getSettingDefinitions(): SettingDefinitionControl<DockerConnectorControlKey>[] { return CONTROL_DEFINITIONS; }
+
+  getControlValue(key: string): unknown {
+    switch (key) {
+      case "automaticRefresh": return this.plugin.settings.automaticRefresh;
+      case "refreshIntervalMinutes": return this.plugin.settings.refreshIntervalMinutes;
+      case "integrateWithTheme": return this.plugin.settings.integrateWithTheme;
+      default: return undefined;
+    }
+  }
+
+  async setControlValue(key: string, value: unknown): Promise<void> {
+    switch (key) {
+      case "automaticRefresh": this.plugin.settings.automaticRefresh = value === true; break;
+      case "integrateWithTheme": this.plugin.settings.integrateWithTheme = value === true; break;
+      case "refreshIntervalMinutes": {
+        // A half-typed interval must not be persisted or restart the timer.
+        const minutes = Math.floor(Number(value));
+        if (!Number.isFinite(minutes) || minutes < 1) return;
+        this.plugin.settings.refreshIntervalMinutes = minutes;
+        break;
+      }
+      default: return;
+    }
+    await this.plugin.saveSettings();
+    if (key !== "integrateWithTheme") this.plugin.configureRefresh();
+  }
+
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    new Setting(containerEl).setName("Automatic refresh").setDesc("Refresh configured hosts in the background.")
-      .addToggle((toggle) => toggle.setValue(this.plugin.settings.automaticRefresh).onChange(async (value) => {
-        this.plugin.settings.automaticRefresh = value;
-        await this.plugin.saveSettings();
-        this.plugin.configureRefresh();
-      }));
-    new Setting(containerEl).setName("Refresh interval").setDesc("Minutes between background refreshes.")
-      .addText((text) => text.setValue(String(this.plugin.settings.refreshIntervalMinutes)).onChange(async (value) => {
-        const minutes = Number(value);
-        if (Number.isFinite(minutes) && minutes >= 1) {
-          this.plugin.settings.refreshIntervalMinutes = Math.floor(minutes);
-          await this.plugin.saveSettings();
-          this.plugin.configureRefresh();
-        }
-      }));
-    new Setting(containerEl).setName("Theme integration").setDesc("Use Obsidian's native theme variables.")
-      .addToggle((toggle) => toggle.setValue(this.plugin.settings.integrateWithTheme).onChange(async (value) => {
-        this.plugin.settings.integrateWithTheme = value;
-        await this.plugin.saveSettings();
-      }));
+    for (const definition of CONTROL_DEFINITIONS) this.renderControl(containerEl, definition);
     this.renderAboutFooter(containerEl);
+  }
+
+  private renderControl(containerEl: HTMLElement, definition: SettingDefinitionControl<DockerConnectorControlKey>): void {
+    const setting = new Setting(containerEl).setName(definition.name);
+    if (typeof definition.desc === "string") setting.setDesc(definition.desc);
+    const key = definition.control.key;
+    if (definition.control.type === "toggle") {
+      setting.addToggle((toggle) => toggle.setValue(this.getControlValue(key) === true).onChange((value) => void this.setControlValue(key, value)));
+      return;
+    }
+    setting.addText((text) => text.setValue(String(this.getControlValue(key))).onChange((value) => void this.setControlValue(key, value)));
   }
 
   /**
@@ -104,7 +140,7 @@ export class DockerConnectorSettingTab extends PluginSettingTab {
    * window fallback.
    */
   private openExternalUrl(url: string): void {
-    const app = this.app as App & { openExternalUrl?: (target: string) => void; openExternal?: (target: string) => void };
+    const app: App & { openExternalUrl?: (target: string) => void; openExternal?: (target: string) => void } = this.app;
     if (app.openExternalUrl) { app.openExternalUrl(url); return; }
     if (app.openExternal) { app.openExternal(url); return; }
     window.open(url, "_blank", "noopener");

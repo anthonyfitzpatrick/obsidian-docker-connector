@@ -1,4 +1,5 @@
 import type { DockerConnectionProfile } from "../models/DockerConnectionProfile";
+import { stripControlCharacters } from "../utils/text";
 
 /**
  * Shared transport contract for the local socket, SSH, Docker Context, and
@@ -38,7 +39,7 @@ export class HostKeyMismatchError extends DockerConnectionError {
 }
 
 export function dockerHttpError(status: number, body: string, ping = false): DockerConnectionError {
-  const daemonMessage = body.replace(/[\x00-\x1F\x7F]/g, " ").replace(/\s+/g, " ").trim().slice(0, 240);
+  const daemonMessage = stripControlCharacters(body, " ").replace(/\s+/g, " ").trim().slice(0, 240);
   const message = `${ping ? "Docker /_ping" : "Docker API"} returned HTTP ${status}.${daemonMessage ? ` ${daemonMessage}` : ""}`;
   return new DockerConnectionError(ping ? "DOCKER_PING_FAILED" : "DOCKER_HTTP_FAILED", message, daemonMessage || undefined, status);
 }

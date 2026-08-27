@@ -1,5 +1,6 @@
 import type { DockerConnectionProfile } from "../models/DockerConnectionProfile";
 import { RuntimeCredentialStore } from "../security/RuntimeCredentialStore";
+import { createDesktopTransport } from "./DesktopTransportFactory";
 import type { DockerTransport } from "./DockerTransport";
 import { DockerConnectionError } from "./DockerTransport";
 import { isProfileSupportedOnPlatform, platformCapabilities } from "../platform/PlatformCapabilities";
@@ -48,9 +49,9 @@ export class DockerConnectionFactory {
   async disconnectAll(): Promise<void> { await Promise.all([...this.transports.values()].map((transport) => transport.disconnect())); this.transports.clear(); this.credentials.clearAll(); }
 }
 export function loadBundledDesktopTransportModule(): DesktopTransportModule {
-  // Esbuild includes this module in main.js while delaying its initialization
-  // until the desktop capability gate in create() has passed.
-  return require("./DesktopTransportFactory") as DesktopTransportModule;
+  // create() calls this only after the desktop capability gate has passed, so
+  // no Node-backed transport is ever constructed on an unsupported platform.
+  return { createDesktopTransport };
 }
 class UnsupportedDesktopTransport implements DockerTransport {
   constructor(readonly profile: DockerConnectionProfile) {}

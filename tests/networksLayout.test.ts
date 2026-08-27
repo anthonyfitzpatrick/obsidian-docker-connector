@@ -53,7 +53,7 @@ describe("Networks resource layout", () => {
   it("anchors every network text line to a fixed icon and flexible text track", () => {
     const card = rule(".dc-networks-tab .docker-connector__network-card");
     const header = rule(".dc-networks-tab .docker-connector__network-card-header");
-    const title = rule(".dc-networks-tab .docker-connector__network-card-identity strong");
+    const title = rule(".dc-networks-tab .docker-connector__network-card-header > strong");
     const metadata = rule(".dc-networks-tab .docker-connector__network-card-metadata");
     const secondary = rule(".dc-networks-tab .docker-connector__network-card-secondary, .dc-networks-tab .docker-connector__network-card-metadata");
 

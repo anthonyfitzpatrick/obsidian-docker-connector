@@ -59,9 +59,8 @@ export class VolumesTab {
     const card = list.createEl("button", { cls: `docker-connector__volume-card${selected ? " is-selected" : ""}`, attr: { "aria-label": volume.name, "aria-pressed": String(selected) } });
     card.onclick = () => void this.open(volume, card);
     const header = card.createDiv({ cls: "docker-connector__volume-card-header" });
-    const identity = header.createDiv({ cls: "docker-connector__volume-card-identity" });
-    const icon = identity.createDiv({ cls: "docker-connector__volume-card-icon" }); setIcon(icon, "database");
-    identity.createEl("strong", { text: volume.name, attr: { title: volume.name } });
+    const icon = header.createDiv({ cls: "docker-connector__volume-card-icon" }); setIcon(icon, "database");
+    header.createEl("strong", { text: volume.name, attr: { title: volume.name } });
     header.appendChild(badge(volume.inUse ? "In use" : "Unused", volume.inUse ? "in-use" : "unused"));
     card.createSpan({ text: `Mount · ${truncate(volume.mountpoint)}`, cls: "docker-connector__volume-card-secondary docker-connector__muted", attr: { title: volume.mountpoint ?? "No mountpoint" } });
     const metadata = card.createDiv({ cls: "docker-connector__volume-card-metadata" });

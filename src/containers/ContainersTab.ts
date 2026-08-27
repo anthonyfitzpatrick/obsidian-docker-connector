@@ -457,14 +457,11 @@ export class ContainersTab {
     const header = row.createDiv({
       cls: "docker-connector__container-card-header",
     });
-    const identity = header.createDiv({
-      cls: "docker-connector__container-card-identity",
-    });
-    const state = identity.createSpan({
+    const state = header.createSpan({
       cls: `dc-container-state-dot container-${container.state}`,
     });
     setIcon(state, stateIcon(container.state));
-    identity.createEl("strong", {
+    header.createEl("strong", {
       text: container.displayName,
       cls: "docker-connector__container-card-name",
     });

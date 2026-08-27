@@ -1,0 +1,55 @@
+name: Release
+
+# Builds the plugin from a pushed version tag, attaches the three release files
+# Obsidian expects, and attests their provenance so anyone can verify they were
+# built from this repository at this commit.
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Verify the tag matches the manifest
+        run: |
+          manifest_version=$(node -p "require('./manifest.json').version")
+          if [ "$manifest_version" != "${GITHUB_REF_NAME}" ]; then
+            echo "manifest.json is ${manifest_version} but the tag is ${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+
+      - run: npm test
+
+      - run: npm run release:check
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            main.js
+            styles.css
+            manifest.json
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" main.js manifest.json styles.css \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes

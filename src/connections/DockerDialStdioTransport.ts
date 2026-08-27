@@ -1,5 +1,6 @@
 import type { Client, ClientChannel } from "ssh2";
 import { DockerConnectionError } from "./DockerTransport";
+import { stripControlCharacters } from "../utils/text";
 
 const DIAL_COMMAND = "docker system dial-stdio";
 const STDERR_LIMIT = 16 * 1024;
@@ -140,7 +141,7 @@ export function mapDialFailure(message: string, exitCode?: number, exitSignal?: 
 }
 
 function safeTechnicalDetail(message: string, exitCode?: number, exitSignal?: string): string | undefined {
-  const normalized = message.replace(/[\x00-\x1F\x7F]/g, " ").replace(/\s+/g, " ").trim().slice(-512);
+  const normalized = stripControlCharacters(message, " ").replace(/\s+/g, " ").trim().slice(-512);
   const exit = exitCode !== undefined ? `exit ${exitCode}` : exitSignal ? `signal ${exitSignal}` : "";
   return [exit, normalized].filter(Boolean).join("; ") || undefined;
 }

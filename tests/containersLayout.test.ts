@@ -19,7 +19,7 @@ describe("Containers card layout", () => {
 
   it("uses an Applications-style card grid with separate normal-flow container content", () => {
     for (const value of ["docker-connector__containers-header", "docker-connector__containers-toolbar", "docker-connector__containers-layout", "docker-connector__containers-list", "docker-connector__container-card", "docker-connector__containers-detail"]) expect(tab).toContain(value);
-    for (const value of ["docker-connector__container-card-header", "docker-connector__container-card-identity", "dc-container-state-dot", "docker-connector__container-card-name", "docker-connector__container-card-badges", "docker-connector__container-card-secondary", "docker-connector__container-card-id", "docker-connector__container-card-metadata", "docker-connector__container-card-status", "docker-connector__container-card-ports", "docker-connector__container-card-created"]) expect(tab).toContain(value);
+    for (const value of ["docker-connector__container-card-header", "dc-container-state-dot", "docker-connector__container-card-name", "docker-connector__container-card-badges", "docker-connector__container-card-secondary", "docker-connector__container-card-id", "docker-connector__container-card-metadata", "docker-connector__container-card-status", "docker-connector__container-card-ports", "docker-connector__container-card-created"]) expect(tab).toContain(value);
     expect(tab).not.toContain("docker-connector__containers-row");
     expect(css).toMatch(/containers-list \{ display: grid; grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
     expect(css).toMatch(/containers-layout\.is-detail-open .*containers-list \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);

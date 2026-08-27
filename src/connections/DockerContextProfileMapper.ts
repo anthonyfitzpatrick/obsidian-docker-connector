@@ -1,5 +1,6 @@
 import type { DiscoveredDockerContext } from "./DockerContextDiscovery";
 import type { DockerContextProfile } from "../models/DockerConnectionProfile";
+import { stripControlCharacters } from "../utils/text";
 
 const SAVABLE_ENDPOINT_TYPES = new Set(["unix-socket", "windows-named-pipe", "ssh", "tcp-tls"]);
 
@@ -59,6 +60,6 @@ export function updateDockerContextProfile(input: {
   return { ...mapped, enabled: input.existingProfile.enabled, createdAt: input.existingProfile.createdAt };
 }
 
-function clean(value: string): string { return value.trim().replace(/[\x00-\x1F\x7F]/g, ""); }
+function clean(value: string): string { return stripControlCharacters(value.trim()); }
 function optional(value: string | undefined): string | undefined { const result = value === undefined ? undefined : clean(value); return result || undefined; }
 function safeEndpointDisplay(value: string): string { return value.replace(/^[^@]+@/, ""); }

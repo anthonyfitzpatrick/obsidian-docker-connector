@@ -37,7 +37,7 @@ describe("Volumes resource layout", () => {
   it("anchors every volume text line to a fixed icon and flexible text track", () => {
     const card = rule(".dc-volumes-tab .docker-connector__volume-card");
     const header = rule(".dc-volumes-tab .docker-connector__volume-card-header");
-    const title = rule(".dc-volumes-tab .docker-connector__volume-card-identity strong");
+    const title = rule(".dc-volumes-tab .docker-connector__volume-card-header > strong");
     const metadata = rule(".dc-volumes-tab .docker-connector__volume-card-metadata");
     const secondary = rule(".dc-volumes-tab .docker-connector__volume-card-secondary, .dc-volumes-tab .docker-connector__volume-card-metadata");
 

@@ -1,6 +1,7 @@
 import type { DockerContextProfile, DockerContextProfileSnapshot } from "../models/DockerConnectionProfile";
 import type { DiscoveredDockerContext } from "./DockerContextDiscovery";
 import { canSaveDiscoveredDockerContext, mapDiscoveredDockerContextSnapshot } from "./DockerContextProfileMapper";
+import { stripControlCharacters } from "../utils/text";
 
 export type DockerContextLifecycleState = "not-tested" | "unchanged" | "missing" | "changed" | "unsupported" | "cli-unavailable" | "discovery-error";
 export interface DockerContextSnapshotChange { field: "endpoint-type" | "endpoint-display" | "skip-tls-verify" | "supported"; previousValue: string | boolean | undefined; currentValue: string | boolean | undefined; severity: "info" | "warning" | "danger"; }
@@ -42,7 +43,7 @@ function currentSnapshot(context: DiscoveredDockerContext, now: string, imported
   if (!endpoint) return undefined;
   return { description: clean(context.description), isCurrentWhenSaved: context.isCurrent, endpointType: endpoint.type, endpointDisplay: clean(endpoint.displayHost.replace(/^[^@]+@/, "")), skipTlsVerify: endpoint.skipTlsVerify, supported: false, importedAt, lastDiscoveredAt: now };
 }
-function clean(value: string | undefined): string | undefined { const cleaned = value?.trim().replace(/[\x00-\x1F\x7F]/g, ""); return cleaned || undefined; }
+function clean(value: string | undefined): string | undefined { const cleaned = value === undefined ? undefined : stripControlCharacters(value.trim()); return cleaned || undefined; }
 function compare(previous: DockerContextProfileSnapshot, current: DockerContextProfileSnapshot): DockerContextSnapshotChange[] {
   const fields: Array<[DockerContextSnapshotChange["field"], string | boolean | undefined, string | boolean | undefined]> = [["endpoint-type", previous.endpointType, current.endpointType], ["endpoint-display", previous.endpointDisplay, current.endpointDisplay], ["skip-tls-verify", previous.skipTlsVerify, current.skipTlsVerify], ["supported", previous.supported, current.supported]];
   return fields.filter(([, left, right]) => left !== right).map(([field, previousValue, currentValue]) => ({ field, previousValue, currentValue, severity: field === "endpoint-display" ? "info" : field === "skip-tls-verify" && previousValue === false && currentValue === true || field === "supported" && currentValue === false ? "danger" : "warning" }));
