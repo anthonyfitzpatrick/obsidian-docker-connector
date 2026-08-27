@@ -106,28 +106,16 @@ export class FloatingModalController {
     this.resizeObserver = undefined;
     this.environment.removeResizeListener(this.normalize);
     this.geometry = undefined;
+    // Removing the class reverts the fixed positioning it declares; only the
+    // measured geometry has to be cleared explicitly.
     this.modalEl.removeClass("dc-floating-modal");
-    this.modalEl.style.position = "";
-    this.modalEl.style.left = "";
-    this.modalEl.style.top = "";
-    this.modalEl.style.width = "";
-    this.modalEl.style.height = "";
-    this.modalEl.style.minWidth = "";
-    this.modalEl.style.minHeight = "";
-    this.modalEl.style.maxWidth = "";
-    this.modalEl.style.maxHeight = "";
-    this.modalEl.style.transform = "";
-    this.modalEl.style.translate = "";
-    this.modalEl.style.margin = "";
+    this.modalEl.setCssStyles({ left: "", top: "", width: "", height: "", minWidth: "", minHeight: "", maxWidth: "", maxHeight: "" });
   }
 
   private initialize(): void {
     if (this.geometry) return;
+    // The class carries the fixed positioning; only measured values are set here.
     this.modalEl.addClass("dc-floating-modal");
-    this.modalEl.style.position = "fixed";
-    this.modalEl.style.transform = "none";
-    this.modalEl.style.translate = "none";
-    this.modalEl.style.margin = "0";
     this.geometry = centerModalInViewport(FLOATING_MODAL_DEFAULT, this.environment.viewport());
     this.applyGeometry();
     this.resizeObserver = this.environment.createResizeObserver(this.normalize);
@@ -149,14 +137,16 @@ export class FloatingModalController {
     const minimum = { width: Math.min(FLOATING_MODAL_MINIMUM.width, maximum.width), height: Math.min(FLOATING_MODAL_MINIMUM.height, maximum.height) };
     const geometry = fitModalToViewport(this.geometry, viewport);
     this.geometry = geometry;
-    this.modalEl.style.left = `${geometry.left}px`;
-    this.modalEl.style.top = `${geometry.top}px`;
-    this.modalEl.style.width = `${geometry.width}px`;
-    this.modalEl.style.height = `${geometry.height}px`;
-    this.modalEl.style.minWidth = `${minimum.width}px`;
-    this.modalEl.style.minHeight = `${minimum.height}px`;
-    this.modalEl.style.maxWidth = `${maximum.width}px`;
-    this.modalEl.style.maxHeight = `${maximum.height}px`;
+    this.modalEl.setCssStyles({
+      left: `${geometry.left}px`,
+      top: `${geometry.top}px`,
+      width: `${geometry.width}px`,
+      height: `${geometry.height}px`,
+      minWidth: `${minimum.width}px`,
+      minHeight: `${minimum.height}px`,
+      maxWidth: `${maximum.width}px`,
+      maxHeight: `${maximum.height}px`
+    });
   }
 }
 

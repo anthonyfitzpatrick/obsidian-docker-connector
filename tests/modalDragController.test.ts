@@ -85,7 +85,8 @@ describe("FloatingModalController geometry", () => {
     expect(handle.listeners.pointerdown).toBeUndefined();
     expect(resizeListener).toBeUndefined();
     expect(observerListener).toBeUndefined();
-    expect(modal.style.position).toBe("");
+    expect(modal.style.left).toBe("");
+    expect(modal.style.width).toBe("");
     expect(modal.classes).not.toContain("dc-floating-modal");
   });
 
@@ -113,6 +114,7 @@ function fakeElement(): { element: HTMLElement; classes: string[]; captured: num
   const style: Record<string, string> = {};
   const element = {
     style,
+    setCssStyles: (values: Record<string, string>) => Object.assign(style, values),
     addClass: (name: string) => { if (!classes.includes(name)) classes.push(name); },
     removeClass: (name: string) => { const index = classes.indexOf(name); if (index >= 0) classes.splice(index, 1); },
     addEventListener: (type: string, listener: (event: PointerEvent) => void) => { listeners[type] = listener; },

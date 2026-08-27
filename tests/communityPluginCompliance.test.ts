@@ -85,6 +85,14 @@ describe("Obsidian Community Plugin release guard", () => {
     expect(styles).toMatch(/\.docker-connector/);
   });
 
+  it("never assigns element styles directly", async () => {
+    // obsidianmd/no-static-styles-assignment: styling belongs in styles.css,
+    // and measured values go through setCssStyles or setCssProps.
+    const sources = await Promise.all(["src/ui/ModalDragController.ts", "src/views/DockerDashboardView.ts", "src/containers/ContainersTab.ts", "src/settings/settings.ts"].map(source));
+    for (const file of sources) expect(file).not.toMatch(/\.style\.[a-zA-Z]+\s*=/);
+    expect(sources[0]).toContain("setCssStyles(");
+  });
+
   it("leaves the settings tab without a redundant title heading", async () => {
     // Obsidian labels the tab itself, so a plugin-name heading above a short
     // list of settings only repeats what the sidebar already says.
