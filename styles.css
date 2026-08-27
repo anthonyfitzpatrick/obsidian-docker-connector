@@ -826,6 +826,56 @@ button.dc-metric-card:focus-visible,
 	background: color-mix(in srgb, var(--dc-surface-raised) 97%, var(--dc-accent-soft));
 }
 
+/* Attached containers read as one clickable list, not as separate pills. */
+.dc-network-attachments {
+	display: grid;
+	margin-top: 4px;
+}
+
+.dc-network-attachments button {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	width: 100%;
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+	padding: 9px 4px;
+	background: transparent;
+	box-shadow: none;
+	color: var(--text-normal);
+	font-size: .84em;
+	text-align: left;
+}
+
+.dc-network-attachments button + button {
+	border-top: 1px solid color-mix(in srgb, var(--dc-border) 70%, transparent);
+}
+
+.dc-network-attachments button:hover {
+	background: var(--background-modifier-hover);
+	box-shadow: none;
+	color: var(--dc-accent);
+}
+
+.dc-network-attachments button:focus-visible {
+	outline: 2px solid var(--dc-accent);
+	outline-offset: -2px;
+}
+
+.dc-network-attachment-name {
+	min-width: 0;
+	overflow-wrap: anywhere;
+	font-weight: 600;
+}
+
+.dc-network-attachment-address {
+	flex: 0 0 auto;
+	color: var(--dc-text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
 .dc-container-detail-header,
 .dc-image-detail-header {
 	padding-bottom: 15px;

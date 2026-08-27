@@ -7,6 +7,17 @@ const css = readFileSync(resolve(process.cwd(), "styles.css"), "utf8");
 const rule = (selector: string) => [...css.matchAll(new RegExp(`${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`, "g"))].at(-1)?.[1] ?? "";
 
 describe("Networks resource layout", () => {
+  it("renders attached containers as one clickable list rather than pill buttons", () => {
+    expect(tab).toContain('cls: "dc-network-attachments"');
+    expect(tab).toContain('cls: "dc-network-attachment-name"');
+    expect(tab).toContain('cls: "dc-network-attachment-address"');
+    const button = rule(".dc-network-attachments button");
+    expect(button).toContain("background: transparent");
+    expect(button).toContain("width: 100%");
+    expect(button).toContain("border-radius: 0");
+    expect(rule(".dc-network-attachments button:hover")).toContain("background: var(--background-modifier-hover)");
+  });
+
   it("states when a network has no attached containers, as Images and Volumes do", () => {
     expect(tab).toContain("No attached containers.");
     expect(tab).toContain("selected.containers.length ?");
