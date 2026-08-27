@@ -24,7 +24,7 @@ export function selectedInventorySnapshots(
 
 /**
  * Selects one stable read-only inventory per daemon. Online, non-stale results
- * win; then the newest result; finally configured profile order wins ties.
+ * win; every remaining tie is settled by configured profile order.
  */
 export function representativeDaemonSnapshots(snapshots: DockerHostSnapshot[]): DockerHostSnapshot[] {
   const representatives = new Map<string, { snapshot: DockerHostSnapshot; index: number }>();
@@ -41,8 +41,10 @@ export function representativeDaemonSnapshots(snapshots: DockerHostSnapshot[]): 
 function compareSnapshots(candidate: DockerHostSnapshot, candidateIndex: number, current: DockerHostSnapshot, currentIndex: number): number {
   const usability = snapshotUsability(candidate) - snapshotUsability(current);
   if (usability) return usability;
-  const recency = timestamp(candidate.refreshedAt) - timestamp(current.refreshedAt);
-  if (recency) return recency;
+  // Refresh time deliberately does not participate. Profiles that share a
+  // daemon complete within the same refresh pass, so preferring the newest
+  // result made the representative - and the host name shown beside every
+  // resource it owns - change from one refresh to the next.
   return currentIndex - candidateIndex;
 }
 
@@ -50,7 +52,3 @@ function snapshotUsability(snapshot: DockerHostSnapshot): number {
   return snapshot.status === "online" ? snapshot.stale ? 1 : 2 : 0;
 }
 
-function timestamp(value: string): number {
-  const parsed = Date.parse(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}

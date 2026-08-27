@@ -6,17 +6,17 @@ const profiles = [profile("ssh-a", "ssh"), profile("context-b", "docker-context"
 
 describe("Docker host snapshot selection", () => {
   it("uses one deterministic representative inventory for profiles targeting the same daemon", () => {
-    const first = snapshot("ssh-a", "daemon-a", "2026-08-26T10:00:00.000Z", "online", { containers: ["same-container", "a-only"], images: ["same-image"], volumes: ["shared-volume"], networks: ["same-network"] });
-    const representative = snapshot("context-b", "daemon-a", "2026-08-26T11:00:00.000Z", "online", { containers: ["same-container", "b-only"], images: ["same-image", "b-image"], volumes: ["shared-volume", "b-volume"], networks: ["same-network", "b-network"] });
+    const representative = snapshot("ssh-a", "daemon-a", "2026-08-26T10:00:00.000Z", "online", { containers: ["same-container", "a-only"], images: ["same-image", "a-image"], volumes: ["shared-volume", "a-volume"], networks: ["same-network", "a-network"] });
+    const duplicate = snapshot("context-b", "daemon-a", "2026-08-26T11:00:00.000Z", "online", { containers: ["same-container", "b-only"], images: ["same-image", "b-image"], volumes: ["shared-volume", "b-volume"], networks: ["same-network", "b-network"] });
     const other = snapshot("tls-c", "daemon-c", "2026-08-26T09:00:00.000Z", "online", { containers: ["same-container"], images: ["same-image"], volumes: ["shared-volume"], networks: ["same-network"] });
-    const selected = selectedInventorySnapshots(profiles, new Map([[first.hostId, first], [representative.hostId, representative], [other.hostId, other]]), "all");
+    const selected = selectedInventorySnapshots(profiles, new Map([[representative.hostId, representative], [duplicate.hostId, duplicate], [other.hostId, other]]), "all");
 
     expect(selected).toEqual([representative, other]);
     expect(selected.flatMap((item) => item.containers)).toHaveLength(3);
     expect(selected.flatMap((item) => item.images)).toHaveLength(3);
     expect(selected.flatMap((item) => item.volumes)).toHaveLength(3);
     expect(selected.flatMap((item) => item.networks)).toHaveLength(3);
-    expect(selected[0].containers[0].hostProfileId).toBe("context-b");
+    expect(selected[0].containers[0].hostProfileId).toBe("ssh-a");
     expect(dockerResourceKey(selected[0], "same-container")).not.toBe(dockerResourceKey(selected[1], "same-container"));
   });
 
@@ -32,13 +32,23 @@ describe("Docker host snapshot selection", () => {
     expect(logicalDockerHostId(sameNameElsewhere)).toBe("daemon:daemon-c");
   });
 
-  it("prefers usable snapshots, then freshness, then configured profile order", () => {
+  it("prefers usable snapshots, then configured profile order", () => {
     const stale = snapshot("ssh-a", "daemon-a", "2026-08-26T12:00:00.000Z", "online", {}, true);
-    const fresh = snapshot("context-b", "daemon-a", "2026-08-26T11:00:00.000Z", "online");
-    const newestTie = snapshot("tls-c", "daemon-a", "2026-08-26T11:00:00.000Z", "online");
-    const snapshots = new Map([[stale.hostId, stale], [fresh.hostId, fresh], [newestTie.hostId, newestTie]]);
+    const usable = snapshot("context-b", "daemon-a", "2026-08-26T11:00:00.000Z", "online");
+    const laterProfile = snapshot("tls-c", "daemon-a", "2026-08-26T11:00:00.000Z", "online");
+    const snapshots = new Map([[stale.hostId, stale], [usable.hostId, usable], [laterProfile.hostId, laterProfile]]);
 
-    expect(selectedInventorySnapshots(profiles, snapshots, "all")).toEqual([fresh]);
+    expect(selectedInventorySnapshots(profiles, snapshots, "all")).toEqual([usable]);
+  });
+
+  it("keeps the same representative when a later profile refreshes more recently", () => {
+    const earliestProfile = snapshot("ssh-a", "daemon-a", "2026-08-26T10:00:00.000Z", "online");
+    const refreshedLater = snapshot("context-b", "daemon-a", "2026-08-26T18:00:00.000Z", "online");
+    const snapshots = new Map([[earliestProfile.hostId, earliestProfile], [refreshedLater.hostId, refreshedLater]]);
+
+    // A refresh that lands out of order must not move the representative, or
+    // the host name shown for every resource on this daemon would change.
+    expect(selectedInventorySnapshots(profiles, snapshots, "all")).toEqual([earliestProfile]);
   });
 });
 
