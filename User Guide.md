@@ -370,20 +370,13 @@ The **Images** tab is a read-only image inventory. Summary cards cover Images, I
 Select an image for an inspector with overview data, repository tags and digests, safe labels, and visible container references. Docker Connector does not delete images or expose arbitrary pull controls from this view.
 
 ### Screenshot 28 — Images view
-> **Screenshot placeholder 28**
->
-> **Capture:** Image inventory and detail inspector.
->
-> **How to capture this screenshot:**
-> 1. Select a populated Online test environment and open **Images**.
-> 2. Wait for image inventory and summary counts to load.
-> 3. Select a non-sensitive image so the inspector is visible.
-> 4. Ensure the inventory, tags/IDs, usage information, and inspector are readable.
-> 5. Do not expose registry credentials or private repository information not intended for publication.
-> 6. Capture the Images view with both list and inspector if the layout allows.
+![Images inventory with an image inspector open](docs/images/user-guide/28-images-view.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/28-images-view.png`
+Each image card shows its repository and tag, short ID, size, and how many containers use it, with a badge of **In use**, **Unused**, or **Dangling**. The count above the summary cards can be lower than the **Images** total, as it is above: untagged images are kept out of the list until you choose the **Dangling** filter.
+
+The four cards describe the same library from different angles. **In use** and **No visible references** split the images by whether a container on the refreshed host references them, so those two add up to the total. **Dangling** counts untagged images, which appear in one of the other two counts depending on whether a container still uses them.
+
+Selecting an image opens the inspector with its full ID, creation time, size, architecture, operating system, build comment, repository tags and digests, labels, and the containers using it. Selecting a listed container opens it in **Containers**. Docker Connector does not delete images or pull them from this view.
 
 ## 16. Volumes
 
