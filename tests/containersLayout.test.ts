@@ -63,8 +63,11 @@ describe("Containers card layout", () => {
   });
 
   it("points read-only container actions at the controls that actually enable management", () => {
-    expect(tab).toContain("dashboard header switch or its Connections card");
+    // The header switch was removed in c49540e; the Connections card carries the
+    // only control that enables management for a profile.
+    expect(tab).toContain("on its Connections card to change containers");
     expect(tab).not.toContain("Enable management for this connection in Overview");
+    expect(tab).not.toContain("header switch");
   });
 
   it("keeps container inspection, copying, and authorized management safeguards intact", () => {
