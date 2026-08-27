@@ -6,6 +6,7 @@ import { renderMetricCards } from "../ui/MetricCards";
 import { DEFAULT_VOLUMES_STATE, type DockerVolumeSummary, type VolumeFilter, type VolumesViewState } from "./VolumeModels";
 import { selectVolumes, values } from "./VolumeSelectors";
 import { pluralize } from "../ui/pluralize";
+import { multiHostResourceLabel } from "../ui/HostResourceLabel";
 
 /** Interactive read-only volume inventory. Documentation: [[Docker Connector - Volumes View]]. */
 export class VolumesTab {
@@ -37,7 +38,7 @@ export class VolumesTab {
     const list = layout.createDiv({ cls: "dc-volume-list docker-connector__volumes-list", attr: { "aria-label": "Volume results" } });
     if (!all.length) list.createDiv({ text: "No volumes were returned by this Docker host.", cls: "dc-container-empty" });
     else if (!results.length) list.createDiv({ text: "No volumes match the current filters.", cls: "dc-container-empty" });
-    results.forEach((volume) => this.row(list, volume));
+    results.forEach((volume) => this.row(list, volume, multiHostResourceLabel(snapshots, this.plugin.settings.profiles, volume.hostProfileId)));
     if (this.state.selected) this.detail(layout, profiles, snapshots);
   }
 
@@ -53,7 +54,7 @@ export class VolumesTab {
     this.select(toolbar, "Sort", this.state.sort, [["name", "Name"], ["driver", "Driver"], ["created-newest", "Created newest"], ["created-oldest", "Created oldest"], ["usage-count", "Usage count"]], (value) => { this.state.sort = value as VolumesViewState["sort"]; this.rerender(); });
   }
 
-  private row(list: HTMLElement, volume: DockerVolumeSummary): void {
+  private row(list: HTMLElement, volume: DockerVolumeSummary, host?: string): void {
     const selected = this.state.selected === this.key(volume);
     const card = list.createEl("button", { cls: `docker-connector__volume-card${selected ? " is-selected" : ""}`, attr: { "aria-label": volume.name, "aria-pressed": String(selected) } });
     card.onclick = () => void this.open(volume, card);
@@ -67,6 +68,7 @@ export class VolumesTab {
     metadata.createSpan({ text: `Driver · ${volume.driver}` });
     metadata.createSpan({ text: `Scope · ${volume.scope}` });
     metadata.createSpan({ text: pluralize(volume.containersUsingVolume, "container") });
+    if (host) metadata.createSpan({ text: host });
   }
 
   private detail(root: HTMLElement, profiles: DockerConnectionProfile[], snapshots: DockerHostSnapshot[]): void {

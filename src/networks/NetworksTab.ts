@@ -4,6 +4,7 @@ import { dockerResourceKey, selectedInventorySnapshots } from "../models/DockerH
 import { renderMetricCards } from "../ui/MetricCards";
 import { selectNetworks, values } from "./NetworkSelectors";
 import { pluralize } from "../ui/pluralize";
+import { multiHostResourceLabel } from "../ui/HostResourceLabel";
 import type { NetworkFilter } from "./NetworkModels";
 
 /** Read-only Networks tab backed by the current `/networks` snapshot. */
@@ -47,6 +48,7 @@ export class NetworksTab {
     const layout = root.createDiv({ cls: `dc-network-layout docker-connector__networks-layout${this.selected ? " is-detail-open" : ""}` });
     const list = layout.createDiv({ cls: "dc-network-list docker-connector__networks-list", attr: { "aria-label": "Network results" } });
     if (!all.length) list.createDiv({ text: "No networks were returned by this Docker host.", cls: "dc-container-empty" });
+    const hostLabel = (hostProfileId: string) => multiHostResourceLabel(snapshots, this.plugin.settings.profiles, hostProfileId);
     items.forEach((network) => {
       const isSelected = this.selected === this.key(network);
       const card = list.createEl("button", { cls: `docker-connector__network-card${isSelected ? " is-selected" : ""}`, attr: { "aria-label": network.name, "aria-pressed": String(isSelected) } });
@@ -61,6 +63,8 @@ export class NetworksTab {
       metadata.createSpan({ text: `Driver · ${network.driver}` });
       metadata.createSpan({ text: `Scope · ${network.scope}` });
       metadata.createSpan({ text: `Containers · ${network.containersAttached}` });
+      const host = hostLabel(network.hostProfileId);
+      if (host) metadata.createSpan({ text: host });
     });
     const selected = snapshots.flatMap((snapshot) => snapshot.networks.map((network) => ({ network, snapshot }))).find(({ network, snapshot }) => dockerResourceKey(snapshot, network.id) === this.selected)?.network;
     if (selected) {

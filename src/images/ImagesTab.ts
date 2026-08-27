@@ -6,6 +6,7 @@ import { renderMetricCards } from "../ui/MetricCards";
 import { DEFAULT_IMAGES_VIEW_STATE, type DockerImageSummary, type ImageFilter, type ImageSort, type ImagesViewState } from "./ImageModels";
 import { selectImages, values } from "./ImageSelectors";
 import { pluralize } from "../ui/pluralize";
+import { multiHostResourceLabel } from "../ui/HostResourceLabel";
 
 /** Interactive read-only image inventory. Documentation: [[Docker Connector - Images View]]. */
 export class ImagesTab {
@@ -60,11 +61,11 @@ export class ImagesTab {
     const list = layout.createDiv({ cls: "dc-image-list docker-connector__images-list", attr: { "aria-label": "Image results" } });
     if (!all.length) { list.createDiv({ text: "No images were returned by this Docker host.", cls: "dc-container-empty" }); return; }
     if (!results.length) { list.createDiv({ text: this.state.search ? "No images match your search." : "No images match the current filters.", cls: "dc-container-empty" }); return; }
-    results.forEach((image) => this.row(list, image));
+    results.forEach((image) => this.row(list, image, multiHostResourceLabel(snapshots, this.plugin.settings.profiles, image.hostProfileId)));
     if (this.state.selectedImageId) this.detail(layout, profiles, snapshots);
   }
 
-  private row(list: HTMLElement, image: DockerImageSummary): void {
+  private row(list: HTMLElement, image: DockerImageSummary, host?: string): void {
     const selected = this.state.selectedImageId === this.key(image);
     const card = list.createEl("button", { cls: `docker-connector__image-card${selected ? " is-selected" : ""}`, attr: { "aria-label": `${image.repository}:${image.tag}`, "aria-pressed": String(selected) } });
     card.onclick = () => void this.open(image, card);
@@ -81,6 +82,7 @@ export class ImagesTab {
     const metadata = card.createDiv({ cls: "docker-connector__image-card-metadata" });
     metadata.createSpan({ text: `Size · ${bytes(image.sizeBytes)}` });
     metadata.createSpan({ text: image.containersUsingImage < 0 ? "Usage unknown" : `${image.containersUsingImage} in use` });
+    if (host) metadata.createSpan({ text: host });
   }
 
   private detail(root: HTMLElement, profiles: DockerConnectionProfile[], snapshots: DockerHostSnapshot[]): void {
