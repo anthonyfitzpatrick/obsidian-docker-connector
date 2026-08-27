@@ -319,21 +319,21 @@ Applications is read-only at the project level. Docker Connector does not run `d
 
 ## 13. Containers
 
-The **Containers** tab is the main container inventory. It has summary cards for **Containers**, **Running**, **Stopped**, and **Updates Available**. Selecting the Updates Available card filters the list; clear the active filter to return to the complete inventory.
+The **Containers** tab is the main container inventory. It has summary cards for **Containers**, **Running**, **Stopped**, and **Updates Available**.
 
-### Screenshot 24 — Updates Available filter
-![Updates Available filter applied in Containers](docs/images/user-guide/24-updates-filter.png)
-
-Selecting the **Updates Available** card applies an additive filter to the container list. The applied filter appears as an **Updates available** chip in the **Active filters** row, alongside **Clear all**, and the result count above the summary cards reports how many of the total containers currently match.
-
-In the example above the filter is applied while every checked container is current, so the count shows `0 of 16 containers` and the list shows the **Everything is up to date** empty state with **Show all containers**. When containers do have a newer image available, the same filtered list shows only those containers instead. Use **Show all containers**, the chip's remove control, or **Clear all** to return to the complete inventory.
-
-### Screenshot 25 — Containers view
-![Containers inventory with no active filters](docs/images/user-guide/25-containers-view.png)
+### Screenshot 24 — Containers view
+![Containers inventory with no active filters](docs/images/user-guide/24-containers-view.png)
 
 With no filter applied the count shows the full inventory, and the summary cards report the totals for the selected environment. The example above shows sixteen containers across **All Docker hosts**, all of them running.
 
 Use the toolbar to search by container information and filter by State, Health, and Network. Sort and density controls make it practical to work with larger inventories. Each container card identifies the container, image, short ID, state, and health, together with its status, Docker host, networks, published ports, and creation time at Comfortable density. Selecting a card's short ID copies the full container ID to the clipboard without opening the container or changing the Docker host.
+
+### Screenshot 25 — Updates Available filter
+![Updates Available filter applied in Containers](docs/images/user-guide/25-updates-filter.png)
+
+Selecting the **Updates Available** card applies an additive filter to the container list. The applied filter appears as an **Updates available** chip in the **Active filters** row, alongside **Clear all**, and the result count above the summary cards reports how many of the total containers currently match.
+
+In the example above the filter is applied while every checked container is current, so the count shows `0 of 16 containers` and the list shows the **Everything is up to date** empty state with **Show all containers**. When containers do have a newer image available, the same filtered list shows only those containers instead. Use **Show all containers**, the chip's remove control, or **Clear all** to return to the complete inventory.
 
 ### Screenshot 26 — Container filters and search
 > **Screenshot placeholder 26**
@@ -868,8 +868,8 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 21 | `21-current-environment.png` | Interface | Selector |
 | 22 | `22-applications-list.png` | Applications | List |
 | 23 | `23-application-inspector.png` | Applications | Detail |
-| 24 | `24-updates-filter.png` | Containers | Filter |
-| 25 | `25-containers-view.png` | Containers | List |
+| 24 | `24-containers-view.png` | Containers | List |
+| 25 | `25-updates-filter.png` | Containers | Filter |
 | 26 | `26-container-filters.png` | Containers | Controls |
 | 27 | `27-container-inspector.png` | Container detail | Detail |
 | 28 | `28-images-view.png` | Images | Inventory |
