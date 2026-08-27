@@ -440,8 +440,15 @@ Authorization is valid only while the profile remains continuously verified as *
 
 When disabled, the Actions section says that the plugin is in read-only mode. When enabled, action availability depends on the container’s current state, host status, profile capabilities, and whether another operation is already in progress.
 
-### Screenshot 32 — Container management disabled
-> **Screenshot placeholder 32**
+### Screenshot 32 — Container management switch on a Connections card
+![A Connections card with Container management set to Read-only](docs/images/user-guide/32-management-card-read-only.png)
+
+Every saved connection carries its own **Container management** switch at the bottom of its Connections card. It reads **Read-only** by default and after every Obsidian restart, and it is the only control that authorizes lifecycle and update actions for that host.
+
+The switch is available only while that connection is **Online**; the card above also shows the host's inventory counts, Docker Engine details, and the endpoint the connection uses, so you can confirm you are enabling the host you intended.
+
+### Screenshot 33 — Container management disabled
+> **Screenshot placeholder 33**
 >
 > **Capture:** Read-only Actions panel and enable guidance.
 >
@@ -454,23 +461,21 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. Do not enable management until after this screenshot is complete.
 
 >
-> **Suggested filename:** `docs/images/user-guide/32-management-disabled.png`
+> **Suggested filename:** `docs/images/user-guide/33-management-disabled.png`
 
-### Screenshot 33 — Per-profile Container management enabled
-> **Screenshot placeholder 33**
->
-> **Capture:** An individual Online host with management enabled on its Connections card.
->
-> **How to capture this screenshot:**
-> 1. Select an individual known-safe **Online** test host in Docker Connector; do not use **All Docker hosts**.
-> 2. Turn on **Container management** on that host’s Connections card.
-> 3. Accept the confirmation only in an isolated test environment after confirming the configured environments are understood and you intend to continue test work.
-> 4. Confirm the card shows **Enabled** for that profile only and that other hosts remain **Read-only**.
-> 5. Capture the enabled profile state; do not include credentials, unrelated settings, or Docker actions in progress.
-> 6. If desired, disable management again after all management/update screenshots are finished.
+### Screenshot 34 — Enabling asks for confirmation
+![Confirmation dialog shown when enabling Container management](docs/images/user-guide/34-management-confirmation.png)
 
->
-> **Suggested filename:** `docs/images/user-guide/33-management-enabled.png`
+Turning the switch on asks for confirmation first, and the prompt names the connection you are about to authorize. It states exactly what is being granted — Start, Stop, Shut down, Restart, and standalone Update for that Docker connection — and that the authorization lasts only for the current Obsidian session, ending if the connection is lost or Obsidian restarts.
+
+Choosing **Cancel** leaves the connection read-only and the switch returns to its previous position. Read the connection name before accepting: authorization applies to that profile alone, and the actions it permits change the Docker host.
+
+### Screenshot 35 — Per-profile Container management enabled
+![A Connections card with Container management enabled](docs/images/user-guide/35-management-enabled.png)
+
+After accepting, the switch reads **Enabled** for that profile. Only this connection is authorized: every other saved connection stays **Read-only** until it is enabled on its own card.
+
+The authorization is session-only and is never written to disk. It ends when Obsidian restarts or reloads, and it is revoked the moment the connection stops being Online — reconnecting returns the card to **Read-only** rather than restoring it. Turn the switch off yourself when you have finished the work that needed it.
 
 ### Start, Stop, Shut down, and Restart
 
@@ -479,8 +484,8 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 - **Stop** uses the normal stop action with a 10-second wait.
 - **Restart** uses Docker’s restart action with a 10-second wait.
 
-### Screenshot 34 — Stopped container Start control
-> **Screenshot placeholder 34**
+### Screenshot 36 — Stopped container Start control
+> **Screenshot placeholder 36**
 >
 > **Capture:** Start action for a stopped standalone container.
 >
@@ -493,12 +498,12 @@ When disabled, the Actions section says that the plugin is in read-only mode. Wh
 > 6. After capturing, return the test container to its desired normal state.
 
 >
-> **Suggested filename:** `docs/images/user-guide/34-stopped-start.png`
+> **Suggested filename:** `docs/images/user-guide/36-stopped-start.png`
 
 Docker Connector asks for confirmation before lifecycle actions and coordinates a refresh after an accepted action. These controls never appear as a bulk-action interface.
 
-### Screenshot 35 — Running container lifecycle controls
-> **Screenshot placeholder 35**
+### Screenshot 37 — Running container lifecycle controls
+> **Screenshot placeholder 37**
 >
 > **Capture:** Shut down, Stop, Restart, and Update eligibility where applicable.
 >
@@ -511,7 +516,7 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 > 6. Capture the Actions section and container identity clearly enough to show it is a test target.
 
 >
-> **Suggested filename:** `docs/images/user-guide/35-running-actions.png`
+> **Suggested filename:** `docs/images/user-guide/37-running-actions.png`
 
 ### Update
 
@@ -521,8 +526,8 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 
 An eligible Update begins with a confirmation preview. It identifies the container and image, summarizes supported configuration preservation, shows warnings, and offers Cancel or a direct proceed action. There is no acknowledgement checkbox; the writable-layer warning remains prominent.
 
-### Screenshot 36 — Update preview
-> **Screenshot placeholder 36**
+### Screenshot 38 — Update preview
+> **Screenshot placeholder 38**
 >
 > **Capture:** Preview, configuration summary, and writable-layer warning.
 >
@@ -535,12 +540,12 @@ An eligible Update begins with a confirmation preview. It identifies the contain
 > 6. Capture the complete preview dialog before selecting Proceed.
 
 >
-> **Suggested filename:** `docs/images/user-guide/36-update-preview.png`
+> **Suggested filename:** `docs/images/user-guide/38-update-preview.png`
 
 The transaction is designed for standalone containers. It inspects the original container, validates eligibility, pulls the candidate image, compares image IDs, stops the original if needed, preserves it as a backup, creates and configures a replacement, restores supported networking, starts and verifies the replacement, then cleans up the backup where safe. The exact progress view reports the stage actually in progress.
 
-### Screenshot 37 — Update progress
-> **Screenshot placeholder 37**
+### Screenshot 39 — Update progress
+> **Screenshot placeholder 39**
 >
 > **Capture:** Real in-progress transaction stages.
 >
@@ -553,12 +558,12 @@ The transaction is designed for standalone containers. It inspects the original 
 > 6. If the operation completes too quickly to capture reliably, repeat only on the disposable test target when safe.
 
 >
-> **Suggested filename:** `docs/images/user-guide/37-update-progress.png`
+> **Suggested filename:** `docs/images/user-guide/39-update-progress.png`
 
 Docker Connector attempts to preserve the supported Docker configuration needed to recreate an eligible standalone container, including its relevant mounts, ports, restart configuration, and network attachments. No update workflow can make writable-layer-only data persistent.
 
-### Screenshot 38 — Successful update result
-> **Screenshot placeholder 38**
+### Screenshot 40 — Successful update result
+> **Screenshot placeholder 40**
 >
 > **Capture:** Completed replacement and image identifiers.
 >
@@ -571,7 +576,7 @@ Docker Connector attempts to preserve the supported Docker configuration needed 
 > 6. Capture the final success/result panel.
 
 >
-> **Suggested filename:** `docs/images/user-guide/38-update-success.png`
+> **Suggested filename:** `docs/images/user-guide/40-update-success.png`
 
 ## 21. Rollback and recovery
 
@@ -579,8 +584,8 @@ If a replacement cannot be created, started, or verified after mutation starts, 
 
 Rollback is a recovery attempt, not an absolute guarantee against every host, storage, or Docker failure. If the result says a backup was retained, rollback is incomplete, or manual recovery is required, pause and inspect the reported container names and Docker state before taking further action. Do not repeatedly retry an unclear update result.
 
-### Screenshot 39 — Rollback or recovery result
-> **Screenshot placeholder 39**
+### Screenshot 41 — Rollback or recovery result
+> **Screenshot placeholder 41**
 >
 > **Capture:** Safe rollback, backup-retained, or manual-recovery guidance.
 >
@@ -593,7 +598,7 @@ Rollback is a recovery attempt, not an absolute guarantee against every host, st
 > 6. If no safe real recovery result is available, leave this placeholder uncaptured rather than manufacturing a misleading screenshot.
 
 >
-> **Suggested filename:** `docs/images/user-guide/39-update-recovery.png`
+> **Suggested filename:** `docs/images/user-guide/41-update-recovery.png`
 
 > [!warning] Writable-layer data
 > Data kept only in a container’s writable layer is not equivalent to a named volume or bind mount. Recreating a container can lose writable-layer-only changes. Persist important data with Docker volumes or bind mounts before updating.
@@ -612,8 +617,8 @@ Docker Connector Settings provide:
 
 Container management is intentionally not a Setting. It is controlled only by the per-profile Connections-card switches and never persists across a restart or reload.
 
-### Screenshot 40 — Settings page
-> **Screenshot placeholder 40**
+### Screenshot 42 — Settings page
+> **Screenshot placeholder 42**
 >
 > **Capture:** Automatic refresh, interval, and theme integration.
 >
@@ -625,7 +630,7 @@ Container management is intentionally not a Setting. It is controlled only by th
 > 5. Capture the Docker Connector settings page at a width where labels, descriptions, and controls are readable.
 
 >
-> **Suggested filename:** `docs/images/user-guide/40-settings.png`
+> **Suggested filename:** `docs/images/user-guide/42-settings.png`
 
 ## 24. Security model and saved information
 
@@ -825,12 +830,14 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 29 | `29-volumes-view.png` | Volumes | Inventory |
 | 30 | `30-networks-view.png` | Networks | Inventory |
 | 31 | `31-image-current.png` | Image updates | Current |
-| 32 | `32-management-disabled.png` | Container management | Read-only |
-| 33 | `33-management-enabled.png` | Container management | Per-profile enabled |
-| 34 | `34-stopped-start.png` | Container management | Start |
-| 35 | `35-running-actions.png` | Container management | Running actions |
-| 36 | `36-update-preview.png` | Update | Preview |
-| 37 | `37-update-progress.png` | Update | Progress |
-| 38 | `38-update-success.png` | Update | Result |
-| 39 | `39-update-recovery.png` | Recovery | Result |
-| 40 | `40-settings.png` | Settings | Full page |
+| 32 | `32-management-card-read-only.png` | Container management | Connections-card switch |
+| 33 | `33-management-disabled.png` | Container management | Read-only |
+| 34 | `34-management-confirmation.png` | Container management | Enable confirmation |
+| 35 | `35-management-enabled.png` | Container management | Per-profile enabled |
+| 36 | `36-stopped-start.png` | Container management | Start |
+| 37 | `37-running-actions.png` | Container management | Running actions |
+| 38 | `38-update-preview.png` | Update | Preview |
+| 39 | `39-update-progress.png` | Update | Progress |
+| 40 | `40-update-success.png` | Update | Result |
+| 41 | `41-update-recovery.png` | Recovery | Result |
+| 42 | `42-settings.png` | Settings | Full page |
