@@ -484,8 +484,15 @@ The **Image update** area appears with it. Until a check has run it reports **Up
 
 Docker Connector asks for confirmation before lifecycle actions and coordinates a refresh after an accepted action. These controls never appear as a bulk-action interface.
 
-### Screenshot 37 — Stopped container Start control
-> **Screenshot placeholder 37**
+### Screenshot 37 — Lifecycle action confirmation
+![Confirmation prompt shown before stopping a container](docs/images/user-guide/37-action-confirmation.png)
+
+Start, Shut down, Stop, and Restart each ask before anything is sent, and the prompt names the container, the image it runs, and the Docker host it belongs to. Check those three lines before accepting: they are what distinguishes the container you meant from a similarly named one on another host.
+
+**Cancel** sends nothing at all. **OK** sends exactly one typed action for that one container, after which Docker Connector refreshes the host and reports the outcome. There is no bulk action, and no way to apply a lifecycle action to several containers at once.
+
+### Screenshot 38 — Stopped container Start control
+> **Screenshot placeholder 38**
 >
 > **Capture:** Start action for a stopped standalone container.
 >
@@ -498,7 +505,7 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 > 6. After capturing, return the test container to its desired normal state.
 
 >
-> **Suggested filename:** `docs/images/user-guide/37-stopped-start.png`
+> **Suggested filename:** `docs/images/user-guide/38-stopped-start.png`
 
 ### Update
 
@@ -508,8 +515,8 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 
 An eligible Update begins with a confirmation preview. It identifies the container and image, summarizes supported configuration preservation, shows warnings, and offers Cancel or a direct proceed action. There is no acknowledgement checkbox; the writable-layer warning remains prominent.
 
-### Screenshot 38 — Update preview
-> **Screenshot placeholder 38**
+### Screenshot 39 — Update preview
+> **Screenshot placeholder 39**
 >
 > **Capture:** Preview, configuration summary, and writable-layer warning.
 >
@@ -522,12 +529,12 @@ An eligible Update begins with a confirmation preview. It identifies the contain
 > 6. Capture the complete preview dialog before selecting Proceed.
 
 >
-> **Suggested filename:** `docs/images/user-guide/38-update-preview.png`
+> **Suggested filename:** `docs/images/user-guide/39-update-preview.png`
 
 The transaction is designed for standalone containers. It inspects the original container, validates eligibility, pulls the candidate image, compares image IDs, stops the original if needed, preserves it as a backup, creates and configures a replacement, restores supported networking, starts and verifies the replacement, then cleans up the backup where safe. The exact progress view reports the stage actually in progress.
 
-### Screenshot 39 — Update progress
-> **Screenshot placeholder 39**
+### Screenshot 40 — Update progress
+> **Screenshot placeholder 40**
 >
 > **Capture:** Real in-progress transaction stages.
 >
@@ -540,12 +547,12 @@ The transaction is designed for standalone containers. It inspects the original 
 > 6. If the operation completes too quickly to capture reliably, repeat only on the disposable test target when safe.
 
 >
-> **Suggested filename:** `docs/images/user-guide/39-update-progress.png`
+> **Suggested filename:** `docs/images/user-guide/40-update-progress.png`
 
 Docker Connector attempts to preserve the supported Docker configuration needed to recreate an eligible standalone container, including its relevant mounts, ports, restart configuration, and network attachments. No update workflow can make writable-layer-only data persistent.
 
-### Screenshot 40 — Successful update result
-> **Screenshot placeholder 40**
+### Screenshot 41 — Successful update result
+> **Screenshot placeholder 41**
 >
 > **Capture:** Completed replacement and image identifiers.
 >
@@ -558,7 +565,7 @@ Docker Connector attempts to preserve the supported Docker configuration needed 
 > 6. Capture the final success/result panel.
 
 >
-> **Suggested filename:** `docs/images/user-guide/40-update-success.png`
+> **Suggested filename:** `docs/images/user-guide/41-update-success.png`
 
 ## 21. Rollback and recovery
 
@@ -566,8 +573,8 @@ If a replacement cannot be created, started, or verified after mutation starts, 
 
 Rollback is a recovery attempt, not an absolute guarantee against every host, storage, or Docker failure. If the result says a backup was retained, rollback is incomplete, or manual recovery is required, pause and inspect the reported container names and Docker state before taking further action. Do not repeatedly retry an unclear update result.
 
-### Screenshot 41 — Rollback or recovery result
-> **Screenshot placeholder 41**
+### Screenshot 42 — Rollback or recovery result
+> **Screenshot placeholder 42**
 >
 > **Capture:** Safe rollback, backup-retained, or manual-recovery guidance.
 >
@@ -580,7 +587,7 @@ Rollback is a recovery attempt, not an absolute guarantee against every host, st
 > 6. If no safe real recovery result is available, leave this placeholder uncaptured rather than manufacturing a misleading screenshot.
 
 >
-> **Suggested filename:** `docs/images/user-guide/41-update-recovery.png`
+> **Suggested filename:** `docs/images/user-guide/42-update-recovery.png`
 
 > [!warning] Writable-layer data
 > Data kept only in a container’s writable layer is not equivalent to a named volume or bind mount. Recreating a container can lose writable-layer-only changes. Persist important data with Docker volumes or bind mounts before updating.
@@ -599,8 +606,8 @@ Docker Connector Settings provide:
 
 Container management is intentionally not a Setting. It is controlled only by the per-profile Connections-card switches and never persists across a restart or reload.
 
-### Screenshot 42 — Settings page
-> **Screenshot placeholder 42**
+### Screenshot 43 — Settings page
+> **Screenshot placeholder 43**
 >
 > **Capture:** Automatic refresh, interval, and theme integration.
 >
@@ -612,7 +619,7 @@ Container management is intentionally not a Setting. It is controlled only by th
 > 5. Capture the Docker Connector settings page at a width where labels, descriptions, and controls are readable.
 
 >
-> **Suggested filename:** `docs/images/user-guide/42-settings.png`
+> **Suggested filename:** `docs/images/user-guide/43-settings.png`
 
 ## 24. Security model and saved information
 
@@ -817,9 +824,10 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 34 | `34-management-confirmation.png` | Container management | Enable confirmation |
 | 35 | `35-management-enabled.png` | Container management | Per-profile enabled |
 | 36 | `36-running-actions.png` | Container management | Enabled actions |
-| 37 | `37-stopped-start.png` | Container management | Start |
-| 38 | `38-update-preview.png` | Update | Preview |
-| 39 | `39-update-progress.png` | Update | Progress |
-| 40 | `40-update-success.png` | Update | Result |
-| 41 | `41-update-recovery.png` | Recovery | Result |
-| 42 | `42-settings.png` | Settings | Full page |
+| 37 | `37-action-confirmation.png` | Container management | Action confirmation |
+| 38 | `38-stopped-start.png` | Container management | Start |
+| 39 | `39-update-preview.png` | Update | Preview |
+| 40 | `40-update-progress.png` | Update | Progress |
+| 41 | `41-update-success.png` | Update | Result |
+| 42 | `42-update-recovery.png` | Recovery | Result |
+| 43 | `43-settings.png` | Settings | Full page |
