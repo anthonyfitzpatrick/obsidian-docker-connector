@@ -355,14 +355,16 @@ The inspector lets you refresh details and copy the full container ID. It does n
 ### Screenshot 27 — Container detail inspector
 > **Screenshot placeholder 27**
 >
-> **Capture:** Read-only sections and the Image update area.
+> **Capture:** The read-only inspector sections.
 >
 > **How to capture this screenshot:**
 > 1. Open **Containers** and select a safe test container.
 > 2. Allow the detail inspector to populate.
-> 3. Ensure **Actions**, **Overview**, **State**, **Configuration**, **Networking**, **Storage**, **Metadata**, and the **Image update** area are visible as much as the layout permits.
+> 3. Ensure **Actions**, **Overview**, **State**, **Configuration**, **Networking**, **Storage**, **Metadata**, and **Safe diagnostics** are visible as much as the layout permits; collapsed headings are sufficient for the lower sections.
 > 4. Use a test container whose metadata does not contain sensitive environment information.
-> 5. Capture the inspector and selected container row; do not expand anything that would expose secrets.
+> 5. Capture the inspector and the selected container card; do not expand anything that would expose secrets.
+>
+> The **Image update** area is part of the Actions section and appears only while Container management is enabled for that connection, so a read-only inspector cannot show it. Screenshots 31 and 32 cover it.
 
 >
 > **Suggested filename:** `docs/images/user-guide/27-container-inspector.png`

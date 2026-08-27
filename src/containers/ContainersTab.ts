@@ -747,7 +747,7 @@ export class ContainersTab {
     });
     if (!managementEnabled) {
       section.createDiv({
-        text: "Read-only mode. Enable management for this connection in Overview to change containers.",
+        text: "Read-only mode. Enable Container management for this connection from the dashboard header switch or its Connections card to change containers.",
         cls: "docker-connector__muted",
       });
       return;

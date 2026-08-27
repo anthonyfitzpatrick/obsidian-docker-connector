@@ -54,6 +54,19 @@ describe("Containers card layout", () => {
     expect(applications).toContain('cls: "docker-connector__application-summary"');
   });
 
+  it("keeps the density and refresh controls intact when the toolbar runs out of room", () => {
+    // The toolbar is a flex row, so both controls must wrap rather than shrink
+    // into a clipped label once a detail panel narrows the available width.
+    expect(css).toContain(".dc-container-density { display: inline-flex; flex-shrink: 0;");
+    expect(css).toContain(".dc-container-refresh { align-self: end; flex-shrink: 0;");
+    expect(declaration(".dc-container-density button")).toContain("white-space: nowrap");
+  });
+
+  it("points read-only container actions at the controls that actually enable management", () => {
+    expect(tab).toContain("dashboard header switch or its Connections card");
+    expect(tab).not.toContain("Enable management for this connection in Overview");
+  });
+
   it("keeps container inspection, copying, and authorized management safeguards intact", () => {
     for (const value of ["navigator.clipboard.writeText(container.id)", 'role: "button"', 'tabindex: "0"', "Refresh container details", "getContainerActionCapabilities", "isProfileManagementEnabled", "getContainerUpdateEligibility", "Container management enabled"]) expect(tab).toContain(value);
   });
