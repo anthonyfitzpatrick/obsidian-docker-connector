@@ -526,57 +526,48 @@ Bringing a container back up changes the Docker host as surely as taking it down
 
 An eligible Update begins with a confirmation preview. It identifies the container and image, summarizes supported configuration preservation, shows warnings, and offers Cancel or a direct proceed action. There is no acknowledgement checkbox; the writable-layer warning remains prominent.
 
-### Screenshot 41 — Update preview
-> **Screenshot placeholder 41**
->
-> **Capture:** Preview, configuration summary, and writable-layer warning.
->
-> **How to capture this screenshot:**
-> 1. Use the approved disposable standalone container with a confirmed available update.
-> 2. Select **Update** to open the confirmation preview.
-> 3. Do not proceed immediately.
-> 4. Ensure the preview shows the container/image, supported configuration-preservation summary, writable-layer warning, **Cancel**, and **Proceed with update**.
-> 5. Check carefully that no environment values or credentials appear.
-> 6. Capture the complete preview dialog before selecting Proceed.
+### What the preview shows
 
->
-> **Suggested filename:** `docs/images/user-guide/41-update-preview.png`
+Choosing **Update** opens a read-only preview and changes nothing on the Docker host. Building it inspects the container once and reports what a replacement would be made from:
+
+- The container's name, the Docker host and connection it belongs to, and whether it is currently running.
+- The image reference that will be pulled, and the ID of the image the container runs today. Comparing those two is what the update is for.
+- Counts of the things that must survive the replacement: named volumes, bind mounts, published ports, environment variables, and labels.
+- The networks it is attached to, its restart policy, its stop timeout, whether it defines a health check, and — where set — its working directory, configured user, and read-only root filesystem.
+
+Environment variables are counted, never listed. Their values are not shown in the preview, in progress messages, or in any error the transaction produces, because a container's environment is where secrets usually live.
+
+The preview is also the last point at which nothing has happened. Cancelling leaves the container exactly as it was, and the update advisory remains for later.
 
 The transaction is designed for standalone containers. It inspects the original container, validates eligibility, pulls the candidate image, compares image IDs, stops the original if needed, preserves it as a backup, creates and configures a replacement, restores supported networking, starts and verifies the replacement, then cleans up the backup where safe. The exact progress view reports the stage actually in progress.
 
-### Screenshot 42 — Update progress
-> **Screenshot placeholder 42**
->
-> **Capture:** Real in-progress transaction stages.
->
-> **How to capture this screenshot:**
-> 1. Use only the approved disposable standalone test container.
-> 2. From the Update preview, select **Proceed with update**.
-> 3. Watch the progress view and capture while the transaction is actively between stages—not before it starts and not after it completes.
-> 4. Prefer a moment showing several completed stages plus one clearly active stage such as creating, starting, or verifying the replacement.
-> 5. Do not interrupt the transaction merely to obtain the screenshot.
-> 6. If the operation completes too quickly to capture reliably, repeat only on the disposable test target when safe.
+### The stages, in order
 
->
-> **Suggested filename:** `docs/images/user-guide/42-update-progress.png`
+Proceeding runs a fixed sequence, and the progress view names the stage actually running rather than a generic spinner:
+
+1. **Inspecting the container** — the current configuration is read once and becomes the plan for the replacement.
+2. **Validating the configuration** — eligibility is checked again, and any configuration the plugin cannot recreate faithfully stops the transaction here.
+3. **Pulling the image** — the configured repository and tag are pulled through the Docker daemon.
+4. **Comparing image versions** — the newly resolved image ID is matched against the one the container runs. If Docker cannot resolve an ID for the pulled reference, the transaction stops rather than guess.
+5. **Stopping the original** — only if it was running, and using the container's own stop timeout.
+6. **Creating the rollback backup** — the original container is *renamed*, not deleted, to a reserved name formed from its own name plus a `.docker-connector-backup-` suffix. The name is checked for conflicts first. The original container, with its writable layer, still exists at this point.
+7. **Creating the replacement** — a new container is created under the original name, from the new image, with the captured configuration.
+8. **Restoring network connections** — the replacement is created attached to the first network and connected to each remaining one by its Docker network ID, preserving aliases.
+9. **Starting the replacement** — only if the original had been running.
+10. **Verifying the replacement** — it must reach the state the original was in. If the image defines a health check, Docker Connector waits for it, polling every second for up to thirty seconds. A health check that reports unhealthy, or that has not passed by then, fails verification and triggers rollback.
+11. **Removing the rollback backup** — the original container is deleted only after verification succeeds, and only with Docker's volume removal and force flags both off. Named volumes are never removed by an update.
+
+Every mutation the transaction can make is restricted to that sequence. It can pull an image, stop, rename or start a container, create one, connect one to a network, and delete a container without touching its volumes. No other Docker route is reachable from an update, whatever happens mid-transaction.
+
+You can cancel while it runs. Before the first mutation, cancelling simply stops. After mutation has begun, cancellation follows the same rollback path as a failure. If you cancel after the replacement has already been verified, the update stands and the backup is kept for you to inspect.
 
 Docker Connector attempts to preserve the supported Docker configuration needed to recreate an eligible standalone container, including its relevant mounts, ports, restart configuration, and network attachments. No update workflow can make writable-layer-only data persistent.
 
-### Screenshot 43 — Successful update result
-> **Screenshot placeholder 43**
->
-> **Capture:** Completed replacement and image identifiers.
->
-> **How to capture this screenshot:**
-> 1. Complete a successful Update on the approved disposable standalone test container.
-> 2. Wait for the final result state and subsequent refresh.
-> 3. Ensure the result identifies successful completion and, where the UI provides them, original/replacement or image identifiers.
-> 4. Confirm the replacement container is healthy/running before capturing.
-> 5. Ensure no Update action remains if the image is now current.
-> 6. Capture the final success/result panel.
+### After a successful update
 
->
-> **Suggested filename:** `docs/images/user-guide/43-update-success.png`
+The result names the container that was replaced and the image IDs it moved between, and Docker Connector refreshes the host so the inventory reflects the new container. The replacement carries a new container ID: an update recreates a container rather than modifying one in place.
+
+The update status for that container resets to current, so no further Update action is offered until a later check finds something newer.
 
 ## 21. Rollback and recovery
 
@@ -584,21 +575,21 @@ If a replacement cannot be created, started, or verified after mutation starts, 
 
 Rollback is a recovery attempt, not an absolute guarantee against every host, storage, or Docker failure. If the result says a backup was retained, rollback is incomplete, or manual recovery is required, pause and inspect the reported container names and Docker state before taking further action. Do not repeatedly retry an unclear update result.
 
-### Screenshot 44 — Rollback or recovery result
-> **Screenshot placeholder 44**
->
-> **Capture:** Safe rollback, backup-retained, or manual-recovery guidance.
->
-> **How to capture this screenshot:**
-> 1. Do **not** deliberately break a production or valued container to create this screenshot.
-> 2. Prefer an existing safe rollback/recovery result from disposable testing if one occurs naturally, or create a controlled failure only on a dedicated disposable fixture designed for recovery testing.
-> 3. Acceptable states include successful rollback, backup retained, or explicit manual-recovery guidance.
-> 4. Ensure the screenshot clearly shows the recovery outcome and any safe container/backup names needed for understanding.
-> 5. Do not expose environment values, credentials, or unrelated server data.
-> 6. If no safe real recovery result is available, leave this placeholder uncaptured rather than manufacturing a misleading screenshot.
+### Reading the result
 
->
-> **Suggested filename:** `docs/images/user-guide/44-update-recovery.png`
+Each outcome is reported distinctly, because what you should do next differs:
+
+- **Updated** — the replacement is running and verified, and the backup has been removed. Nothing further is required.
+- **Updated, backup retained** — the replacement is running and verified, but deleting the old container failed. The update succeeded; a stopped container with the `.docker-connector-backup-` name remains, and you can remove it yourself once satisfied.
+- **Already current** — the pulled image matched the running one. Nothing was changed.
+- **Cancelled** — you stopped the transaction. If it had passed verification, the replacement stands with its backup retained; otherwise the original was restored.
+- **Failed before any change** — inspection, validation, the pull, or the image comparison failed while the container was still untouched. The original is running exactly as it was, and the reported code says which step refused.
+- **Failed, original restored** — a mutation failed and rollback completed: the replacement was stopped and deleted, the backup was renamed back to the original name, and the original was returned to its previous running state and confirmed.
+- **Rollback incomplete** — recovery could not be confirmed. This is the one result that needs you. It names the original container, the backup name it may still be under, and the replacement to check, so you can inspect Docker directly and decide.
+
+The last case also covers a rarer situation: if Docker creates a replacement but does not return its identity, the transaction cannot safely delete what it cannot name, and it says so rather than guessing.
+
+If Obsidian is closed or the plugin is reloaded during an update, in-flight transactions are cancelled and given a bounded fifteen seconds to complete their rollback. If that window passes, the result reports a timeout and names the container to verify — it does not claim a rollback that may not have finished.
 
 > [!warning] Writable-layer data
 > Data kept only in a container’s writable layer is not equivalent to a named volume or bind mount. Recreating a container can lose writable-layer-only changes. Persist important data with Docker volumes or bind mounts before updating.
@@ -617,8 +608,8 @@ Docker Connector Settings provide:
 
 Container management is intentionally not a Setting. It is controlled only by the per-profile Connections-card switches and never persists across a restart or reload.
 
-### Screenshot 45 — Settings page
-> **Screenshot placeholder 45**
+### Screenshot 41 — Settings page
+> **Screenshot placeholder 41**
 >
 > **Capture:** Automatic refresh, interval, and theme integration.
 >
@@ -630,7 +621,7 @@ Container management is intentionally not a Setting. It is controlled only by th
 > 5. Capture the Docker Connector settings page at a width where labels, descriptions, and controls are readable.
 
 >
-> **Suggested filename:** `docs/images/user-guide/45-settings.png`
+> **Suggested filename:** `docs/images/user-guide/41-settings.png`
 
 ## 24. Security model and saved information
 
@@ -839,8 +830,4 @@ This is an index and capture checklist; the full numbered screenshots and placeh
 | 38 | `38-action-confirmation.png` | Container management | Action confirmation |
 | 39 | `39-stopped-start.png` | Container management | Start |
 | 40 | `40-start-confirmation.png` | Container management | Start confirmation |
-| 41 | `41-update-preview.png` | Update | Preview |
-| 42 | `42-update-progress.png` | Update | Progress |
-| 43 | `43-update-success.png` | Update | Result |
-| 44 | `44-update-recovery.png` | Recovery | Result |
-| 45 | `45-settings.png` | Settings | Full page |
+| 41 | `41-settings.png` | Settings | Full page |

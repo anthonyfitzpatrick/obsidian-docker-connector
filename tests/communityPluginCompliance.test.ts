@@ -90,7 +90,7 @@ describe("Obsidian Community Plugin release guard", () => {
     const filenames = [...guide.matchAll(/^> \*\*Suggested filename:\*\* `[^`/]+(?:\/[^`/]+)*\/(\d{2})-[^`]+`$/gm)].map((match) => match[1]);
     const checklist = [...guide.matchAll(/^\| (\d{2}) \| `\1-[^`]+` \|/gm)].map((match) => match[1]);
     const embedded = [...guide.matchAll(/!\[[^\]]*\]\(docs\/images\/user-guide\/(\d{2}-[^)]+)\)/g)].map((match) => match[1]);
-    const expected = Array.from({ length: 45 }, (_, index) => screenshotNumber(index));
+    const expected = Array.from({ length: 41 }, (_, index) => screenshotNumber(index));
     // Captured screenshots need not be a contiguous run, so require instead
     // that every planned number is either embedded or still has a brief, and
     // that each brief keeps its own suggested filename.
