@@ -339,7 +339,7 @@ Status is information, not an action. The current states are **Unknown**, **Conn
 ### Authentication required and Reconnect
 <div align="center">
 
-![A profile awaiting authentication, with its Reconnect action|430](docs/images/user-guide/19-authentication-required-reconnect.png)
+![A profile awaiting authentication, with its Reconnect action|393](docs/images/user-guide/19-authentication-required-reconnect.png)
 
 </div>
 
