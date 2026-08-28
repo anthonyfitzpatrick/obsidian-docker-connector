@@ -135,8 +135,10 @@ describe("Obsidian Community Plugin release guard", () => {
     if (main.includes("revealLeaf(")) expect([major, minor, patch] >= [1, 7, 2]).toBe(true);
     expect(manifest.minAppVersion).toBe("1.7.2");
     // setDestructive is @since 1.13.0, well above that floor, so the
-    // deprecated setWarning stays until minAppVersion can move.
-    expect(modal).not.toContain("setDestructive(");
+    // deprecated setWarning stays until minAppVersion can move. Match the
+    // invocation, not the word, which also appears in the note explaining why.
+    expect(modal).not.toMatch(/button\.setDestructive\(/);
+    expect(modal).toMatch(/button\.setWarning\(\)/);
   });
 
   it("keeps the type packages installable without dev dependencies", async () => {
