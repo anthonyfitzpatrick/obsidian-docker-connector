@@ -598,7 +598,9 @@ Nothing else is withheld. Overview, State, and the remaining sections stay fully
 
 Turning the switch on asks for confirmation first, in an **Enable container management** dialog that names the connection you are about to authorize. It states exactly what is being granted — Start, Stop, Shut down, Restart, and standalone Update for that Docker connection — and that the authorization lasts only for the current Obsidian session, ending if the connection is lost or Obsidian restarts.
 
-Choosing **Cancel**, or dismissing the dialog any other way, leaves the connection read-only and the switch returns to its previous position. Only **Enable management** grants the authorization. Read the connection name before accepting: authorization applies to that profile alone, and the actions it permits change the Docker host.
+The button that grants it is the one on the right, labelled **Enable management**. It is the only control that turns the switch on: **Cancel**, the close control, and dismissing the dialog any other way all leave the connection read-only, and the switch returns to the position it was in before you touched it. Nothing is granted by opening this dialog.
+
+Read the connection name before pressing **Enable management**. Authorization applies to that profile alone, and the actions it permits change the Docker host.
 
 ### Per-profile Container management enabled
 <div align="center">
@@ -640,7 +642,9 @@ Docker Connector asks for confirmation before lifecycle actions and coordinates 
 
 Start, Shut down, Stop, and Restart each ask before anything is sent. The dialog is titled with the action — **Start container**, **Stop container**, **Restart container**, or **Shut down container gracefully** — and lists the container, the image it runs, and the Docker host it belongs to. Check those three rows before accepting: they are what distinguishes the container you meant from a similarly named one on another host.
 
-**Cancel**, or dismissing the dialog, sends nothing at all. The accepting button is labelled with the action itself — **Stop**, **Restart**, **Shut down**, **Start** — and sends exactly one typed action for that one container, after which Docker Connector refreshes the host and reports the outcome. There is no bulk action, and no way to apply a lifecycle action to several containers at once.
+The button that carries it out is the one on the right, labelled with the action itself — **Stop** above, and **Restart**, **Shut down** or **Start** for the others. No confirmation here says OK, so the button you press always tells you what is about to happen. **Stop**, **Restart** and **Shut down** are drawn in red, because each one takes a running workload away; only **Start** is the accent-coloured primary action. **Cancel**, the close control, and dismissing the dialog all send nothing at all.
+
+Pressing it sends exactly one typed action for that one container, after which Docker Connector refreshes the host and reports the outcome. There is no bulk action, and no way to apply a lifecycle action to several containers at once.
 
 ### Stopped container Start control
 <div align="center">
