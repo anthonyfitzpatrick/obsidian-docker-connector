@@ -32,7 +32,7 @@ describe("ContainerImageUpdateService", () => {
     const published: string[] = [];
     service.onStatusChange((status) => published.push(status.state));
     const check = service.check(profile, id, true);
-    await vi.waitFor(() => expect(request.mock.calls.some(([call]) => (call as { path: string }).path.startsWith("/images/create"))).toBe(true));
+    await vi.waitFor(() => expect(request.mock.calls.some(([call]) => (call).path.startsWith("/images/create"))).toBe(true));
     service.clearProfile(profile.id);
     releasePull?.();
     await check;

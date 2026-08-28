@@ -10,7 +10,7 @@ import type { DockerConnectionProfile, DockerTlsProfile, SshDockerProfile } from
 
 const base = { enabled: true, createdAt: "", updatedAt: "" };
 const local: DockerConnectionProfile = { ...base, id: "local", name: "Local", connectionType: "local", localEndpoint: { type: "unix-socket", socketPath: "/var/run/docker.sock" } };
-const context: DockerConnectionProfile = { ...base, id: "context", name: "Context", connectionType: "docker-context", contextName: "test", dockerCliPath: "docker", contextEndpoint: "unix:///var/run/docker.sock", contextTlsVerify: false };
+const context: DockerConnectionProfile = { ...base, id: "context", name: "Context", connectionType: "docker-context", contextName: "test", contextSnapshot: { isCurrentWhenSaved: true, endpointType: "unix-socket", supported: true, importedAt: "", lastDiscoveredAt: "" } };
 const tls: DockerTlsProfile = { ...base, id: "tls", name: "TLS", connectionType: "docker-tls", host: "docker.example.test", port: 2376, serverName: "docker.example.test", caCertificatePath: "/tmp/ca", clientCertificatePath: "/tmp/cert", clientKeyPath: "/tmp/key", tlsSnapshot: { serverName: "docker.example.test", importedAt: "" } };
 const ssh: SshDockerProfile = { ...base, id: "ssh", name: "SSH", connectionType: "ssh", sshHost: "docker.example.test", sshPort: 22, sshUsername: "docker", authentication: { type: "private-key", privateKeyPath: "/tmp/key" }, remoteSocketPath: "/var/run/docker.sock" };
 const originalPlatform = (window as unknown as { Platform?: unknown }).Platform;
@@ -48,7 +48,7 @@ describe("single-bundle Community Plugin architecture", () => {
     const bundle = await bundledModule('export { desktopUi } from "./src/platform/DesktopUiAdapter";');
     try {
       const { desktopUi: compiledDesktopUi } = nodeRequire(bundle.path) as { desktopUi: typeof desktopUi };
-      expect(compiledDesktopUi({})).toMatchObject({
+      expect(compiledDesktopUi()).toMatchObject({
         discoverLocalDockerEndpoints: expect.any(Function),
         discoverContexts: expect.any(Function),
         validateDockerTlsFiles: expect.any(Function)

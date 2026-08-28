@@ -23,7 +23,7 @@ describe("Docker dial-stdio transport", () => {
   });
 
   it("provides remediation without privileged plugin commands", () => {
-    const text = dockerPermissionRemediation({ id: "wolf", name: "Wolf", sshHost: "46.62.226.180", sshPort: 22, sshUsername: "obsidian", remoteSocketPath: "/var/run/docker.sock", enabled: true, createdAt: "" , updatedAt: "" }, "docker");
+    const text = dockerPermissionRemediation({ connectionType: "ssh", id: "wolf", name: "Wolf", sshHost: "46.62.226.180", sshPort: 22, sshUsername: "obsidian", authentication: { type: "password" }, remoteSocketPath: "/var/run/docker.sock", enabled: true, createdAt: "" , updatedAt: "" }, "docker");
     expect(text).toContain("sudo usermod -aG docker obsidian");
     expect(text).toContain("docker ps");
     expect(text).not.toContain("sudo docker system dial-stdio");

@@ -70,8 +70,9 @@ Not covered by the harness, because it performs no mutation and does not drive t
 ## Automated commands
 
 ```bash
-npm test            # 84 files / 389 tests
-npm run lint        # typecheck, then typescript-eslint type-checked rules and
+npm test            # 85 files / 396 tests, plus 16 live checks skipped by default
+npm run lint        # typechecks src and tests, then runs typescript-eslint's
+                    # type-checked rules and
                     # eslint-plugin-obsidianmd, the plugin check's own rules,
                     # at --max-warnings 0
 npm run build

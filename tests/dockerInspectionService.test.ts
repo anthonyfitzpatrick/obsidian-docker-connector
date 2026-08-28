@@ -4,7 +4,7 @@ import { DockerConnectionError, type DockerTransport } from "../src/connections/
 import type { SshDockerProfile } from "../src/models/DockerConnectionProfile";
 import type { DockerTlsProfile } from "../src/models/DockerConnectionProfile";
 
-const profile: SshDockerProfile = { id: "wolf-359", name: "Wolf 359", enabled: true, createdAt: "", updatedAt: "", sshHost: "46.62.226.180", sshPort: 22, sshUsername: "obsidian", authentication: { type: "password" }, remoteSocketPath: "/var/run/docker.sock" };
+const profile: SshDockerProfile = { connectionType: "ssh", id: "wolf-359", name: "Wolf 359", enabled: true, createdAt: "", updatedAt: "", sshHost: "46.62.226.180", sshPort: 22, sshUsername: "obsidian", authentication: { type: "password" }, remoteSocketPath: "/var/run/docker.sock" };
 const privateKeyProfile: SshDockerProfile = { ...profile, id: "private-key", authentication: { type: "private-key", privateKeyPath: "/tmp/id_ed25519" } };
 
 describe("DockerInspectionService", () => {
@@ -55,14 +55,14 @@ describe("DockerInspectionService", () => {
 
   it("recognizes authentication errors emitted by the separately bundled desktop transport", async () => {
     const desktopBundleError = Object.assign(new Error("Enter the SSH password to connect."), { name: "DockerConnectionError", code: "SSH_PASSWORD_REQUIRED" });
-    const snapshot = await new DockerInspectionService({ create: () => failingTransport(desktopBundleError as DockerConnectionError) } as never).inspectHost(profile);
+    const snapshot = await new DockerInspectionService({ create: () => failingTransport(desktopBundleError) } as never).inspectHost(profile);
 
     expect(snapshot).toMatchObject({ status: "authentication-required", error: "Password required to reconnect." });
   });
 
   it("keeps an encrypted SSH private-key passphrase request actionable across the desktop artifact boundary", async () => {
     const desktopBundleError = Object.assign(new Error("The selected private key requires a passphrase."), { name: "DockerConnectionError", code: "SSH_PRIVATE_KEY_PASSPHRASE_REQUIRED" });
-    const snapshot = await new DockerInspectionService({ create: () => failingTransport(desktopBundleError as DockerConnectionError) } as never).inspectHost(profile);
+    const snapshot = await new DockerInspectionService({ create: () => failingTransport(desktopBundleError) } as never).inspectHost(profile);
 
     expect(snapshot).toMatchObject({ status: "authentication-required", error: "The selected private key requires a passphrase." });
   });

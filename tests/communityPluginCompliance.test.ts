@@ -72,7 +72,7 @@ describe("Obsidian Community Plugin release guard", () => {
     expect(main).toMatch(/connectionFactory\.disconnectAll\(\)/);
     // Obsidian types onunload as synchronous and never awaits it, so authority
     // must be revoked before it returns rather than after an await.
-    expect(main).toMatch(/^  onunload\(\): void \{/m);
+    expect(main).toMatch(/^ {2}onunload\(\): void \{/m);
     expect(main).not.toMatch(/async onunload/);
     // Obsidian restores its own leaves; a plugin that detaches them on unload
     // destroys the user's layout on every update.

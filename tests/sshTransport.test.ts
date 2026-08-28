@@ -1,3 +1,4 @@
+import type { SyncHostVerifier } from "ssh2";
 import { EventEmitter } from "node:events";
 import { generateKeyPairSync } from "node:crypto";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
@@ -9,12 +10,12 @@ import { SshDockerTransport } from "../src/connections/SshDockerTransport";
 import { HostKeyVerifier } from "../src/security/HostKeyVerifier";
 import { SshKeyGenerationService } from "../src/security/SshKeyGenerationService";
 import type { SshDockerProfile } from "../src/models/DockerConnectionProfile";
-class FakeClient extends EventEmitter { ended = false; config?: ConnectConfig; connect(config: ConnectConfig): this { this.config = config; config.hostVerifier?.(Buffer.from("known-key")); queueMicrotask(() => { this.emit("connect"); this.emit("handshake"); this.emit("ready"); }); return this; } end(): this { this.ended = true; return this; } }
-class HostKeyFailureClient extends EventEmitter { connect(config: ConnectConfig): this { config.hostVerifier?.(Buffer.from("received-key")); queueMicrotask(() => this.emit("error", new Error("Host verification failed"))); return this; } end(): this { return this; } }
+class FakeClient extends EventEmitter { ended = false; config?: ConnectConfig; connect(config: ConnectConfig): this { this.config = config; (config.hostVerifier as SyncHostVerifier | undefined)?.(Buffer.from("known-key")); queueMicrotask(() => { this.emit("connect"); this.emit("handshake"); this.emit("ready"); }); return this; } end(): this { this.ended = true; return this; } }
+class HostKeyFailureClient extends EventEmitter { connect(config: ConnectConfig): this { (config.hostVerifier as SyncHostVerifier | undefined)?.(Buffer.from("received-key")); queueMicrotask(() => this.emit("error", new Error("Host verification failed"))); return this; } end(): this { return this; } }
 class KeyboardInteractiveClient extends EventEmitter {
   responses?: string[];
   connect(config: ConnectConfig): this {
-    config.hostVerifier?.(Buffer.from("known-key"));
+    (config.hostVerifier as SyncHostVerifier | undefined)?.(Buffer.from("known-key"));
     queueMicrotask(() => { this.emit("connect"); this.emit("handshake"); });
     queueMicrotask(() => this.emit("keyboard-interactive", "Password", "", "", [{ prompt: "Password: ", echo: false }], (responses: string[]) => { this.responses = responses; this.emit("ready"); }));
     return this;
@@ -41,7 +42,7 @@ class DockerClient extends FakeClient {
   command?: string;
   exec(command: string, callback: (error: Error | undefined, stream?: unknown) => void): this { this.command = command; if (command.includes("__IDENTITY_USERNAME__")) { const probe = new ProbeChannel(); callback(undefined, probe); probe.emitResult(); } else callback(undefined, new DockerChannel()); return this; }
 }
-const profile: SshDockerProfile = { id: "ssh", name: "SSH", enabled: true, createdAt: "", updatedAt: "", sshHost: "127.0.0.1", sshPort: 22, sshUsername: "obsidian", authentication: { type: "password" }, remoteSocketPath: "/var/run/docker.sock", hostKeyFingerprint: new HostKeyVerifier().fingerprint(Buffer.from("known-key")) };
+const profile: SshDockerProfile = { connectionType: "ssh", id: "ssh", name: "SSH", enabled: true, createdAt: "", updatedAt: "", sshHost: "127.0.0.1", sshPort: 22, sshUsername: "obsidian", authentication: { type: "password" }, remoteSocketPath: "/var/run/docker.sock", hostKeyFingerprint: new HostKeyVerifier().fingerprint(Buffer.from("known-key")) };
 describe("password SSH lifecycle", () => {
   it("passes the normalized target and exact session-only password to ssh2 without a TCP preflight socket", async () => { const clients: FakeClient[] = []; const transport = new SshDockerTransport(profile, () => ({ password: " password is not trimmed " }), undefined, () => { const client = new FakeClient(); clients.push(client); return client as unknown as Client; }); await transport.connect(); expect(transport.isConnected()).toBe(true); expect(clients[0].config).toMatchObject({ host: "127.0.0.1", port: 22, username: "obsidian", password: " password is not trimmed ", tryKeyboard: true }); expect(clients[0].config?.privateKey).toBeUndefined(); expect(clients[0].config?.sock).toBeUndefined(); await transport.disconnect(); expect(clients[0].ended).toBe(true); });
   it("uses the supplied password for a single keyboard-interactive prompt", async () => { const client = new KeyboardInteractiveClient(); const transport = new SshDockerTransport(profile, () => ({ password: "session-password" }), undefined, () => client as unknown as Client); await transport.connect(); expect(client.responses).toEqual(["session-password"]); });

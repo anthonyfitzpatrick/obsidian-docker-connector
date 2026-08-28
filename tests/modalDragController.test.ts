@@ -70,7 +70,7 @@ describe("FloatingModalController geometry", () => {
     expect(modal.classes).not.toContain("dc-is-dragging");
     expect(handle.captured).toEqual([]);
 
-    handle.emit("pointerdown", pointerEvent({ target: { closest: () => ({}) }, pointerId: 9 }));
+    handle.emit("pointerdown", pointerEvent({ target: { closest: () => ({}) } as unknown as EventTarget, pointerId: 9 }));
     expect(handle.captured).toEqual([]);
 
     viewport = { width: 640, height: 480 };

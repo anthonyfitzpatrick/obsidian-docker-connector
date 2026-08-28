@@ -38,4 +38,21 @@ export default tseslint.config(
       }],
     },
   },
+  {
+    // Tests are a harness, not plugin runtime. The Obsidian rules describe how
+    // a plugin must behave inside Obsidian, and the unsafe-value rules fire on
+    // the deliberately partial stubs a test builds. Everything that still
+    // catches a real mistake in test code stays on.
+    files: ["tests/**/*.ts"],
+    rules: {
+      "obsidianmd/prefer-window-timers": "off",
+      "obsidianmd/no-global-this": "off",
+      "obsidianmd/rule-custom-message": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+    },
+  },
 );

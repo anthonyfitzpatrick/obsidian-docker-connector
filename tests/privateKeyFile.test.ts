@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { generateKeyPairSync } from "node:crypto";
-import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadPrivateKeyFile, resolvePrivateKeyPath } from "../src/security/PrivateKeyFile";

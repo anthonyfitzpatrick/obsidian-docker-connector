@@ -3,7 +3,7 @@ import { selectAttentionItems } from "../src/overview/AttentionItems";
 import type { DockerContainerSummary } from "../src/containers/ContainerModels";
 import type { SshDockerProfile } from "../src/models/DockerConnectionProfile";
 
-const profile: SshDockerProfile = { id: "host", name: "Production", enabled: true, createdAt: "", updatedAt: "", sshHost: "example.test", sshPort: 22, sshUsername: "operator", remoteSocketPath: "/var/run/docker.sock" };
+const profile: SshDockerProfile = { connectionType: "ssh", id: "host", name: "Production", enabled: true, createdAt: "", updatedAt: "", sshHost: "example.test", sshPort: 22, sshUsername: "operator", authentication: { type: "password" }, remoteSocketPath: "/var/run/docker.sock" };
 const container = (changes: Partial<DockerContainerSummary> = {}): DockerContainerSummary => ({ id: "container", shortId: "container", names: ["web"], displayName: "web", image: "nginx:1.0", createdAt: "", createdTimestamp: 0, state: "running", statusText: "Up", health: "healthy", ports: [], mounts: [], networks: [], labels: {}, hostProfileId: "host", mapperWarnings: [], ...changes });
 
 describe("overview attention items", () => {
