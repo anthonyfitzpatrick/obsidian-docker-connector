@@ -2,7 +2,7 @@ import obsidianmd from "eslint-plugin-obsidianmd";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["main.js", "dist/**", "node_modules/**", "docs/**", "*.mjs"] },
+  { ignores: ["main.js", "dist/**", "node_modules/**", "docs/**", "*.mjs", "*.mts", "tools/**"] },
   ...tseslint.configs.recommendedTypeChecked,
   // The same rules the Obsidian plugin check runs, so its findings
   // surface here and in CI rather than after a release.
