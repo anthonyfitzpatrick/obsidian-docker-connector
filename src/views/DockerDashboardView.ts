@@ -524,6 +524,11 @@ class ReconnectPasswordModal extends Modal {
       button.setButtonText("Reconnect").setCta().onClick(() => void this.submit());
       this.reconnectButton = button.buttonEl;
     });
+    // Carry the reason that made this host need attention. A key the server
+    // refused is not fixed by a passphrase, so the dialog has to say what went
+    // wrong instead of presenting an empty field as if it were.
+    const current = this.plugin.snapshots.get(this.profile.id);
+    if (current && current.status !== "online" && current.error) this.reportFailure(current.error);
   }
 
   /** Shows why the attempt failed and leaves the dialog open to retry. */

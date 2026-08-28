@@ -40,10 +40,14 @@ describe("rejected credential feedback", () => {
     expect(classifyHostFailure(new DockerConnectionError("SSH_CONNECTION_REFUSED", "refused")).status).toBe("offline");
   });
 
-  it("leaves a key the server refuses as degraded, since asking again cannot fix it", () => {
-    // Deliberately not authentication-required: the remedy is authorising the
-    // key on the host, not re-entering a passphrase.
-    expect(classifyHostFailure(new DockerConnectionError("SSH_PRIVATE_KEY_REJECTED", "refused key")).status).toBe("degraded");
+  it("includes a refused key, and opens the dialog on its reason rather than a bare prompt", async () => {
+    // A passphrase cannot authorise a key on the host, so the dialog has to
+    // say why it opened instead of only asking for one.
+    expect(classifyHostFailure(new DockerConnectionError("SSH_PRIVATE_KEY_REJECTED", "refused key")).status).toBe("authentication-required");
+    const view = await source("src/views/DockerDashboardView.ts");
+    const open = view.slice(view.indexOf("class ReconnectPasswordModal"), view.indexOf("private async submit()"));
+    expect(open).toContain("this.plugin.snapshots.get(this.profile.id)");
+    expect(open).toContain("this.reportFailure(");
   });
 
   it("reports a refused reconnection in the dialog instead of closing it", async () => {

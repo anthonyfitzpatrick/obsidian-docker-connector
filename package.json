@@ -1,6 +1,6 @@
 {
   "name": "obsidian-docker-connector",
-  "version": "1.1.12",
+  "version": "1.1.13",
   "description": "A desktop Docker environment dashboard with optional, explicitly enabled container management.",
   "main": "main.js",
   "scripts": {

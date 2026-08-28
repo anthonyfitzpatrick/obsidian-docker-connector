@@ -72,9 +72,13 @@ describe("DockerInspectionService", () => {
     const snapshot = await new DockerInspectionService({ create: () => transport } as never).inspectHost(profile);
     expect(snapshot).toMatchObject({ status: "authentication-required", error: "The SSH server rejected the username or password." });
   });
-  it("keeps a rejected private key distinct from a missing runtime passphrase", async () => {
+  it("treats a rejected private key as an authentication outcome", async () => {
+    // This was degraded, to keep it distinct from a missing passphrase. That
+    // distinction cost the user the Reconnect affordance and the reason with
+    // it, so every refused credential now reaches authentication-required and
+    // the reconnect dialog opens showing why the key was refused.
     const snapshot = await new DockerInspectionService({ create: () => failingTransport(new DockerConnectionError("SSH_PRIVATE_KEY_REJECTED", "The SSH server rejected the selected private key.")) } as never).inspectHost(privateKeyProfile);
-    expect(snapshot).toMatchObject({ status: "degraded", error: "The SSH server rejected the selected private key." });
+    expect(snapshot).toMatchObject({ status: "authentication-required", error: "The SSH server rejected the selected private key." });
   });
   it("keeps missing and invalid private-key files distinct from authentication-required", async () => {
     for (const code of ["SSH_PRIVATE_KEY_NOT_FOUND", "SSH_PRIVATE_KEY_UNSUPPORTED_FORMAT"]) {
