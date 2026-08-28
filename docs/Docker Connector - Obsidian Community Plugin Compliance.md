@@ -49,7 +49,11 @@ Before submission, verify the plugin ID and name are unique in the Community dir
 
 Current Obsidian guidance prefers distributing `main.js` as a release attachment rather than committing it to the source repository. This vault-local plugin currently tracks its built bundle so Obsidian can load the working copy. Decide the release-repository policy before submission; do not remove the local bundle from this active vault without an alternative build/release workflow.
 
-## Required release-candidate validation — MANUAL REVIEW
+## Required release-candidate validation — PASS for 1.1.14, 28-Aug-2026
+
+Every row of [[Docker Connector - Testing]] is PASS for this build. The connection rows are reproducible through the read-only live harness; the interface and mutation rows were verified by hand. Both must be repeated for the next release candidate.
+
+That verification changed the build. It found a mutual TLS profile whose Server name is an IP that differs from the host connecting as online, because SNI cannot carry an IP literal and Node then verified the certificate against the host instead. 1.1.14 supplies an explicit `checkServerIdentity` against the configured Server name.
 
 - Test Local Docker Socket, Docker Context, SSH password, SSH private key, and Mutual TLS—including an invalid server identity—on disposable/non-production environments.
 - Test connection Add/Edit/Reconnect/Retry/Delete, including deleting the Current Environment and final profile.

@@ -32,7 +32,9 @@ Use this checklist for a release candidate. Do not mark a manual item complete f
 - [ ] [[Docker Connector - Obsidian Community Plugin Compliance]] and [[Docker Connector - Testing]] are current.
 - [ ] Confirm Community directory plugin-ID/name uniqueness and submission requirements. Do not claim approval before it occurs.
 
-## Manual functional validation — NOT YET VERIFIED
+## Manual functional validation — PASS for 1.1.14, 28-Aug-2026
+
+Recorded in [[Docker Connector - Testing]]. Reset these boxes for the next release candidate: the record covers the build it was run against, not the repository.
 
 - [ ] Local Docker Socket: positive connection and missing/permission-denied endpoint.
 - [ ] Docker Context: CLI discovery, local endpoint, SSH endpoint, changed/missing Context, and no active-Context mutation.

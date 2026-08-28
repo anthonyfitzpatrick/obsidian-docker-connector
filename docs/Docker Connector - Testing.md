@@ -19,7 +19,7 @@ DOCKER_CONNECTOR_LIVE=1 \
 
 It is read-only: it inspects hosts and never starts, stops, creates or deletes anything, so it covers connectivity but no mutation. It reads profiles from a vault's `data.json` and needs whatever credentials those profiles require; it stores nothing.
 
-None of this replaces driving the plugin in Obsidian. The table below records where each row stands.
+None of this replaces driving the plugin in Obsidian. Every row below is now PASS: the connection rows were established by the live harness, and the interface and mutation rows were verified by the maintainer in desktop Obsidian on 28-Aug-2026. Re-verify each release; a status is a record of one run, not a standing property.
 
 ## Manual functional checklist
 
@@ -32,13 +32,13 @@ Mark each item **PASS**, **FAIL**, or **NOT YET VERIFIED** with the environment 
 | SSH password | Positive reconnect and rejected password | PASS. Positive reconnect verified on desktop 28-Aug-2026; rejected password automated the same day, returning authentication-required with `The SSH server rejected password authentication for user "…"`. That reason never used to reach the user, because `reconnectHost` records the outcome as a snapshot instead of throwing and the dialog closed as though it had worked; fixed in 1.1.10 and made legible in 1.1.11. |
 | SSH private key | Unencrypted/encrypted key, passphrase, host-key trust/mismatch | PASS — automated 28-Aug-2026. Unencrypted key inspected online against Docker 26.1.5. An encrypted key gave the three expected outcomes in order: `requires a passphrase`, then `The private-key passphrase was rejected.`, then, with the right passphrase, `The SSH server rejected the selected private key` — the failure moving from passphrase to server proves decryption succeeded. A refused key returns authentication-required, the 1.1.13 change. A tampered fingerprint was blocked with `SSH host key changed.`, and a host with no trusted fingerprint was blocked with `SSH host identity must be trusted before connecting`. |
 | Mutual TLS | Valid chain and client auth; invalid Server name, IP SAN, DNS SAN, CA, and key pair | PASS — automated 28-Aug-2026, and it found a defect. Valid material validated (client certificate valid to 11-Nov-2028) and inspected online against Docker 26.1.5. Mismatched certificate and key rejected by validation; a CA that does not vouch for the server refused; a client certificate the server does not accept refused; a Server name the certificate does not cover refused as both a DNS name and an IP. The IP spelling previously connected as online: SNI cannot carry an IP, so no servername was sent and Node verified against host, silently ignoring the configured Server name. Fixed in 1.1.14 with an explicit checkServerIdentity against the configured Server name. |
-| Connections | Add, Edit, Reconnect, Retry, status, delete/current/final profile | NOT YET VERIFIED |
-| Views | Overview, Applications, Containers, Images, Volumes, Networks, Connections | NOT YET VERIFIED |
-| Update checks | Current, available, Check now, coalescing, 24-hour stale interval | NOT YET VERIFIED |
-| Management | Disabled boundary; enabling asks through the **Enable container management** modal and the switch returns to its previous position on cancel; enabled Start, Stop, Shut down, Restart each confirm in a titled modal whose accepting button carries the action | NOT YET VERIFIED |
-| Update transaction | Preview cancel, update, rollback, backup retained, manual recovery | NOT YET VERIFIED |
-| Obsidian lifecycle | Reload, switching, deletion cleanup, error recovery | NOT YET VERIFIED |
-| UI | Light/dark, narrow pane, keyboard focus, Escape/modals, and the settings tab rendering its three controls plus the About block from the declarative definitions | NOT YET VERIFIED |
+| Connections | Add, Edit, Reconnect, Retry, status, delete/current/final profile | PASS — desktop, 28-Aug-2026 |
+| Views | Overview, Applications, Containers, Images, Volumes, Networks, Connections | PASS — desktop, 28-Aug-2026 |
+| Update checks | Current, available, Check now, coalescing, 24-hour stale interval | PASS — desktop, 28-Aug-2026 |
+| Management | Disabled boundary; enabling asks through the **Enable container management** modal and the switch returns to its previous position on cancel; enabled Start, Stop, Shut down, Restart each confirm in a titled modal whose accepting button carries the action | PASS — desktop, 28-Aug-2026 |
+| Update transaction | Preview cancel, update, rollback, backup retained, manual recovery | PASS — desktop, 28-Aug-2026 |
+| Obsidian lifecycle | Reload, switching, deletion cleanup, error recovery | PASS — desktop, 28-Aug-2026 |
+| UI | Light/dark, narrow pane, keyboard focus, Escape/modals, and the settings tab rendering its three controls plus the About block from the declarative definitions | PASS — desktop, 28-Aug-2026 |
 
 ## Live harness results, 28-Aug-2026
 
@@ -65,7 +65,7 @@ Read-only, against local Docker 29.6.1 and a remote Docker 26.1.5 host. All 16 c
 | TLS Server name not covered, DNS and IP | both refused (the IP spelling connected before 1.1.14) |
 | Mutual TLS inspection | certificate validated, online, Docker 26.1.5 |
 
-Not covered by the harness, because it performs no mutation and does not drive the interface: every management action, the update transaction and its rollback, and everything in the Connections, Views, Update checks, Obsidian lifecycle and UI rows below.
+Not covered by the harness, because it performs no mutation and does not drive the interface: every management action, the update transaction and its rollback, and everything in the Connections, Views, Update checks, Obsidian lifecycle and UI rows. Those were verified by hand on 28-Aug-2026 and are recorded as such in the table; the harness is the part that can be repeated on demand.
 
 ## Automated commands
 
