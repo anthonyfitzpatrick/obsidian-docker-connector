@@ -8,7 +8,7 @@ Implemented: [[Docker Connector - Applications View]] groups Docker Compose-mana
 
 Implemented: Applications presentation uses naturally sized cards, wrapping service previews, responsive filters, and a Containers-style master/detail inspector. Inspector rows contain their complete metadata, long identifiers truncate safely with a tooltip, selection changes reset scroll, and refresh timestamps are human-readable. Manual validation remains appropriate for actual Obsidian pane dimensions and installed themes.
 
-Implemented: Password and Private Key authentication, session-only credentials, host-key verification, Remote Docker via SSH dial-stdio, direct Local Docker Socket HTTP transport over Unix sockets/named pipes, and saving/editing safe Docker Context profiles. Docker Context execution now resolves local Unix/named-pipe endpoints through the local transport and retains dial-stdio only for SSH Contexts. Windows live validation remains outstanding.
+Implemented: Password and Private key authentication, session-only credentials, host-key verification, Remote Docker via SSH dial-stdio, direct Local Docker Socket HTTP transport over Unix sockets/named pipes, and saving/editing safe Docker Context profiles. Docker Context execution now resolves local Unix/named-pipe endpoints through the local transport and retains dial-stdio only for SSH Contexts. Windows live validation remains outstanding.
 
 Implemented: deletion of saved Docker Connector connection profiles with explicit confirmation. Deletion clears plugin-owned runtime state and never deletes external Docker resources, Docker Contexts, credential files, or server configuration.
 

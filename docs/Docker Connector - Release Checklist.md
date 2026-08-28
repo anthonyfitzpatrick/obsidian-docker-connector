@@ -9,18 +9,19 @@ Use this checklist for a release candidate. Do not mark a manual item complete f
 ## Package and release assets
 
 - [ ] Confirm `manifest.json`, `package.json`, `package-lock.json`, and `versions.json` have the intended matching version/minimum app version.
-- [ ] Confirm the manifest ID, display name, description, and `isDesktopOnly: false` are current.
-- [ ] Build and attach exactly `main.js`, `manifest.json`, and `styles.css` to the matching release tag.
+- [ ] Confirm the manifest ID, display name, description, and `isDesktopOnly: true` are current.
+- [ ] Push the version tag and let `.github/workflows/release.yml` build it, attach exactly `main.js`, `manifest.json`, and `styles.css`, and publish their provenance attestations. Verify one with `gh attestation verify main.js --repo anthonyfitzpatrick/obsidian-docker-connector`.
 - [ ] Confirm no source, `node_modules`, fixtures, credentials, or development configuration are needed by installers.
 
 ## Automated checks
 
 - [ ] `npm test`
-- [ ] `npm run lint` (the project TypeScript typecheck)
+- [ ] `npm run lint` (TypeScript typecheck, then ESLint with typescript-eslint's type-checked rules and the Obsidian plugin check's own `eslint-plugin-obsidianmd` rules, at `--max-warnings 0`)
 - [ ] `npm run build`
 - [ ] `npm run release:check` (rebuilds and validates the staged three-file release package)
 - [ ] `git diff --check`
-- [ ] Review `npm audit`; record any unresolved advisory and its decision. Do not use a forced breaking upgrade without review.
+- [ ] Review `npm audit --omit=dev` for anything reaching the bundle, then `npm audit` for the build tooling; record any unresolved advisory and its decision. Do not use a forced breaking upgrade without review.
+- [ ] Confirm `npm ci` succeeds under an older npm as well as the current one, since the plugin check installs with its own.
 - [ ] Search for debug logs, credentials, private paths, `shell: true`, disabled TLS verification, Context mutation, and insecure Docker TCP.
 
 ## Documentation and submission

@@ -13,7 +13,7 @@ This is an engineering compliance record, not an Obsidian approval statement. **
 
 ## Manifest and release — PASS
 
-`manifest.json` uses the stable lowercase-hyphenated ID `docker-connector`, semantic version `1.0.0`, minimum Obsidian version `1.7.0`, and `isDesktopOnly: true`. Desktop transport methods use Node APIs for sockets, SSH, TLS files, and bounded child processes. `package.json`, `manifest.json`, and `versions.json` are version-aligned. Release assets are [[main.js]], [[manifest.json]], and [[styles.css]].
+`manifest.json` uses the stable lowercase-hyphenated ID `docker-connector`, semantic version `1.1.9`, minimum Obsidian version `1.13.0`, and `isDesktopOnly: true`. The 1.13.0 floor is set by `ButtonComponent.setDestructive` and by the settings tab rendering from `getSettingDefinitions()` alone; the next constraint below it is `Workspace.revealLeaf` at 1.7.2. `versions.json` lists `1.1.9` only, which is the single published release. Desktop transport methods use Node APIs for sockets, SSH, TLS files, and bounded child processes. `package.json`, `manifest.json`, and `versions.json` are version-aligned. Release assets are [[main.js]], [[manifest.json]], and [[styles.css]].
 
 This review was checked against the current official Obsidian documentation: [Manifest](https://docs.obsidian.md/Reference/Manifest), [Events](https://docs.obsidian.md/Plugins/Events), [Plugin load time](https://docs.obsidian.md/plugins/guides/load-time), [plugin self-critique checklist](https://docs.obsidian.md/oo/plugin), and [Community Plugin submission](https://docs.obsidian.md/Plugins/Releasing/Submit%20your%20plugin). These cover manifest and versioning rules, desktop-only declaration, lifecycle registration and timers, deferred startup work, Node/Electron implications, UI/style guidance, release assets, README/LICENSE expectations, and submission workflow. The review also verified the repository's privacy, external-resource, dependency, command, filesystem, child-process, network, CSS, and accessibility boundaries against those requirements and the published developer policies referenced by the submission guide.
 
@@ -35,11 +35,13 @@ There is no telemetry, analytics, cloud service, remote script, remote CSS, or r
 
 ## Dependency advisories — MANUAL REVIEW
 
-Part 1’s `npm audit` reported a moderate advisory for transitive `esbuild` and a high advisory for transitive `nanoid`. The available esbuild remediation required a breaking upgrade, so this documentation/release pass does not apply it automatically. Re-run and assess `npm audit` at release time; record the result and any accepted risk in the release notes.
+`npm audit --omit=dev` reports no vulnerabilities, so nothing advisory reaches the shipped bundle. The full tree reports one moderate advisory, GHSA-67mh-4wv8-2f99, against `esbuild`'s development server. That server is never started: esbuild is used only as a one-shot bundler in `npm run build`. The earlier high advisory for transitive `nanoid` is gone with the move to vitest 3. Re-run `npm audit` at release time and record the result.
 
 ## Documentation and automated validation — PASS
 
-The canonical [[User Guide]] and README document four desktop connection methods; privilege model; settings; Applications; inventories; update checks; explicit profile-scoped management; rollback limits; privacy model; troubleshooting; FAQ; and 43 numbered screenshot capture specifications. Automated validation must be repeated for the release candidate.
+The canonical [[User Guide]] and README document four desktop connection methods; privilege model; settings; Applications; inventories; update checks; explicit profile-scoped management; rollback limits; privacy model; troubleshooting; FAQ; and 41 captured screenshots, each centred and width-limited.
+
+The Obsidian plugin check's own rules run in this repository. `eslint-plugin-obsidianmd` is a dev dependency, its recommended configuration is enabled in `eslint.config.mjs` alongside typescript-eslint's type-checked rules, and `npm run lint` runs both with `--max-warnings 0`, so any finding fails the build. `.github/workflows/release.yml` runs lint and the test suite from the pushed tag, verifies `npm ci` succeeds under npm 10 as well as the runner's npm, and publishes build provenance attestations for `main.js`, `manifest.json`, and `styles.css`.
 
 ## Manual Marketplace submission checks — MANUAL REVIEW
 
