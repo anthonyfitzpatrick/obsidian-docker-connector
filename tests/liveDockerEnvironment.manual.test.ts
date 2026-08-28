@@ -119,6 +119,82 @@ describe.skipIf(!live)("live Docker environment (read-only)", () => {
     expect(snapshot.error).toBeTruthy();
   }, 60_000);
 
+  it("handles an encrypted private key: required, rejected, then accepted", async () => {
+    const keyPath = process.env.DOCKER_CONNECTOR_ENCRYPTED_KEY;
+    const passphrase = process.env.DOCKER_CONNECTOR_ENCRYPTED_KEY_PASSPHRASE;
+    expect(keyPath && passphrase, "set DOCKER_CONNECTOR_ENCRYPTED_KEY and _PASSPHRASE").toBeTruthy();
+    const all = await profiles();
+    const real = all.find((item) => item.connectionType === "ssh" && item.authentication.type === "private-key");
+    const encrypted = { ...real!, id: `${real!.id}-encrypted`, authentication: { type: "private-key" as const, privateKeyPath: keyPath! } } as DockerConnectionProfile;
+
+    const noPassphrase = await new DockerInspectionService(new DockerConnectionFactory()).inspectHost(encrypted);
+    summarise("encrypted key, no passphrase", noPassphrase);
+
+    const wrongFactory = new DockerConnectionFactory();
+    wrongFactory.setRuntimePrivateKeyPassphrase(encrypted.id, "not-the-passphrase");
+    const wrong = await new DockerInspectionService(wrongFactory).inspectHost(encrypted);
+    summarise("encrypted key, wrong passphrase", wrong);
+
+    const rightFactory = new DockerConnectionFactory();
+    rightFactory.setRuntimePrivateKeyPassphrase(encrypted.id, passphrase!);
+    const right = await new DockerInspectionService(rightFactory).inspectHost(encrypted);
+    // The key is a throwaway the server does not authorise, so success here is
+    // the server refusing the key: that only happens once it has decrypted.
+    summarise("encrypted key, correct passphrase", right);
+    expect(noPassphrase.error).toMatch(/requires a passphrase/i);
+    expect(wrong.error).toMatch(/passphrase was rejected/i);
+    // Decryption succeeded: the failure moved from the passphrase to the server.
+    expect(right.error).toMatch(/rejected the selected private key/i);
+  }, 90_000);
+
+  it("blocks a host whose key has never been trusted", async () => {
+    const all = await profiles();
+    const real = all.find((item) => item.connectionType === "ssh" && item.authentication.type === "private-key");
+    const untrusted = { ...real!, id: `${real!.id}-untrusted`, hostKeyFingerprint: undefined } as DockerConnectionProfile;
+    const snapshot = await new DockerInspectionService(new DockerConnectionFactory()).inspectHost(untrusted);
+    summarise("ssh first contact", snapshot);
+    expect(snapshot.status).not.toBe("online");
+    expect(snapshot.error).toMatch(/trusted before connecting/i);
+  }, 60_000);
+
+  it("rejects mismatched TLS client certificate and key", async () => {
+    const rogueKey = process.env.DOCKER_CONNECTOR_ROGUE_KEY;
+    const profile = byType(await profiles(), "docker-tls") as DockerTlsProfile;
+    await expect(validateDockerTlsFiles({ ...profile, clientKeyPath: rogueKey! })).rejects.toThrow();
+    console.log("  mismatched cert/key: rejected by validation");
+  }, 30_000);
+
+  it("refuses a server that the configured CA does not vouch for", async () => {
+    const rogueCa = process.env.DOCKER_CONNECTOR_ROGUE_CA;
+    const profile = byType(await profiles(), "docker-tls") as DockerTlsProfile;
+    const snapshot = await new DockerInspectionService(new DockerConnectionFactory()).inspectHost({ ...profile, id: `${profile.id}-rogue-ca`, caCertificatePath: rogueCa! });
+    summarise("tls rogue CA", snapshot);
+    expect(snapshot.status).not.toBe("online");
+    expect(snapshot.error).toMatch(/CA certificate/i);
+  }, 60_000);
+
+  it("refuses a server name the certificate does not cover", async () => {
+    const profile = byType(await profiles(), "docker-tls") as DockerTlsProfile;
+    for (const [label, serverName] of [["dns", "not-this-host.example.test"], ["ip", "127.0.0.1"]] as const) {
+      const snapshot = await new DockerInspectionService(new DockerConnectionFactory()).inspectHost({ ...profile, id: `${profile.id}-${label}`, serverName });
+      summarise(`tls wrong server name (${label})`, snapshot);
+      expect(snapshot.status).not.toBe("online");
+      // Both spellings must be refused. An IP is never sent as SNI, so before
+      // the explicit checkServerIdentity the IP case verified against host
+      // and connected, silently ignoring the configured Server name.
+      expect(snapshot.error).toMatch(/Server Name/i);
+    }
+  }, 90_000);
+
+  it("refuses a client certificate the server does not accept", async () => {
+    const rogueCert = process.env.DOCKER_CONNECTOR_ROGUE_CERT;
+    const rogueKey = process.env.DOCKER_CONNECTOR_ROGUE_KEY;
+    const profile = byType(await profiles(), "docker-tls") as DockerTlsProfile;
+    const snapshot = await new DockerInspectionService(new DockerConnectionFactory()).inspectHost({ ...profile, id: `${profile.id}-rogue-client`, clientCertificatePath: rogueCert!, clientKeyPath: rogueKey! });
+    summarise("tls rogue client cert", snapshot);
+    expect(snapshot.status).not.toBe("online");
+  }, 60_000);
+
   it("validates the mutual TLS material and connects", async () => {
     const profile = byType(await profiles(), "docker-tls") as DockerTlsProfile | undefined;
     expect(profile).toBeDefined();

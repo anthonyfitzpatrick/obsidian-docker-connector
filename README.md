@@ -57,7 +57,7 @@ When a newer image is confirmed and a standalone container is eligible, **Update
 - Docker access remains privileged; use least-privileged access where possible.
 - SSH passwords, SSH private-key passphrases, and TLS client-key passphrases are session-only by default. Only an explicit per-profile SSH password opt-in stores a password separately in unencrypted local plugin data; it is never a profile field. Passive cards hide SSH usernames, authentication labels, credential paths, and secrets.
 - Selected key and certificate paths can be saved; their file contents are not copied into settings.
-- Mutual TLS requires server-certificate and Server name verification. There is no insecure verification bypass.
+- Mutual TLS requires server-certificate and Server name verification, enforced against the Server name you configure whether it is a host name or an IP address. There is no insecure verification bypass.
 - Docker Contexts are discovered and used without `docker context use`, create, update, remove, import, or export commands.
 - Insecure plain Docker TCP is blocked.
 - Delete connection removes only Docker Connector’s profile, runtime credentials, cache, and transport state. It never deletes Docker resources, Docker Contexts, sockets, SSH keys, TLS certificate files, or remote-server configuration.

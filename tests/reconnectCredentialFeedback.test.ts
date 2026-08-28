@@ -36,6 +36,17 @@ describe("rejected credential feedback", () => {
     expect(styles).not.toMatch(/\.dc-connection-reason[^{]*\{[^}]*background-color: var\(--background-modifier-error\)/);
   });
 
+  it("verifies the TLS server identity against the configured Server name", async () => {
+    // SNI cannot carry an IP, so servername is omitted for one. Without an
+    // explicit checkServerIdentity, Node verifies against host instead and a
+    // configured Server name that is an IP is silently ignored. Confirmed
+    // against a live daemon: it connected as online before this.
+    const transport = await source("src/connections/DockerMutualTlsTransport.ts");
+    expect(transport).toContain('import { checkServerIdentity } from "node:tls";');
+    expect(transport).toMatch(/checkServerIdentity: \(_hostname, certificate\) => checkServerIdentity\(this\.profile\.serverName, certificate\)/);
+    expect(transport).toContain("rejectUnauthorized: true");
+  });
+
   it("keeps an unreachable host distinct from a refused credential", () => {
     expect(classifyHostFailure(new DockerConnectionError("SSH_CONNECTION_REFUSED", "refused")).status).toBe("offline");
   });
