@@ -128,17 +128,26 @@ describe("Obsidian Community Plugin release guard", () => {
 
   it("declares a minAppVersion that covers the Obsidian APIs it calls", async () => {
     // obsidianmd/no-unsupported-api compares each API against minAppVersion.
-    // Workspace.revealLeaf is @since 1.7.2, so the manifest cannot claim less.
-    const [manifestText, main, modal] = await Promise.all([source("manifest.json"), source("src/main.ts"), source("src/ui/ConfirmationModal.ts")]);
-    const manifest = JSON.parse(manifestText) as { minAppVersion: string };
-    const [major, minor, patch] = manifest.minAppVersion.split(".").map(Number);
-    if (main.includes("revealLeaf(")) expect([major, minor, patch] >= [1, 7, 2]).toBe(true);
-    expect(manifest.minAppVersion).toBe("1.7.2");
-    // setDestructive is @since 1.13.0, well above that floor, so the
-    // deprecated setWarning stays until minAppVersion can move. Match the
-    // invocation, not the word, which also appears in the note explaining why.
-    expect(modal).not.toMatch(/button\.setDestructive\(/);
-    expect(modal).toMatch(/button\.setWarning\(\)/);
+    // Workspace.revealLeaf is @since 1.7.2 and ButtonComponent.setDestructive
+    // is @since 1.13.0, so the manifest cannot claim less than the higher one.
+    const [manifestText, versionsText, modal, dashboard, keySetup] = await Promise.all(
+      ["manifest.json", "versions.json", "src/ui/ConfirmationModal.ts", "src/views/DockerDashboardView.ts", "src/views/SshKeySetupModals.ts"].map(source),
+    );
+    const manifest = JSON.parse(manifestText) as { version: string; minAppVersion: string };
+    expect(manifest.minAppVersion).toBe("1.13.0");
+    // setWarning is deprecated in favour of setDestructive, which renders the
+    // same. No call site may fall back to the old spelling.
+    for (const file of [modal, dashboard, keySetup]) {
+      expect(file).not.toMatch(/\.setWarning\(/);
+      expect(file).toMatch(/\.setDestructive\(/);
+    }
+    // Raising the floor must not strand anyone: every earlier entry stays on
+    // the version it actually ran on, so Obsidian below 1.13 is served those.
+    const versions = JSON.parse(versionsText) as Record<string, string>;
+    expect(versions[manifest.version]).toBe("1.13.0");
+    for (const [pluginVersion, appVersion] of Object.entries(versions)) {
+      if (pluginVersion !== manifest.version) expect(appVersion).toBe("1.7.2");
+    }
   });
 
   it("keeps the type packages installable without dev dependencies", async () => {

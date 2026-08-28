@@ -77,7 +77,7 @@ export class SshPublicKeyInstallModal extends Modal {
     new Setting(this.contentEl).setName("Current SSH password").addText((text) => { text.inputEl.type = "password"; text.inputEl.autocomplete = "current-password"; text.setValue(this.workflow.credential); text.setDisabled(busy || state.state === "installed" || state.state === "already-installed"); text.onChange((value) => this.workflow.setPassword(value)); });
     if (state.message) this.contentEl.createDiv({ text: `${state.state === "installed" || state.state === "already-installed" ? "✓ " : ""}${state.message}`, cls: `dc-host-modal__key-status is-${state.state === "failed" ? "error" : state.state === "installed" || state.state === "already-installed" ? "success" : "warning"}`, attr: { role: "status", "aria-live": "polite" } });
     const footer = new Setting(this.contentEl).addButton((button) => button.setButtonText(state.state === "installed" || state.state === "already-installed" ? "Close" : "Cancel").onClick(() => this.close()));
-    if (state.state !== "installed" && state.state !== "already-installed") footer.addButton((button) => button.setButtonText(state.state === "installing" ? "Installing…" : state.state === "failed" ? "Retry" : "Install public key").setWarning().setDisabled(busy).onClick(() => void this.install()));
+    if (state.state !== "installed" && state.state !== "already-installed") footer.addButton((button) => button.setButtonText(state.state === "installing" ? "Installing…" : state.state === "failed" ? "Retry" : "Install public key").setDestructive().setDisabled(busy).onClick(() => void this.install()));
   }
 
   private async install(): Promise<void> {
