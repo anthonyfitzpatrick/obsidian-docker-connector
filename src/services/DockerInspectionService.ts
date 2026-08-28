@@ -97,6 +97,10 @@ function connectionFailure(error: unknown): { code: string; message: string } | 
 const AUTHENTICATION_ERROR_CODES = new Set([
   "SSH_PASSWORD_REJECTED",
   "SSH_PRIVATE_KEY_PASSPHRASE_REQUIRED",
+  // A wrong passphrase is fixed by asking again, exactly like a missing one,
+  // so it belongs here. A key the server refuses does not: SSH_PRIVATE_KEY_REJECTED
+  // stays degraded because re-prompting cannot resolve it.
+  "SSH_PRIVATE_KEY_PASSPHRASE_REJECTED",
   "SSH_KEYBOARD_INTERACTIVE_REJECTED",
   "SSH_AUTHENTICATION_FAILED",
   "SSH_AUTHENTICATION_METHOD_UNSUPPORTED"

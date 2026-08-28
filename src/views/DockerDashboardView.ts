@@ -481,6 +481,8 @@ class ReconnectPasswordModal extends Modal {
   private credential = "";
   private reconnectButton?: HTMLButtonElement;
   private submitting = false;
+  private errorEl?: HTMLElement;
+  private inputEl?: HTMLInputElement;
   constructor(private readonly plugin: DockerConnectorPlugin, private readonly profile: DockerConnectionProfile, private readonly onComplete: () => Promise<void>) { super(plugin.app); }
   onOpen(): void {
     this.contentEl.createEl("h2", { text: `Reconnect ${this.profile.name}` });
@@ -489,6 +491,7 @@ class ReconnectPasswordModal extends Modal {
     new Setting(this.contentEl).setName(tls ? "Client key passphrase" : privateKey ? "Private-key passphrase" : "SSH password").setDesc("Used only in memory for this Obsidian session.").addText((text) => {
       text.inputEl.type = "password";
       text.inputEl.focus();
+      this.inputEl = text.inputEl;
       text.onChange((value) => this.credential = value);
       // The handler is owned by the input element, which Obsidian removes with
       // the modal content; no listener survives after the dialog closes.
@@ -502,6 +505,20 @@ class ReconnectPasswordModal extends Modal {
       button.setButtonText("Reconnect").setCta().onClick(() => void this.submit());
       this.reconnectButton = button.buttonEl;
     });
+    // A rejected credential has to be reported in the dialog the user is
+    // looking at. role="alert" so it is announced rather than only seen.
+    this.errorEl = this.contentEl.createDiv({ cls: "dc-reconnect-error", attr: { role: "alert" } });
+    this.errorEl.hide();
+  }
+
+  /** Shows why the attempt failed and leaves the dialog open to retry. */
+  private reportFailure(message: string): void {
+    if (this.errorEl) {
+      this.errorEl.setText(message);
+      this.errorEl.show();
+    }
+    this.inputEl?.focus();
+    this.inputEl?.select();
   }
 
   private async submit(): Promise<void> {
@@ -510,7 +527,15 @@ class ReconnectPasswordModal extends Modal {
     this.submitting = true;
     this.reconnectButton?.setAttribute("disabled", "true");
     try {
+      this.errorEl?.hide();
       await this.plugin.reconnectHost(this.profile, this.credential);
+      // reconnectHost records the outcome as a snapshot rather than throwing,
+      // so a rejected credential arrives here as a status, not an exception.
+      const snapshot = this.plugin.snapshots.get(this.profile.id);
+      if (snapshot && snapshot.status !== "online") {
+        this.reportFailure(snapshot.error ?? "Reconnection failed. Check the credential and try again.");
+        return;
+      }
       this.credential = "";
       await this.onComplete();
       this.close();

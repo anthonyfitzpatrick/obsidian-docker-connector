@@ -1723,3 +1723,13 @@ button.dc-metric-card:focus-visible,
   border-top: 0;
   padding-top: 0;
 }
+
+/* Reconnect dialog: a rejected credential is reported in the dialog itself. */
+.dc-reconnect-error {
+  margin-top: var(--size-4-2, 8px);
+  padding: var(--size-4-2, 8px) var(--size-4-3, 12px);
+  border-radius: var(--radius-s, 4px);
+  background-color: var(--background-modifier-error);
+  color: var(--text-error);
+  font-size: var(--font-ui-small);
+}
