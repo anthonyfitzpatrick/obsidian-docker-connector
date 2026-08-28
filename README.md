@@ -86,7 +86,7 @@ gh attestation verify main.js --repo anthonyfitzpatrick/obsidian-docker-connecto
 
 | Requirement | Details |
 | --- | --- |
-| Obsidian | Obsidian 1.7.0 or later on desktop. |
+| Obsidian | Obsidian 1.7.2 or later on desktop. |
 | Local Docker Socket | A local Docker Engine/Docker Desktop and permission to access its Unix socket or Windows named pipe. |
 | Docker Context | Local Docker CLI and an existing Context. |
 | Remote Docker via SSH | SSH access and Docker access for the remote account; no interactive `sudo`. |

@@ -47,6 +47,9 @@ class ConfirmationModal extends Modal {
           this.confirmed = true;
           this.close();
         });
+        // setDestructive() is the current spelling but is @since 1.13.0.
+        // Taking it would raise minAppVersion from 1.7.2 to 1.13.0 and drop
+        // every user in between, which is not worth a button style.
         if (this.request.destructive) button.setWarning();
         else button.setCta();
       });

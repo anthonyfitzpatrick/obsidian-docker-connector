@@ -126,6 +126,19 @@ describe("Obsidian Community Plugin release guard", () => {
     for (const key of ["automaticRefresh", "refreshIntervalMinutes", "integrateWithTheme"]) expect(settings).toContain(`key: "${key}"`);
   });
 
+  it("declares a minAppVersion that covers the Obsidian APIs it calls", async () => {
+    // obsidianmd/no-unsupported-api compares each API against minAppVersion.
+    // Workspace.revealLeaf is @since 1.7.2, so the manifest cannot claim less.
+    const [manifestText, main, modal] = await Promise.all([source("manifest.json"), source("src/main.ts"), source("src/ui/ConfirmationModal.ts")]);
+    const manifest = JSON.parse(manifestText) as { minAppVersion: string };
+    const [major, minor, patch] = manifest.minAppVersion.split(".").map(Number);
+    if (main.includes("revealLeaf(")) expect([major, minor, patch] >= [1, 7, 2]).toBe(true);
+    expect(manifest.minAppVersion).toBe("1.7.2");
+    // setDestructive is @since 1.13.0, well above that floor, so the
+    // deprecated setWarning stays until minAppVersion can move.
+    expect(modal).not.toContain("setDestructive(");
+  });
+
   it("keeps the type packages installable without dev dependencies", async () => {
     // The plugin check installs without dev dependencies and then runs
     // type-aware lint rules. With obsidian and the node/ssh2 types missing,
