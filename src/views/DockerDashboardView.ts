@@ -482,10 +482,11 @@ class ReconnectPasswordModal extends Modal {
   private reconnectButton?: HTMLButtonElement;
   private submitting = false;
   private errorEl?: HTMLElement;
+  private errorMessageEl?: HTMLElement;
   private inputEl?: HTMLInputElement;
   constructor(private readonly plugin: DockerConnectorPlugin, private readonly profile: DockerConnectionProfile, private readonly onComplete: () => Promise<void>) { super(plugin.app); }
   onOpen(): void {
-    this.contentEl.createEl("h2", { text: `Reconnect ${this.profile.name}` });
+    this.titleEl.setText(`Reconnect ${this.profile.name}`);
     const privateKey = this.profile.connectionType === "ssh" && this.profile.authentication.type === "private-key";
     const tls = this.profile.connectionType === "docker-tls";
     new Setting(this.contentEl).setName(tls ? "Client key passphrase" : privateKey ? "Private-key passphrase" : "SSH password").setDesc("Used only in memory for this Obsidian session.").addText((text) => {
@@ -501,22 +502,23 @@ class ReconnectPasswordModal extends Modal {
         void this.submit();
       };
     });
+    // A rejected credential has to be reported in the dialog the user is
+    // looking at, under the field it is about and before the action. The
+    // role makes it announced rather than only seen.
+    this.errorEl = this.contentEl.createDiv({ cls: "dc-reconnect-error", attr: { role: "alert" } });
+    setIcon(this.errorEl.createSpan({ cls: "dc-reconnect-error__icon" }), "alert-triangle");
+    this.errorMessageEl = this.errorEl.createSpan();
+    this.errorEl.hide();
     new Setting(this.contentEl).addButton((button) => {
       button.setButtonText("Reconnect").setCta().onClick(() => void this.submit());
       this.reconnectButton = button.buttonEl;
     });
-    // A rejected credential has to be reported in the dialog the user is
-    // looking at. role="alert" so it is announced rather than only seen.
-    this.errorEl = this.contentEl.createDiv({ cls: "dc-reconnect-error", attr: { role: "alert" } });
-    this.errorEl.hide();
   }
 
   /** Shows why the attempt failed and leaves the dialog open to retry. */
   private reportFailure(message: string): void {
-    if (this.errorEl) {
-      this.errorEl.setText(message);
-      this.errorEl.show();
-    }
+    this.errorMessageEl?.setText(message);
+    this.errorEl?.show();
     this.inputEl?.focus();
     this.inputEl?.select();
   }

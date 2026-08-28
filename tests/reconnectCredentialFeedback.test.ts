@@ -44,4 +44,19 @@ describe("rejected credential feedback", () => {
     expect(submit.indexOf("reportFailure")).toBeLessThan(submit.indexOf("this.close()"));
     expect(view).toContain('attr: { role: "alert" }');
   });
+
+  it("puts the failure under the field and before the action, with a legible tint", async () => {
+    const [view, styles] = await Promise.all([source("src/views/DockerDashboardView.ts"), source("styles.css")]);
+    const open = view.slice(view.indexOf("class ReconnectPasswordModal"), view.indexOf("private async submit()"));
+    // Read order: password field, then why it failed, then Reconnect.
+    expect(open.indexOf("dc-reconnect-error")).toBeLessThan(open.indexOf('setButtonText("Reconnect")'));
+    // Obsidian renders the modal title; an h2 in the content duplicates it.
+    expect(open).toContain("this.titleEl.setText(");
+    expect(open).not.toMatch(/createEl\("h2"/);
+    const rule = styles.slice(styles.indexOf(".dc-reconnect-error {"), styles.indexOf(".dc-reconnect-error__icon"));
+    // A filled --background-modifier-error puts --text-error red on red.
+    expect(rule).not.toContain("var(--background-modifier-error)");
+    expect(rule).toContain("color-mix(");
+    expect(rule).toContain("var(--dc-danger)");
+  });
 });

@@ -1724,12 +1724,32 @@ button.dc-metric-card:focus-visible,
   padding-top: 0;
 }
 
-/* Reconnect dialog: a rejected credential is reported in the dialog itself. */
+/* Reconnect dialog: a rejected credential is reported in the dialog itself.
+   Tinted rather than filled, so the danger-coloured text stays legible in
+   both themes; a filled --background-modifier-error renders red on red. */
 .dc-reconnect-error {
-  margin-top: var(--size-4-2, 8px);
-  padding: var(--size-4-2, 8px) var(--size-4-3, 12px);
-  border-radius: var(--radius-s, 4px);
-  background-color: var(--background-modifier-error);
-  color: var(--text-error);
-  font-size: var(--font-ui-small);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 9px 11px;
+  border: 1px solid color-mix(in srgb, var(--dc-danger) 45%, transparent);
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--dc-danger) 10%, transparent);
+  color: var(--dc-danger);
+  font-size: .85em;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.dc-reconnect-error__icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  padding-top: 1px;
+}
+
+.dc-reconnect-error__icon svg {
+  width: 15px;
+  height: 15px;
 }

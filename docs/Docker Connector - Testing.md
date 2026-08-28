@@ -4,7 +4,7 @@ tags: [docker-connector, testing]
 
 # Docker Connector testing
 
-Automated coverage currently contains 85 test files / 393 tests. It covers profile migration and validation, runtime secrets, local endpoints, Context discovery/lifecycle/routing, SSH and Mutual TLS boundaries, GET-only API policy, connection deletion, Applications grouping, selectors, update availability, typed lifecycle actions, update transactions, cancellation, and rollback paths.
+Automated coverage currently contains 85 test files / 394 tests. It covers profile migration and validation, runtime secrets, local endpoints, Context discovery/lifecycle/routing, SSH and Mutual TLS boundaries, GET-only API policy, connection deletion, Applications grouping, selectors, update availability, typed lifecycle actions, update transactions, cancellation, and rollback paths.
 
 It also guards the release itself: the community-plugin compliance suite asserts the manifest and `versions.json` agree, that `minAppVersion` covers the Obsidian APIs the code calls, that confirmation goes through the Obsidian modal rather than a browser dialog, that the stylesheet avoids `!important`, `:has`, and `display: contents`, that no element styles are assigned directly, that the settings tab is described once for rendering and search, and that the type packages stay installable without dev dependencies.
 
@@ -18,7 +18,7 @@ Mark each item **PASS**, **FAIL**, or **NOT YET VERIFIED** with the environment 
 | --- | --- | --- |
 | Local Docker Socket | Connect; missing/broken/non-socket/permission cases | PASS — desktop, 28-Aug-2026 |
 | Docker Context | Discover; local and SSH routing; missing/changed Context; no active-context change | PASS — desktop, 28-Aug-2026 |
-| SSH password | Positive reconnect and rejected password | PARTIAL — desktop, 28-Aug-2026. Positive reconnect PASS. A rejected password gave the user no feedback: the dialog closed as though it had worked, because `reconnectHost` records the outcome as a snapshot instead of throwing. Fixed in 1.1.10; re-verify. |
+| SSH password | Positive reconnect and rejected password | PARTIAL — desktop, 28-Aug-2026. Positive reconnect PASS. A rejected password gave the user no feedback: the dialog closed as though it had worked, because `reconnectHost` records the outcome as a snapshot instead of throwing. Fixed in 1.1.10, with the message made legible and moved under the field in 1.1.11; re-verify. |
 | SSH private key | Unencrypted/encrypted key, passphrase, host-key trust/mismatch | NOT YET VERIFIED |
 | Mutual TLS | Valid chain and client auth; invalid Server name, IP SAN, DNS SAN, CA, and key pair | NOT YET VERIFIED |
 | Connections | Add, Edit, Reconnect, Retry, status, delete/current/final profile | NOT YET VERIFIED |
