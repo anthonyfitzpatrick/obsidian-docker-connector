@@ -759,15 +759,17 @@ Container management is intentionally not a Setting. It is controlled only by th
 ### Settings page
 <div align="center">
 
-![The Docker Connector settings tab|880](docs/images/user-guide/41-settings.png)
+![The Docker Connector settings tab|602](docs/images/user-guide/41-settings.png)
 
 </div>
 
-The tab appears in the Settings sidebar under **Community plugins**, as shown on the left above. The gear control in the Docker Connector header opens it directly. Note that **Browse** under Community plugins is not the way here: that list installs plugins from the public catalogue rather than showing an installed plugin's settings.
+The tab appears in the Settings sidebar under **Community plugins**. The gear control in the Docker Connector header opens it directly. Note that **Browse** under Community plugins is not the way here: that list installs plugins from the public catalogue rather than showing an installed plugin's settings.
 
 These three controls are the whole of what Docker Connector persists as preferences. **Automatic refresh** turns background refreshing on or off, **Refresh interval** sets the minutes between those refreshes, and **Theme integration** decides whether the dashboard draws from Obsidian's own theme variables.
 
 **Container management** is deliberately absent. It is session-only and scoped to a single connection, so it belongs on that connection's card rather than in a setting that would outlive the session. Connections themselves are managed in the dashboard, not here.
+
+Below the controls, the About block names the installed version and author and links to the places to report a bug, request a feature, and reach the author's sites. Those links open in your browser; nothing on this tab sends anything anywhere on its own.
 
 ## 24. Security model and saved information
 
