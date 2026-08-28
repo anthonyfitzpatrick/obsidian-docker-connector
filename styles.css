@@ -1716,3 +1716,10 @@ button.dc-metric-card:focus-visible,
     transition-duration: .01ms;
   }
 }
+
+/* The About block takes over its settings row instead of a control slot. */
+.docker-connector-about-row {
+  display: block;
+  border-top: 0;
+  padding-top: 0;
+}

@@ -146,7 +146,7 @@ describe("Obsidian Community Plugin release guard", () => {
     const versions = JSON.parse(versionsText) as Record<string, string>;
     expect(versions[manifest.version]).toBe("1.13.0");
     for (const [pluginVersion, appVersion] of Object.entries(versions)) {
-      if (pluginVersion !== manifest.version) expect(appVersion).toBe("1.7.2");
+      if (pluginVersion !== manifest.version) expect(["1.7.2", "1.13.0"]).toContain(appVersion);
     }
   });
 
@@ -173,6 +173,11 @@ describe("Obsidian Community Plugin release guard", () => {
     // an unsafe call, assignment, member access, argument or return.
     const [config, manifest] = await Promise.all([source("eslint.config.mjs"), source("package.json")]);
     expect(config).toContain("recommendedTypeChecked");
+    // The plugin check's own rules run here too, so its findings appear in
+    // CI rather than after a release.
+    expect(config).toContain("obsidianmd.configs.recommended");
+    expect(manifest).toContain("eslint-plugin-obsidianmd");
+    expect(manifest).toContain("--max-warnings 0");
     expect(config).toContain("projectService: true");
     expect(manifest).toContain("eslint src");
   });

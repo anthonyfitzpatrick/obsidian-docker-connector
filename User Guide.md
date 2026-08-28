@@ -160,7 +160,7 @@ Configure:
 
 - **SSH Host** and **SSH Port**;
 - **SSH Username**;
-- **SSH authentication**: Password or Private Key;
+- **SSH authentication**: Password or Private key;
 - **Remote Docker socket**; and
 - **Host key fingerprint** when host identity verification is required by the connection workflow.
 
@@ -217,7 +217,7 @@ With the option off, an Obsidian restart returns the profile to **Authentication
 
 #### Private-key authentication
 
-With **Private Key** selected, use **Browse…** to choose an existing key or select **Generate SSH key**. For the recommended unattended setup, leave both passphrase fields blank before generation. A nonblank generation passphrase encrypts the key: it remains session-only and must be entered again after restart, so it is not unattended.
+With **Private key** selected, use **Browse…** to choose an existing key or select **Generate SSH key**. For the recommended unattended setup, leave both passphrase fields blank before generation. A nonblank generation passphrase encrypts the key: it remains session-only and must be entered again after restart, so it is not unattended.
 
 ### Generate SSH key completed
 <div align="center">

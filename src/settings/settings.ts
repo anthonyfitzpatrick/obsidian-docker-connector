@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, setIcon, type SettingDefinitionControl } from "obsidian";
+import { App, PluginSettingTab, Setting, setIcon, type SettingDefinitionControl, type SettingDefinitionItem } from "obsidian";
 import type DockerConnectorPlugin from "../main";
 import type { DockerConnectionProfile } from "../models/DockerConnectionProfile";
 import type { ContainerDensity } from "../containers/ContainerModels";
@@ -23,10 +23,9 @@ export const DEFAULT_SETTINGS: DockerConnectorSettings = {
 type DockerConnectorControlKey = "automaticRefresh" | "refreshIntervalMinutes" | "integrateWithTheme";
 
 /**
- * Each setting is described once. Obsidian 1.13 and later index these through
- * getSettingDefinitions() so the settings appear in settings search, and
- * display() renders from the same array, which keeps the tab working on the
- * 1.7 minimum this plugin supports.
+ * Each setting is described once. Obsidian renders the tab from these and
+ * indexes them for settings search; it no longer calls display() when a tab
+ * supplies definitions, so this array is the whole tab.
  */
 const CONTROL_DEFINITIONS: SettingDefinitionControl<DockerConnectorControlKey>[] = [
   { name: "Automatic refresh", desc: "Refresh configured hosts in the background.", control: { type: "toggle", key: "automaticRefresh" } },
@@ -38,7 +37,22 @@ const CONTROL_DEFINITIONS: SettingDefinitionControl<DockerConnectorControlKey>[]
 export class DockerConnectorSettingTab extends PluginSettingTab {
   constructor(app: App, private readonly plugin: DockerConnectorPlugin) { super(app, plugin); }
 
-  getSettingDefinitions(): SettingDefinitionControl<DockerConnectorControlKey>[] { return CONTROL_DEFINITIONS; }
+  getSettingDefinitions(): SettingDefinitionItem[] {
+    return [
+      ...CONTROL_DEFINITIONS,
+      {
+        // The About block is not a setting, so it is excluded from search and
+        // takes over its row entirely rather than sitting in the control slot.
+        name: "About Docker Connector",
+        searchable: false,
+        render: (setting: Setting) => {
+          setting.settingEl.empty();
+          setting.settingEl.addClass("docker-connector-about-row");
+          this.renderAboutFooter(setting.settingEl);
+        },
+      },
+    ];
+  }
 
   getControlValue(key: string): unknown {
     switch (key) {
@@ -64,24 +78,6 @@ export class DockerConnectorSettingTab extends PluginSettingTab {
     }
     await this.plugin.saveSettings();
     if (key !== "integrateWithTheme") this.plugin.configureRefresh();
-  }
-
-  display(): void {
-    const { containerEl } = this;
-    containerEl.empty();
-    for (const definition of CONTROL_DEFINITIONS) this.renderControl(containerEl, definition);
-    this.renderAboutFooter(containerEl);
-  }
-
-  private renderControl(containerEl: HTMLElement, definition: SettingDefinitionControl<DockerConnectorControlKey>): void {
-    const setting = new Setting(containerEl).setName(definition.name);
-    if (typeof definition.desc === "string") setting.setDesc(definition.desc);
-    const key = definition.control.key;
-    if (definition.control.type === "toggle") {
-      setting.addToggle((toggle) => toggle.setValue(this.getControlValue(key) === true).onChange((value) => void this.setControlValue(key, value)));
-      return;
-    }
-    setting.addText((text) => text.setValue(String(this.getControlValue(key))).onChange((value) => void this.setControlValue(key, value)));
   }
 
   /**

@@ -13,7 +13,7 @@ describe("SSH Authentication field layout", () => {
 
   it("preserves SSH authentication values and the conditional password and key fields", () => {
     expect(modal).toContain('addOption("password", "Password")');
-    expect(modal).toContain('addOption("private-key", "Private Key")');
+    expect(modal).toContain('addOption("private-key", "Private key")');
     expect(modal).toContain('if (this.authentication === "password") this.passwordField(details); else this.privateKeyFields(details);');
     expect(modal).toContain('setName("Private-key passphrase")');
   });

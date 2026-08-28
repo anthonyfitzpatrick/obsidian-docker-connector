@@ -13,7 +13,7 @@ describe("saved connection deletion UI", () => {
   it("uses an explicit plugin-only confirmation instead of browser confirmation", () => {
     expect(source).toContain('text: "Delete connection?"');
     expect(source).toContain('This deletes only the saved Docker Connector connection profile and its cached session data.');
-    expect(source).toContain('Containers, images, volumes, networks, SSH keys, TLS certificate files, and Docker Contexts are not deleted.');
+    expect(source).toContain('Containers, images, volumes, networks, SSH keys, TLS certificate files, and Docker contexts are not deleted.');
     expect(source).not.toContain("window.confirm");
   });
   it("reconciles a deleted selected environment to an online profile, then a remaining profile, then all", () => {
