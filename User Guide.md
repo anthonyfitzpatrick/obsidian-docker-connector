@@ -662,9 +662,11 @@ A stopped container offers **Start** alone. Shut down, Stop, and Restart are abs
 
 </div>
 
-Starting a container is confirmed like every other action. The dialog title names the action, and the three rows beneath it identify the container, its image, and the Docker host, exactly as they do for a stop.
+Starting a container is confirmed like every other action. The dialog is titled **Start container**, and the three rows beneath it identify the container, its image, and the Docker host, exactly as they do for a stop.
 
-Bringing a container back up changes the Docker host as surely as taking it down, so it is never a single unconfirmed click. After **Start**, Docker Connector sends one Start, refreshes the host, and reports the result; the open inspector follows the container into its new state.
+The button that carries it out is the one on the right, labelled **Start**. Every confirmation names its action on that button rather than saying OK, so the button you press always tells you what is about to happen. **Start** is drawn as the accent-coloured primary action, not the red of **Stop**, **Restart** and **Shut down**: starting a container adds a running workload rather than taking one away. **Cancel**, the close control, and dismissing the dialog all send nothing.
+
+Bringing a container back up still changes the Docker host, so it is never a single unconfirmed click. After you press **Start**, Docker Connector sends one Start, refreshes the host, and reports the result; the open inspector follows the container into its new state.
 
 ### Update
 
