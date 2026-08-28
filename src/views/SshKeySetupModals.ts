@@ -43,8 +43,8 @@ export class SshKeyGenerationModal extends Modal {
 
   private async generate(): Promise<void> {
     const attempt = this.workflow.submit(
-      (passphrase, onStage) => desktopUi(this.plugin).generateSshKey(passphrase, onStage),
-      (path, passphrase) => desktopUi(this.plugin).resolvePublicKeyForPrivateKey(path, passphrase),
+      (passphrase, onStage) => desktopUi().generateSshKey(passphrase, onStage),
+      (path, passphrase) => desktopUi().resolvePublicKeyForPrivateKey(path, passphrase),
       () => this.render(),
     );
     this.render();

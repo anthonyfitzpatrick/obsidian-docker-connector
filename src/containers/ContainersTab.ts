@@ -77,7 +77,7 @@ export class ContainersTab {
         ? "All Docker hosts"
         : (profiles[0]?.name ?? "Selected host");
     root.addClass("dc-containers-tab");
-    this.header(root, hostLabel, all, results, snapshots);
+    this.header(root, hostLabel, all, results);
     this.metrics(root, all, availableUpdateKeys.size);
     this.toolbar(root, all, profiles);
     this.activeFilters(root);
@@ -103,7 +103,6 @@ export class ContainersTab {
     hostLabel: string,
     all: DockerContainerSummary[],
     results: DockerContainerSummary[],
-    _snapshots: DockerHostSnapshot[],
   ): void {
     const header = root.createDiv({
       cls: "dc-container-header docker-connector__containers-header",

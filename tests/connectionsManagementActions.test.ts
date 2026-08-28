@@ -32,6 +32,6 @@ describe("Connections management actions", () => {
     expect(css).toContain('opacity: 1; pointer-events: auto;');
     expect(css).toContain('.dc-connections-page-header { align-items: flex-start; flex-direction: column; }');
     expect(css).toContain('.dc-connection-card-actions { width: 100%; }');
-    expect(view).toContain('if (this.page !== "connections" && this.requiresAuthenticationGate(profiles))');
+    expect(view).toContain('if (this.page !== "connections" && this.requiresAuthenticationGate())');
   });
 });

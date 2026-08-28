@@ -57,7 +57,7 @@ export class VolumesTab {
   private row(list: HTMLElement, volume: DockerVolumeSummary, host?: string): void {
     const selected = this.state.selected === this.key(volume);
     const card = list.createEl("button", { cls: `docker-connector__volume-card${selected ? " is-selected" : ""}`, attr: { "aria-label": volume.name, "aria-pressed": String(selected) } });
-    card.onclick = () => void this.open(volume, card);
+    card.onclick = () => void this.open(volume);
     const header = card.createDiv({ cls: "docker-connector__volume-card-header" });
     const icon = header.createDiv({ cls: "docker-connector__volume-card-icon" }); setIcon(icon, "database");
     header.createEl("strong", { text: volume.name, attr: { title: volume.name } });
@@ -88,7 +88,7 @@ export class VolumesTab {
     else references.createDiv({ text: "No visible container references.", cls: "docker-connector__muted" });
   }
 
-  private async open(volume: DockerVolumeSummary, _origin: HTMLElement): Promise<void> { this.state.selected = this.key(volume); const profile = this.plugin.settings.profiles.find((item) => item.id === volume.hostProfileId); const snapshot = this.plugin.snapshots.get(volume.hostProfileId); if (!profile || !snapshot) return; const key = dockerResourceKey(snapshot, volume.id); this.state.detail = { status: "loading", name: key }; this.rerender(); try { this.state.detail = { status: "ready", name: key, value: await this.plugin.inspectVolume(profile, snapshot, volume.name) }; } catch (error) { this.state.detail = { status: "error", name: key, message: error instanceof Error ? error.message : "Volume details could not be loaded." }; } this.rerender(); }
+  private async open(volume: DockerVolumeSummary): Promise<void> { this.state.selected = this.key(volume); const profile = this.plugin.settings.profiles.find((item) => item.id === volume.hostProfileId); const snapshot = this.plugin.snapshots.get(volume.hostProfileId); if (!profile || !snapshot) return; const key = dockerResourceKey(snapshot, volume.id); this.state.detail = { status: "loading", name: key }; this.rerender(); try { this.state.detail = { status: "ready", name: key, value: await this.plugin.inspectVolume(profile, snapshot, volume.name) }; } catch (error) { this.state.detail = { status: "error", name: key, message: error instanceof Error ? error.message : "Volume details could not be loaded." }; } this.rerender(); }
   private key(volume: DockerVolumeSummary): string { const snapshot = this.plugin.snapshots.get(volume.hostProfileId); return snapshot ? dockerResourceKey(snapshot, volume.id) : `profile:${volume.hostProfileId}\u0000${volume.id}`; }
   private select(root: HTMLElement, label: string, value: string, options: Array<[string, string]>, change: (value: string) => void): void { const control = root.createEl("label", { cls: "dc-container-select" }); control.createSpan({ text: label }); const select = control.createEl("select", { attr: { "aria-label": `${label} volume control` } }); options.forEach(([optionValue, text]) => select.createEl("option", { value: optionValue, text })); select.value = value; select.onchange = () => change(select.value); }
 }

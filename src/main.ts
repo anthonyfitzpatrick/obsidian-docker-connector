@@ -269,7 +269,7 @@ export default class DockerConnectorPlugin extends Plugin {
   }
   async refreshContextMetadata(profile: DockerContextProfile) {
     const now = new Date().toISOString();
-    try { const result = evaluateDockerContextLifecycle(profile, (await desktopUi(this).discoverContexts()).contexts, now); this.contextLifecycle.set(profile.id, result); return result; }
+    try { const result = evaluateDockerContextLifecycle(profile, (await desktopUi().discoverContexts()).contexts, now); this.contextLifecycle.set(profile.id, result); return result; }
     catch (error) { const result = unavailableDockerContextLifecycle(profile, error, now); this.contextLifecycle.set(profile.id, result); return result; }
     finally { this.refreshOpenDashboard(); }
   }

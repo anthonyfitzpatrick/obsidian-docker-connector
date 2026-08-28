@@ -62,6 +62,6 @@ describe("single-bundle Community Plugin architecture", () => {
     (window as unknown as { Platform?: unknown }).Platform = { isDesktop: false, isMobile: true };
     const factory = new DockerConnectionFactory(() => { throw new Error("desktop loader invoked"); });
     expect(factory.create(ssh).profile.connectionType).toBe("ssh");
-    expect(() => desktopUi({})).toThrow("DESKTOP_UI_UNAVAILABLE");
+    expect(() => desktopUi()).toThrow("DESKTOP_UI_UNAVAILABLE");
   });
 });
