@@ -287,6 +287,17 @@ export class DockerDashboardView extends ItemView {
     copy.createSpan({ text: getDockerConnectionTypeDisplayName(profile.connectionType), cls: "dc-host-card-meta docker-connector__muted" });
     header.appendChild(this.statusPill(status));
 
+    // A host that is not online has a reason, and until now it was only in the
+    // Attention panel and a collapsed diagnostics disclosure. A rejected key
+    // reaches degraded, which offers no reconnect dialog, so the card is the
+    // only place the user is looking when it happens.
+    if (status !== "online" && status !== "unknown" && status !== "connecting" && snapshot?.error) {
+      const reason = card.createDiv({ cls: `dc-connection-reason is-${status === "offline" ? "danger" : "warning"}`, attr: { role: "status" } });
+      const reasonIcon = reason.createSpan({ cls: "dc-connection-reason__icon", attr: { "aria-hidden": "true" } });
+      setIcon(reasonIcon, status === "authentication-required" ? "lock" : "triangle-alert");
+      reason.createSpan({ text: snapshot.error });
+    }
+
     const endpoint = card.createDiv({ cls: "dc-host-card-endpoint" });
     const endpointIcon = endpoint.createSpan({ attr: { "aria-hidden": "true" } }); setIcon(endpointIcon, "network");
     this.connectionCardEndpointDetails(profile).forEach((detail) => endpoint.createSpan({ text: detail }));

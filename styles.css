@@ -1753,3 +1753,41 @@ button.dc-metric-card:focus-visible,
   width: 15px;
   height: 15px;
 }
+
+/* Why a connection card is not online, stated on the card itself. Tinted
+   rather than filled so the text stays legible in both themes. */
+.dc-connection-reason {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: .8em;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.dc-connection-reason.is-danger {
+  border-color: color-mix(in srgb, var(--dc-danger) 40%, transparent);
+  background-color: color-mix(in srgb, var(--dc-danger) 9%, transparent);
+  color: var(--dc-danger);
+}
+
+.dc-connection-reason.is-warning {
+  border-color: color-mix(in srgb, var(--dc-warning) 42%, transparent);
+  background-color: color-mix(in srgb, var(--dc-warning) 11%, transparent);
+  color: var(--dc-warning);
+}
+
+.dc-connection-reason__icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  padding-top: 1px;
+}
+
+.dc-connection-reason__icon svg {
+  width: 14px;
+  height: 14px;
+}

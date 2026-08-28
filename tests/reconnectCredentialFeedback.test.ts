@@ -22,6 +22,20 @@ describe("rejected credential feedback", () => {
     }
   });
 
+  it("states the reason on the connection card for every status that is not online", async () => {
+    // A rejected private key is degraded, which offers Retry rather than the
+    // reconnect dialog, so the card is where the user finds out why.
+    const view = await source("src/views/DockerDashboardView.ts");
+    expect(view).toMatch(/status !== "online" && status !== "unknown" && status !== "connecting" && snapshot\?\.error/);
+    expect(view).toContain("dc-connection-reason");
+    expect(view).toContain("reason.createSpan({ text: snapshot.error })");
+    const styles = await source("styles.css");
+    // Tinted, not filled: a filled error background hides the text.
+    expect(styles).toContain(".dc-connection-reason.is-danger");
+    expect(styles).toContain(".dc-connection-reason.is-warning");
+    expect(styles).not.toMatch(/\.dc-connection-reason[^{]*\{[^}]*background-color: var\(--background-modifier-error\)/);
+  });
+
   it("keeps an unreachable host distinct from a refused credential", () => {
     expect(classifyHostFailure(new DockerConnectionError("SSH_CONNECTION_REFUSED", "refused")).status).toBe("offline");
   });
