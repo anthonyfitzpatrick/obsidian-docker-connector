@@ -4,9 +4,11 @@ tags: [docker-connector, documentation, screenshots]
 
 # Screenshot recapture
 
-6 User Guide screenshots still need retaking, because what they show has structurally changed: a control that no longer exists, a dialog that is now an Obsidian modal, duplicated data since deduplicated, or a block that did not exist yet. Each row was checked by opening the image.
+5 User Guide screenshots still need retaking, because what they show has structurally changed: a control that no longer exists, a dialog that is now an Obsidian modal, duplicated data since deduplicated, or a block that did not exist yet. Each row was checked by opening the image.
 
-01, 02, 18, 20, 21 and 23 were replaced on 28-Aug-2026.
+01, 02, 18, 20, 21, 22 and 23 were replaced on 28-Aug-2026.
+
+Those replacements were captured from a plugin instance that had not been reloaded since the 1.1.16 deploy, so they still show title-case labels such as **Add Docker Host**, and 22 still shows each application twice. The deployed bundle contains the sentence-case labels and deduplicates correctly; reload the plugin before any further capture.
 
 Screenshots whose only difference is letter case are deliberately left as they are: 09, 11, 12, 13, 14, 15, 16, 17 and 30 show title-case labels such as **Test Connection** or **In Use** where the interface now reads **Test connection** and **In use**. They are not being recaptured.
 
@@ -17,7 +19,6 @@ Images live in `docs/images/user-guide/`; the guide sizes each one to at most 88
 | ✓ | # | File | What the current image shows | What the new image must show |
 | --- | --- | --- | --- | --- |
 | [ ] | 19 | `19-authentication-required-reconnect.png` | Authentication-required card: pill, Reconnect, zeroed inventory, *Docker details unavailable* | Card now also carries a **failure-reason line** — lock icon and the server's own reason — above the endpoint row |
-| [ ] | 22 | `22-applications-list.png` | **20 applications, every one duplicated** (gitea ×2, owncloud ×2, …). Header switch present | **10 applications, no duplicates.** Capture after the refresh has settled: immediately after a refresh the list can still show every application twice, which is the state 23 was taken in |
 | [ ] | 35 | `35-management-confirmation.png` | **Native browser dialog**, OS-styled: *Enable container management for …?* with **Cancel / OK** | **Obsidian modal** titled *Enable container management*, a details row naming the Docker host, buttons **Cancel / Enable management** |
 | [ ] | 38 | `38-action-confirmation.png` | **Native browser dialog** *Stop container?* listing Container / Image / Docker host, **Cancel / OK** | **Obsidian modal** titled *Stop container*, the three as labelled rows, red **Stop** button |
 | [ ] | 40 | `40-start-confirmation.png` | **Native browser dialog** *Start container?*, **Cancel / OK** | **Obsidian modal** titled *Start container*, accent **Start** button — start is not destructive, so it is not red |
@@ -27,8 +28,6 @@ Images live in `docs/images/user-guide/`; the guide sizes each one to at most 88
 
 | Cause | Landed | Screenshots still to retake |
 | --- | --- | --- |
-| Header **Container management** switch removed | 26-Aug-2026 22:43 | 22 |
-| Inventories deduplicated by Docker daemon | 26-Aug-2026 23:09 | 22 |
 | About and support footer added to settings | 27-Aug-2026 23:09 | 41 |
 | Browser confirm dialogs replaced by an Obsidian modal | 27-Aug-2026 23:44 | 35, 38, 40 |
 | Connection card states its failure reason | 28-Aug-2026 11:04 | 19 |
