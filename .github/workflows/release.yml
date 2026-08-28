@@ -36,6 +36,20 @@ jobs:
             exit 1
           fi
 
+      # The Obsidian plugin check installs with its own npm before running
+      # type-aware lint rules. A lockfile only one npm major accepts makes that
+      # install fail, leaving no node_modules, so every Obsidian and Node type
+      # resolves to `error` and every API call is reported as unsafe.
+      - name: Verify npm ci works on an older npm
+        run: |
+          work=$(mktemp -d)
+          cp package.json package-lock.json "$work/"
+          cd "$work"
+          npx -y npm@10 ci --omit=dev --no-audit --no-fund
+          test -d node_modules/obsidian
+          test -d node_modules/@types/node
+          test -d node_modules/@types/ssh2
+
       - run: npm run lint
 
       - run: npm test
