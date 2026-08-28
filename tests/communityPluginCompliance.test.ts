@@ -150,6 +150,17 @@ describe("Obsidian Community Plugin release guard", () => {
     }
   });
 
+  it("illustrates the README, since the directory shows its excerpt", async () => {
+    // The community directory renders a README excerpt on the listing page and
+    // rewrites relative image paths against the repository, so the plugin is
+    // seen before it is read. The link check above proves these resolve.
+    const readme = await source("README.md");
+    const images = [...readme.matchAll(/!\[[^\]]*\]\((docs\/images\/[^)]+)\)/g)];
+    expect(images.length).toBeGreaterThanOrEqual(5);
+    // Obsidian's |width syntax is not markdown; GitHub would render it as text.
+    expect(readme).not.toMatch(/!\[[^\]]*\|\d+\]/);
+  });
+
   it("keeps the type packages installable without dev dependencies", async () => {
     // The plugin check installs without dev dependencies and then runs
     // type-aware lint rules. With obsidian and the node/ssh2 types missing,

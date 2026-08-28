@@ -21,6 +21,26 @@ Docker Connector supports desktop Obsidian on macOS, Windows, and Linux with Loc
 
 ## Screenshots
 
+**Overview.** Every configured Docker environment at a glance: host, container, image, volume and network counts, host health, and anything needing attention.
+
+![Docker Connector overview](docs/images/user-guide/02-dashboard-overview.png)
+
+**Four ways to connect.** A local Docker socket, an existing Docker Context, a remote host over SSH, or the Docker Engine API over mutual TLS.
+
+![Choosing a connection method](docs/images/user-guide/04-connection-type-selector.png)
+
+**Connections.** Each saved host shows its status, endpoint, inventory counts and Engine details. Container management is the per-connection switch on each card, off by default.
+
+![Saved Docker connections](docs/images/user-guide/18-connections-overview.png)
+
+**Applications.** Containers grouped into their Docker Compose projects, with services, health and update status, and an inspector for each one.
+
+![Compose applications and the inspector](docs/images/user-guide/23-application-inspector.png)
+
+**Containers.** Per-container state, health and image-update status. Lifecycle actions appear only once management is enabled for that connection, and each one confirms before it is sent.
+
+![Container actions and image update status](docs/images/user-guide/32-image-current.png)
+
 The [User Guide](User%20Guide.md) is illustrated throughout, from first launch and each connection method to the dashboard views, container management, and settings.
 
 ## Connection methods
