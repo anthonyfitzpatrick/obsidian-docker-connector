@@ -126,6 +126,23 @@ describe("Obsidian Community Plugin release guard", () => {
     for (const key of ["automaticRefresh", "refreshIntervalMinutes", "integrateWithTheme"]) expect(settings).toContain(`key: "${key}"`);
   });
 
+  it("keeps the type packages installable without dev dependencies", async () => {
+    // The plugin check installs without dev dependencies and then runs
+    // type-aware lint rules. With obsidian and the node/ssh2 types missing,
+    // every Obsidian and Node symbol resolves to `error`, and each ordinary
+    // API call is reported as an unsafe call, assignment, member access,
+    // argument and return. Keeping them in dependencies is what makes the
+    // checker's install resolve the same types this repo does.
+    const manifest = JSON.parse(await source("package.json")) as {
+      dependencies: Record<string, string>;
+      devDependencies: Record<string, string>;
+    };
+    for (const name of ["obsidian", "@types/node", "@types/ssh2"]) {
+      expect(manifest.dependencies).toHaveProperty(name);
+      expect(manifest.devDependencies).not.toHaveProperty(name);
+    }
+  });
+
   it("ships the ESLint configuration the plugin check reads", async () => {
     // Without a config in the repo, a type-aware checker resolves obsidian and
     // node types to `error`, and every ordinary API call is then reported as
